@@ -36,10 +36,6 @@ import org.identityconnectors.dbcommon.DatabaseConnection;
 import org.identityconnectors.dbcommon.SQLParam;
 import org.identityconnectors.dbcommon.SQLUtil;
 
-/**
- *
- * @author fabio
- */
 public class CSVDirConnection {
 
     /**
@@ -62,11 +58,13 @@ public class CSVDirConnection {
     private FileSystem fileSystem;
 
     private CSVDirConnection(final CSVDirConfiguration configuration)
-            throws SQLException {
+            throws ClassNotFoundException, SQLException {
+
         this.configuration = configuration;
         URL += configuration.getSourcePath() + File.separator + "dbuser";
         fileSystem = new FileSystem(configuration);
 
+        Class.forName("org.hsqldb.jdbcDriver");
         conn = DriverManager.getConnection(URL, "sa", "");
         conn.setAutoCommit(true);
 
@@ -75,12 +73,14 @@ public class CSVDirConnection {
     }
 
     public static CSVDirConnection openConnection(
-            final CSVDirConfiguration configuration) throws SQLException {
+            final CSVDirConfiguration configuration)
+            throws ClassNotFoundException, SQLException {
 
         return new CSVDirConnection(configuration);
     }
 
-    public void closeConnection() throws SQLException {
+    public void closeConnection()
+            throws SQLException {
         if (conn != null) {
 
             LOG.ok("Closing connection ...");
@@ -119,7 +119,8 @@ public class CSVDirConnection {
         }
     }
 
-    private ResultSet doQuery(final PreparedStatement stm) throws SQLException {
+    private ResultSet doQuery(final PreparedStatement stm)
+            throws SQLException {
         LOG.ok("Execute query {0}", stm.toString());
         return stm.executeQuery();
     }
@@ -154,7 +155,8 @@ public class CSVDirConnection {
 
     private void processAllFiles(
             final File[] fileToProcess,
-            final StringBuilder tableHeader) throws IOException, SQLException {
+            final StringBuilder tableHeader)
+            throws IOException, SQLException {
 
         String tableName;
         final StringBuilder createTable = new StringBuilder();
@@ -227,7 +229,8 @@ public class CSVDirConnection {
         }
     }
 
-    private void dropTableAndViewIfExists() throws SQLException {
+    private void dropTableAndViewIfExists()
+            throws SQLException {
         LOG.ok("Drop view {0}", viewname);
 
         conn.createStatement().execute(

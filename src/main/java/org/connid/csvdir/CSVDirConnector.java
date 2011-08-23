@@ -239,15 +239,13 @@ public class CSVDirConnector implements
         CSVDirConnection connection = null;
 
         try {
-
             connection = CSVDirConnection.openConnection(configuration);
 
             buildSyncDelta(connection.modifiedCsvFiles(
                     Long.valueOf(syncToken.getValue().toString())), handler);
 
             token = connection.getFileSystem().getHighestTimeStamp();
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LOG.error(e, "error during syncronizatiion");
             throw new ConnectorIOException(e);
         } finally {
@@ -261,7 +259,8 @@ public class CSVDirConnector implements
         }
     }
 
-    private void buildSyncDelta(final ResultSet rs, final SyncResultsHandler handler)
+    private void buildSyncDelta(final ResultSet rs,
+            final SyncResultsHandler handler)
             throws SQLException {
 
         ConnectorObjectBuilder bld = null;
@@ -298,12 +297,14 @@ public class CSVDirConnector implements
     }
 
     private String getValueFromColumnName(final ResultSet rs,
-            final String columnName) throws SQLException {
+            final String columnName)
+            throws SQLException {
         return rs.getString(rs.findColumn(columnName));
     }
 
     private void choiseRightDeltaType(final ResultSet rs,
-            final SyncDeltaBuilder syncDeltaBuilder) throws SQLException {
+            final SyncDeltaBuilder syncDeltaBuilder)
+            throws SQLException {
         if (Boolean.valueOf(getValueFromColumnName(rs,
                 configuration.getDeleteColumnName()))) {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.DELETE);
