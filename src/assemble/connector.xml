@@ -31,6 +31,7 @@
         <dependencySet>
             <includes>
                 <include>org.connid.bundles.db:common</include>
+                <include>org.hsqldb:hsqldb</include>
             </includes>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>
