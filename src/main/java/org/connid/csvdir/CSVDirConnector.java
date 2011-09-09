@@ -37,6 +37,7 @@ import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.AttributeInfo;
 import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
+import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationalAttributeInfos;
@@ -101,6 +102,7 @@ public class CSVDirConnector implements
 
         final String deletedColumn = configuration.getDeleteColumnName();
         final String passwordColumn = configuration.getPasswordColumnName();
+        final String[] keyColumns = configuration.getKeyColumnNames();
 
         final Set<AttributeInfo> attrInfos = new HashSet<AttributeInfo>();
         AttributeInfoBuilder abld = null;
@@ -109,6 +111,10 @@ public class CSVDirConnector implements
             if (!fieldName.equals(deletedColumn)) {
                 if (fieldName.equalsIgnoreCase(passwordColumn)) {
                     abld.setName(OperationalAttributeInfos.PASSWORD.getName());
+                } else if (keyColumns != null
+                        && keyColumns.length == 1
+                        && fieldName.equalsIgnoreCase(keyColumns[0])) {
+                    abld.setName(Name.NAME);
                 } else {
                     abld.setName(fieldName.trim());
                 }
