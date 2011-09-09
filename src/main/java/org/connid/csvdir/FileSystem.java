@@ -76,7 +76,7 @@ public class FileSystem {
                 highestTimeStamp = file.lastModified();
             }
         }
-        
+
         return returnNewArrayIfCsvFilesIsEmpty(csvFiles);
     }
 

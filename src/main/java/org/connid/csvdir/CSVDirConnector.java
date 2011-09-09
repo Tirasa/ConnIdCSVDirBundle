@@ -39,6 +39,7 @@ import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
+import org.identityconnectors.framework.common.objects.OperationalAttributeInfos;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SchemaBuilder;
@@ -98,14 +99,25 @@ public class CSVDirConnector implements
         final SchemaBuilder bld = new SchemaBuilder(getClass());
         final String[] fields = configuration.getFields();
 
+        final String deletedColumn = configuration.getDeleteColumnName();
+        final String passwordColumn = configuration.getPasswordColumnName();
+
         final Set<AttributeInfo> attrInfos = new HashSet<AttributeInfo>();
         AttributeInfoBuilder abld = null;
+
         for (String fieldName : fields) {
-            abld = new AttributeInfoBuilder();
-            abld.setName(fieldName.trim().toUpperCase());
-            abld.setCreateable(false);
-            abld.setUpdateable(false);
-            attrInfos.add(abld.build());
+            if (!fieldName.equals(deletedColumn)) {
+                if (fieldName.equalsIgnoreCase(passwordColumn)) {
+                    abld.setName(OperationalAttributeInfos.PASSWORD.getName());
+                } else {
+                    abld.setName(fieldName.trim());
+                }
+
+                abld = new AttributeInfoBuilder();
+                abld.setCreateable(false);
+                abld.setUpdateable(false);
+                attrInfos.add(abld.build());
+            }
         }
 
         // set it to object class account..
