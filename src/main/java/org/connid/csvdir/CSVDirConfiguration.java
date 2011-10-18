@@ -1,29 +1,28 @@
 /*
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2011 Tirasa. All rights reserved.     
- * 
- * The contents of this file are subject to the terms of the Common Development 
- * and Distribution License("CDDL") (the "License").  You may not use this file 
+ *
+ * Copyright 2011 Tirasa. All rights reserved.
+ *
+ * The contents of this file are subject to the terms of the Common Development
+ * and Distribution License("CDDL") (the "License").  You may not use this file
  * except in compliance with the License.
- * 
- * You can obtain a copy of the License at 
+ *
+ * You can obtain a copy of the License at
  * http://IdentityConnectors.dev.java.net/legal/license.txt
- * See the License for the specific language governing permissions and limitations 
- * under the License. 
- * 
- * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * See the License for the specific language governing
+ * permissions and limitations under the License.
+ *
+ * When distributing the Covered Code, include this
+ * CDDL Header Notice in each file
  * and include the License file at identityconnectors/legal/license.txt.
- * If applicable, add the following below this CDDL Header, with the fields 
- * enclosed by brackets [] replaced by your own identifying information: 
+ * If applicable, add the following below this CDDL Header, with the fields
+ * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
- */
-package org.connid.csvdir;
+ */package org.connid.csvdir;
 
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.spi.AbstractConfiguration;
@@ -100,13 +99,13 @@ public class CSVDirConfiguration extends AbstractConfiguration {
 
     @ConfigurationProperty(displayMessageKey = "fileMask.display",
     helpMessageKey = "fileMask.help", required = true, order = 2)
-    public String getFileMask() {
+    public final String getFileMask() {
         return fileMask;
     }
 
     @ConfigurationProperty(displayMessageKey = "encoding.display",
     helpMessageKey = "encoding.help", order = 3)
-    public String getEncoding() {
+    public final String getEncoding() {
         return encoding;
     }
 
