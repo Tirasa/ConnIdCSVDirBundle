@@ -35,13 +35,13 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethods{
-    
+public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethods {
+
     @Test
     public final void createTest() {
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("thousands.*\\.csv"));
-        Name name = new Name("___mperro123,pmassi,mperrone");
+        Name name = new Name("___mperro123;pmassi;mperrone");
         Uid newAccount = connector.create(ObjectClass.ACCOUNT,
                 createSetOfAttributes(name), null);
         Assert.assertEquals(name.getNameValue(), newAccount.getUidValue());
@@ -50,33 +50,33 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
 
     private Set<Attribute> createSetOfAttributes(Name name) {
         Set<Attribute> attributes = new HashSet<Attribute>();
-        
+
         attributes.add(name);
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                ACCOUNTID, "___mperro123"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                FIRSTNAME, "pmassi"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                LASTNAME, "mperrone"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                EMAIL, "massimiliano.perrone@test.it"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                CHANGE_NUMBER, "0"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                PASSWORD, "password"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                DELETED, "no"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID,
+                "___mperro123"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME,
+                "pmassi"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.LASTNAME,
+                "mperrone"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL,
+                "massimiliano.perrone@test.it"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.CHANGE_NUMBER,
+                "0"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD,
+                "password"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.DELETED, "no"));
         return attributes;
     }
-    
+
     @Test(expected = ConnectorException.class)
-    public final void createOfUserExistsTest() throws IOException {
+    public final void createExistingUserTest()
+            throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
-        Name name = new Name("____jpc4323435,jPenelope");
+        Name name = new Name("____jpc4323435;jPenelope");
         Uid newAccount = connector.create(ObjectClass.ACCOUNT,
                 createSetOfAttributes(name), null);
         connector.dispose();
-    }        
+    }
 }

@@ -32,7 +32,8 @@ public class CommonOperation {
 
     protected static Boolean userExists(final String uidString,
             final CSVDirConnection connection,
-            final CSVDirConfiguration configuration) throws SQLException {
+            final CSVDirConfiguration configuration)
+            throws SQLException {
         ResultSet rs = connection.allCsvFiles();
         Boolean founded = Boolean.FALSE;
         Boolean toBeContinued;
@@ -40,9 +41,9 @@ public class CommonOperation {
         String[] uidKeys = uidString.split(configuration.getKeyseparator());
         while (rs.next() && !founded) {
             toBeContinued = Boolean.TRUE;
-            for(int i = 0; i < keys.length && toBeContinued; i++) {
+            for (int i = 0; i < keys.length && toBeContinued; i++) {
                 String value = rs.getString(keys[i]);
-                if(!value.equalsIgnoreCase(uidKeys[i])) {
+                if (!value.equalsIgnoreCase(uidKeys[i])) {
                     toBeContinued = Boolean.FALSE;
                 }
             }
@@ -50,9 +51,9 @@ public class CommonOperation {
         }
         return founded;
     }
-    
-    protected static String createUid(final String[] keys,
-            final ResultSet rs, final String keySeparator)
+
+    protected static String createUid(
+            final String[] keys, final ResultSet rs, final String keySeparator)
             throws SQLException {
         final StringBuilder uid = new StringBuilder();
 

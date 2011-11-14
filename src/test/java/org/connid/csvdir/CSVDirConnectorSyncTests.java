@@ -62,26 +62,23 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public void search() throws IOException {
+    public void search()
+            throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
-        connector.init(
-                createConfiguration("sample.*\\.csv"));
+        connector.init(createConfiguration("sample.*\\.csv"));
 
         // -----------------------
         // Filter definition
         // -----------------------
-        Filter firstnameFilter = FilterBuilder.startsWith(
-                AttributeBuilder.build(
-                TestAccountsValue.FIRSTNAME, "jPenelope"));
+        final Filter firstnameFilter = FilterBuilder.startsWith(
+                AttributeBuilder.build(TestAccountsValue.FIRSTNAME, "jPenelope"));
 
-        Filter surnameFilter = FilterBuilder.equalTo(
-                AttributeBuilder.build(
-                TestAccountsValue.LASTNAME, "jBacon"));
+        final Filter surnameFilter = FilterBuilder.equalTo(
+                AttributeBuilder.build(TestAccountsValue.LASTNAME, "jBacon"));
 
-        Filter filter = FilterBuilder.or(
-                firstnameFilter, surnameFilter);
+        final Filter filter = FilterBuilder.or(firstnameFilter, surnameFilter);
         // -----------------------
 
         final Set<TestAccount> actual = new HashSet<TestAccount>();
@@ -99,7 +96,8 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public void getConnectorObject() throws IOException {
+    public void getConnectorObject()
+            throws IOException {
 
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
@@ -112,17 +110,18 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
 
         final ConnectorFacade facade = factory.newInstance(impl);
 
-        Uid uid = new Uid("____jpc4323435,jPenelope");
+        final Uid uid = new Uid("____jpc4323435;jPenelope");
 
-        ConnectorObject object = facade.getObject(
-                ObjectClass.ACCOUNT, uid, null);
+        final ConnectorObject object =
+                facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
         Assert.assertNotNull(object);
         Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
     }
 
     @Test
-    public void functional() throws IOException {
+    public void functional()
+            throws IOException {
 
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
@@ -148,11 +147,12 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
                 }, null);
 
         // attempt to see if they compare..
-        Assert.assertEquals(TestAccountsValue.TEST_ACCOUNTS, actual);
+        Assert.assertTrue(actual.containsAll(TestAccountsValue.TEST_ACCOUNTS));
     }
 
     @Test
-    public final void syncWithNewFile() throws IOException {
+    public final void syncWithNewFile()
+            throws IOException {
         createFile("syncWithNewFile1", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -181,7 +181,8 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void syncWithUpdatedFile() throws IOException {
+    public final void syncWithUpdatedFile()
+            throws IOException {
         File toBeUpdated = createFile(
                 "syncWithUpdatedFile", TestAccountsValue.TEST_ACCOUNTS);
 
@@ -212,9 +213,9 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void syncWithNoFilesForNewToken() throws IOException {
-        createFile("syncWithNoFilesForNewToken",
-                TestAccountsValue.TEST_ACCOUNTS);
+    public final void syncWithNoFilesForNewToken()
+            throws IOException {
+        createFile("syncWithNoFilesForNewToken", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(
@@ -247,7 +248,8 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void syncWithNewFileAndRealToken() throws IOException {
+    public final void syncWithNewFileAndRealToken()
+            throws IOException {
         createFile("syncWithNewFileAndRealToken1",
                 TestAccountsValue.TEST_ACCOUNTS);
 
@@ -285,7 +287,8 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void syncWithUpdatedFileAndRealToken() throws IOException {
+    public final void syncWithUpdatedFileAndRealToken()
+            throws IOException {
         File toBeUpdated = createFile(
                 "syncWithUpdatedFileAndRealToken",
                 TestAccountsValue.TEST_ACCOUNTS);
@@ -324,14 +327,13 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void mixedOperations() throws IOException {
+    public final void mixedOperations()
+            throws IOException {
         File toBeUpdated = createFile(
-                "mixedOperations1",
-                TestAccountsValue.TEST_ACCOUNTS);
+                "mixedOperations1", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
-        connector.init(createConfiguration(
-                "mixedOperations.*\\.csv"));
+        connector.init(createConfiguration("mixedOperations.*\\.csv"));
 
         final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
 
@@ -396,9 +398,10 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
 
         connector.dispose();
     }
-    
+
     @Test
-    public final void syncThousandsEntries() throws IOException {
+    public final void syncThousandsEntries()
+            throws IOException {
         createSampleFile("thousands", (int) (THOUSANDS * 1000));
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -415,7 +418,8 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
     }
 
     @Test
-    public final void concurrentOperations() throws IOException {
+    public final void concurrentOperations()
+            throws IOException {
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("concurrentOperations.*\\.csv"));
         createSampleFile("concurrentOperations", 10);

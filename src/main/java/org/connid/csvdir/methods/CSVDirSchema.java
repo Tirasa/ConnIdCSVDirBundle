@@ -32,25 +32,27 @@ import org.identityconnectors.framework.common.objects.AttributeInfo;
 import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework
-        .common.objects.OperationalAttributeInfos;
+import org.identityconnectors.framework.common.objects.OperationalAttributeInfos;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SchemaBuilder;
 
 public class CSVDirSchema {
-    
+
     /**
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirSchema.class);
+
     private CSVDirConfiguration configuration = null;
+
     private Class connectorClass = null;
 
-    public CSVDirSchema(Class connectorClass, CSVDirConfiguration configuration) {
+    public CSVDirSchema(
+            final Class connectorClass, final CSVDirConfiguration configuration) {
         this.connectorClass = connectorClass;
         this.configuration = configuration;
     }
-    
+
     public Schema execute() {
         try {
             return executeImpl();
@@ -59,8 +61,8 @@ public class CSVDirSchema {
             throw new ConnectorException(e);
         }
     }
-    
-    private Schema executeImpl(){
+
+    private Schema executeImpl() {
         final SchemaBuilder bld = new SchemaBuilder(connectorClass);
         final String[] keyColumns = configuration.getKeyColumnNames();
 

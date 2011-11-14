@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
@@ -42,27 +43,33 @@ import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.spi.Connector;
 
-public class CSVDirExecuteQuery extends CommonOperation{
-    
-    
+public class CSVDirExecuteQuery extends CommonOperation {
+
     /**
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirExecuteQuery.class);
-    
+
     private CSVDirConfiguration configuration = null;
+
     private CSVDirConnection connection = null;
+
     private ObjectClass oclass = null;
+
     private FilterWhereBuilder where = null;
+
     private ResultsHandler handler = null;
+
     private OperationOptions options = null;
-    
+
     public CSVDirExecuteQuery(final CSVDirConfiguration configuration,
             final ObjectClass oclass,
             final FilterWhereBuilder where,
             final ResultsHandler handler,
-            final OperationOptions options) throws
+            final OperationOptions options)
+            throws
             ClassNotFoundException, SQLException {
         this.configuration = configuration;
         this.oclass = oclass;
@@ -71,7 +78,7 @@ public class CSVDirExecuteQuery extends CommonOperation{
         this.options = options;
         connection = CSVDirConnection.openConnection(configuration);
     }
-    
+
     public void execute() {
         try {
             executeImpl();
@@ -89,7 +96,8 @@ public class CSVDirExecuteQuery extends CommonOperation{
         }
     }
 
-    private void executeImpl() throws SQLException {    
+    private void executeImpl()
+            throws SQLException {
         LOG.info("check the ObjectClass and result handler");
 
         // Contract tests
@@ -118,11 +126,11 @@ public class CSVDirExecuteQuery extends CommonOperation{
         LOG.ok("Where Params {0}", params);
 
         ResultSet rs = null;
-        
+
         try {
             rs = connection.allCsvFiles(whereClause, params);
 
-            ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
+            final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
             String name = "";
             String value = "";
 
@@ -132,18 +140,23 @@ public class CSVDirExecuteQuery extends CommonOperation{
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
                     name = rs.getMetaData().getColumnName(i);
                     value = rs.getString(name);
+                    final String[] allValues = value == null
+                            ? new String[]{}
+                            : value.split(
+                            Pattern.quote(configuration.getKeyseparator()), -1);
 
                     if (name.equalsIgnoreCase(
                             configuration.getPasswordColumnName())) {
                         bld.addAttribute(AttributeBuilder.buildPassword(
                                 value.toCharArray()));
                     } else {
-                        bld.addAttribute(name, value);
+                        bld.addAttribute(name, Arrays.asList(allValues));
                     }
                 }
 
-                final String uid =
-                        createUid(configuration.getKeyColumnNames(), rs,
+                final String uid = createUid(
+                        configuration.getKeyColumnNames(),
+                        rs,
                         configuration.getKeyseparator());
 
                 bld.setUid(uid);
@@ -170,7 +183,7 @@ public class CSVDirExecuteQuery extends CommonOperation{
         }
         LOG.ok("Query Account commited");
     }
-    
+
     private Set<String> resolveColumnNamesToGet() {
 
         final Set<String> attributesToGet = new HashSet<String>();

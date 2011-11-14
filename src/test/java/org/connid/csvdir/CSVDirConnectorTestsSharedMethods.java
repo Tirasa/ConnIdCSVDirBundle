@@ -38,7 +38,7 @@ public class CSVDirConnectorTestsSharedMethods {
 
     public CSVDirConnectorTestsSharedMethods() {
     }
-    
+
     protected CSVDirConfiguration createConfiguration(
             final String mask) {
         // create the connector configuration..
@@ -51,6 +51,7 @@ public class CSVDirConnectorTestsSharedMethods {
         config.setSourcePath(System.getProperty("java.io.tmpdir"));
         config.setQuotationRequired(Boolean.TRUE);
         config.setIgnoreHeader(Boolean.TRUE);
+        config.setKeyseparator(";");
         config.setFields(new String[]{
                     TestAccountsValue.ACCOUNTID,
                     TestAccountsValue.FIRSTNAME,
@@ -62,7 +63,7 @@ public class CSVDirConnectorTestsSharedMethods {
         config.validate();
         return config;
     }
-    
+
     protected File createFile(
             final String name, final Set<TestAccount> testAccounts)
             throws IOException {
@@ -74,10 +75,11 @@ public class CSVDirConnectorTestsSharedMethods {
         wrt.close();
         return file;
     }
-    
+
     private void writeOutEachUser(final PrintWriter wrt,
             final Set<TestAccount> testAccounts) {
-        wrt.println(TestAccountsValue.HEADER.toLine(TestAccountsValue.FIELD_DELIMITER,
+        wrt.println(TestAccountsValue.HEADER.toLine(
+                TestAccountsValue.FIELD_DELIMITER,
                 TestAccountsValue.TEXT_QUALIFIER));
         for (TestAccount user : testAccounts) {
             wrt.println(user.toLine(TestAccountsValue.FIELD_DELIMITER,
@@ -115,17 +117,18 @@ public class CSVDirConnectorTestsSharedMethods {
         wrt.close();
         return file;
     }
-    
-    private PrintWriter writeOutFileData(final File file) throws FileNotFoundException {
+
+    private PrintWriter writeOutFileData(final File file)
+            throws FileNotFoundException {
         return new PrintWriter(
                 new OutputStreamWriter(new FileOutputStream(file),
                 getUTF8Charset()));
     }
-    
+
     private Charset getUTF8Charset() {
         return Charset.forName("UTF-8");
     }
-    
+
     protected File updateFile(
             final File file, final Set<TestAccount> testAccounts)
             throws IOException {

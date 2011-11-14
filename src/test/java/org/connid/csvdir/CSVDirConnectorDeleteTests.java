@@ -51,7 +51,7 @@ public class CSVDirConnectorDeleteTests extends
 
         final ConnectorFacade facade = factory.newInstance(impl);
 
-        Uid uid = new Uid("____jpc4323435,jPenelope");
+        Uid uid = new Uid("____jpc4323435;jPenelope");
 
         ConnectorObject object = facade.getObject(
                 ObjectClass.ACCOUNT, uid, null);

@@ -62,16 +62,23 @@ public class TestAccount {
     public TestAccount(final ConnectorObject obj) {
         // go through each of the other variables..
         for (Attribute attr : obj.getAttributes()) {
+            final String value =
+                    attr.getValue() != null && !attr.getValue().isEmpty()
+                    ? attr.getValue().get(0).toString() : null;
+            
             if (TestAccountsValue.CHANGE_NUMBER.equalsIgnoreCase(attr.getName())) {
-                _changeNumber = AttributeUtil.getStringValue(attr);
-            } else if (TestAccountsValue.FIRSTNAME.equalsIgnoreCase(attr.getName())) {
-                _firstName = AttributeUtil.getStringValue(attr);
-            } else if (TestAccountsValue.LASTNAME.equalsIgnoreCase(attr.getName())) {
-                _lastName = AttributeUtil.getStringValue(attr);
+                _changeNumber = value;
+            } else if (TestAccountsValue.FIRSTNAME.equalsIgnoreCase(
+                    attr.getName())) {
+                _firstName = value;
+            } else if (TestAccountsValue.LASTNAME.equalsIgnoreCase(
+                    attr.getName())) {
+                _lastName = value;
             } else if (TestAccountsValue.EMAIL.equalsIgnoreCase(attr.getName())) {
-                _email = AttributeUtil.getStringValue(attr);
-            } else if (TestAccountsValue.ACCOUNTID.equalsIgnoreCase(attr.getName())) {
-                _accountId = AttributeUtil.getStringValue(attr);
+                _email = value;
+            } else if (TestAccountsValue.ACCOUNTID.equalsIgnoreCase(
+                    attr.getName())) {
+                _accountId = value;
             }
         }
     }

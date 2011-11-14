@@ -114,9 +114,8 @@ public class CSVDirConnector implements
             final ResultsHandler handler,
             final OperationOptions options) {
         try {
-            new CSVDirExecuteQuery(configuration, oclass, where,
-                    handler, options)
-                    .execute();
+            new CSVDirExecuteQuery(
+                    configuration, oclass, where, handler, options).execute();
         } catch (ClassNotFoundException ex) {
             LOG.error(ex, "error during execute query");
             throw new ConnectorIOException(ex);
@@ -134,8 +133,9 @@ public class CSVDirConnector implements
             final OperationOptions options) {
 
         try {
-            token = new CSVDirSync(configuration, objectClass, syncToken,
-                    handler, options).execute();
+            token = new CSVDirSync(
+                    configuration, objectClass, syncToken, handler, options).
+                    execute();
         } catch (ClassNotFoundException ex) {
             LOG.error(ex, "error during creation");
             throw new ConnectorIOException(ex);
@@ -157,7 +157,7 @@ public class CSVDirConnector implements
 
     @Override
     public final Uid create(final ObjectClass oc, final Set<Attribute> set,
-    final OperationOptions oo) {
+            final OperationOptions oo) {
         try {
             return new CSVDirCreate(configuration, set).execute();
         } catch (ClassNotFoundException ex) {
@@ -171,7 +171,7 @@ public class CSVDirConnector implements
 
     @Override
     public final Uid update(final ObjectClass oc, final Uid uid,
-    final Set<Attribute> set, final OperationOptions oo) {
+            final Set<Attribute> set, final OperationOptions oo) {
         try {
             return new CSVDirUpdate(configuration, uid, set).execute();
         } catch (ClassNotFoundException ex) {
@@ -185,7 +185,7 @@ public class CSVDirConnector implements
 
     @Override
     public final void delete(final ObjectClass oc, final Uid uid,
-    final OperationOptions oo) {
+            final OperationOptions oo) {
         try {
             new CSVDirDelete(configuration, uid).execute();
         } catch (ClassNotFoundException ex) {

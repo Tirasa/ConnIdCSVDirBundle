@@ -57,7 +57,7 @@ public class CSVDirConnectorUpdateTests extends
 
         final ConnectorFacade facade = factory.newInstance(impl);
 
-        Uid uid = new Uid("____jpc4323435,jPenelope");
+        Uid uid = new Uid("____jpc4323435;jPenelope");
 
         ConnectorObject object = facade.getObject(
                 ObjectClass.ACCOUNT, uid, null);
@@ -91,7 +91,7 @@ public class CSVDirConnectorUpdateTests extends
     @Test (expected = ConnectorException.class)
     public final void updateTestOfNotExistsUser() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
-        Uid uid = new Uid("____jpc4323435,jPenelo");
+        Uid uid = new Uid("____jpc4323435;jPenelo");
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
