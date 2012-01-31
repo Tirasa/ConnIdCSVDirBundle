@@ -38,6 +38,7 @@ import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncDelta;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
@@ -117,6 +118,9 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
 
         Assert.assertNotNull(object);
         Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+
+        Assert.assertFalse((Boolean) object.getAttributeByName(
+                OperationalAttributes.ENABLE_NAME).getValue().get(0));
     }
 
     @Test
@@ -165,6 +169,23 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
 
         Assert.assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
+
+        boolean found = false;
+
+        for (SyncDelta delta : syncDeltaList) {
+            ConnectorObject object = delta.getObject();
+            if ("____jpc4323435;jPenelope".equals(
+                    object.getName().getNameValue())) {
+                Assert.assertFalse((Boolean) object.getAttributeByName(
+                        OperationalAttributes.ENABLE_NAME).getValue().get(0));
+                found = true;
+            } else {
+                Assert.assertTrue((Boolean) object.getAttributeByName(
+                        OperationalAttributes.ENABLE_NAME).getValue().get(0));
+            }
+        }
+
+        Assert.assertTrue(found);
 
         createFile("syncWithNewFile2", TestAccountsValue.TEST_ACCOUNTS2);
 

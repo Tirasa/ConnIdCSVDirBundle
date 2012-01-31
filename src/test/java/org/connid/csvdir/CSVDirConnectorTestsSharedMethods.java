@@ -59,7 +59,9 @@ public class CSVDirConnectorTestsSharedMethods {
                     TestAccountsValue.EMAIL,
                     TestAccountsValue.CHANGE_NUMBER,
                     TestAccountsValue.PASSWORD,
-                    TestAccountsValue.DELETED});
+                    TestAccountsValue.DELETED,
+                    TestAccountsValue.STATUS});
+        config.setStatusColumn("status");
         config.validate();
         return config;
     }

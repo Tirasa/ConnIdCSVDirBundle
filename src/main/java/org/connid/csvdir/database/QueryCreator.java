@@ -42,7 +42,11 @@ public class QueryCreator {
         final StringBuilder set = new StringBuilder();
 
         for (String value : valuesMap.keySet()) {
-            set.append(value).append("=").append(valuesMap.get(value));
+            if (set.length() > 0) {
+                set.append(",");
+            }
+            set.append(value).append("=").
+                    append("'").append(valuesMap.get(value)).append("'");
         }
 
         final String[] uidKeys = uid.getUidValue().split(keySeparator);
@@ -51,7 +55,7 @@ public class QueryCreator {
 
         for (int i = 0; i < keys.length; i++) {
             where.append(keys[i]).append("=").
-                    append("\'").append(uidKeys[i]).append("\'");
+                    append("'").append(uidKeys[i]).append("'");
             if (i < keys.length - 1) {
                 where.append(" AND ");
             }
@@ -75,7 +79,7 @@ public class QueryCreator {
 
         for (int i = 0; i < keys.length; i++) {
             where.append(keys[i]).append("=").
-                    append("\'").append(uidKeys[i]).append("\'");
+                    append("'").append(uidKeys[i]).append("'");
 
             if (i < keys.length - 1) {
                 where.append(" AND ");
@@ -88,10 +92,10 @@ public class QueryCreator {
             final Map<String, String> valuesMap,
             final String[] fields,
             final String tableName) {
-        
+
         final QueryTemplate queryTemplate =
                 new QueryTemplate("INSERT INTO {0} VALUES({1})");
-        
+
         final StringBuilder columnName = new StringBuilder(tableName + "(");
         for (int i = 0; i < fields.length; i++) {
             columnName.append(fields[i]);
@@ -100,10 +104,10 @@ public class QueryCreator {
             }
         }
         columnName.append(")");
-        
+
         final StringBuilder values = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
-            values.append(valuesMap.get("\"" + fields[i] + "\""));
+            values.append("'").append(valuesMap.get(fields[i])).append("'");
             if (i < fields.length - 1) {
                 values.append(",");
             }

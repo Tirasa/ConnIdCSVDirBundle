@@ -24,20 +24,15 @@
 package org.connid.csvdir.methods;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
-import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.common.security.GuardedString.Accessor;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.Name;
-import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -83,53 +78,21 @@ public class CSVDirCreate extends CommonOperation {
     private Uid executeImpl()
             throws SQLException {
 
-        String uidString = "";
-        Map<String, String> attributes = new HashMap<String, String>();
+        final Name name = AttributeUtil.getNameFromAttributes(attrs);
 
-        if (AttributeUtil.getNameFromAttributes(attrs) == null) {
-            throw new IllegalArgumentException("No Name attribute provided"
-                    + "in the attributes");
+        if (name == null || StringUtil.isBlank(name.getNameValue())) {
+            throw new IllegalArgumentException(
+                    "No Name attribute provided in the attributes");
         }
 
-        for (Attribute attr : attrs) {
-            if ((attr.getValue() != null) && (!attr.getValue().isEmpty())) {
-                Object objValue = attr.getValue().get(0);
-
-                if (attr.is(Name.NAME)) {
-                    uidString = objValue.toString();
-                } else {
-                    final Set<String> name = new HashSet<String>();
-                    final Set<String> value = new HashSet<String>();
-
-                    if (attr.is(OperationalAttributes.PASSWORD_NAME)) {
-                        ((GuardedString) objValue).access(new Accessor() {
-
-                            @Override
-                            public void access(char[] clearChars) {
-                                name.add(conf.getPasswordColumnName());
-                                value.add(new String(clearChars));
-                            }
-                        });
-                    } else {
-                        name.add(attr.getName());
-                        value.add(objValue.toString());
-                    }
-
-                    attributes.put(
-                            "\"" + name.iterator().next() + "\"",
-                            "'" + value.iterator().next() + "'");
-                }
-            }
-        }
-
-        if (userExists(uidString, conn, conf)) {
+        if (userExists(name.getNameValue(), conn, conf)) {
             throw new ConnectorException("User Exists");
         }
 
-        conn.insertAccount(attributes);
+        conn.insertAccount(getAttributeMap(conf, attrs));
 
         LOG.ok("Creation commited");
 
-        return new Uid(uidString);
+        return new Uid(name.getNameValue());
     }
 }

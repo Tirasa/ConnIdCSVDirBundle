@@ -24,38 +24,41 @@
 package org.connid.csvdir.methods;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.spi.Connector;
 
-public class CSVDirUpdate extends CommonOperation{
-    
+public class CSVDirUpdate extends CommonOperation {
+
     /**
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirUpdate.class);
-    
+
     private CSVDirConnection connection = null;
-    private CSVDirConfiguration configuration = null;
+
+    private CSVDirConfiguration conf = null;
+
     private Uid uid = null;
+
     private Set<Attribute> attrs = null;
 
-    public CSVDirUpdate(final CSVDirConfiguration configuration,
-            final Uid uid, final Set<Attribute> set) throws
+    public CSVDirUpdate(final CSVDirConfiguration conf,
+            final Uid uid, final Set<Attribute> set)
+            throws
             ClassNotFoundException, SQLException {
-        this.configuration = configuration;
+        this.conf = conf;
         this.uid = uid;
         this.attrs = set;
-        connection = CSVDirConnection.openConnection(configuration);
+        connection = CSVDirConnection.openConnection(conf);
     }
-    
+
     public Uid execute() {
         try {
             return executeImpl();
@@ -73,22 +76,20 @@ public class CSVDirUpdate extends CommonOperation{
         }
     }
 
-    private Uid executeImpl() throws SQLException {
-        Map<String, String> map = new HashMap<String, String>();
+    private Uid executeImpl()
+            throws SQLException {
 
-        for (Attribute attr : attrs) {
-            List<Object> values = attr.getValue();
-                if ((values != null) || (!values.isEmpty())) {
-                    map.put(attr.getName(), "\'"
-                            + (String) values.get(0) + "\'");
-                }
+        if (uid == null || StringUtil.isBlank(uid.getUidValue())) {
+            throw new IllegalArgumentException(
+                    "No Name attribute provided in the attributes");
         }
-        
-        if (!userExists(uid.getUidValue(), connection, configuration)) {
-            throw new ConnectorException("User not exists");
+
+        if (!userExists(uid.getUidValue(), connection, conf)) {
+            throw new ConnectorException("User doesn't exist");
         }
-        
-        connection.updateAccount(map, uid);
+
+        connection.updateAccount(getAttributeMap(conf, attrs), uid);
+
         LOG.ok("Creation commited");
         return uid;
     }

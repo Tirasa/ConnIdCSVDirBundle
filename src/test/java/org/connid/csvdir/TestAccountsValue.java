@@ -27,31 +27,48 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TestAccountsValue {
+
     public static final String FILENAME = "test.csv";
+
     public static final String CHANGE_NUMBER = "changeNumber";
+
     public static final String ACCOUNTID = "accountid";
+
     public static final String PASSWORD = "password";
+
     public static final String DELETED = "deleted";
+
     public static final String FIRSTNAME = "firstname";
+
     public static final String LASTNAME = "lastname";
+
     public static final String EMAIL = "email";
+
+    public static final String STATUS = "status";
+
     public static final char FIELD_DELIMITER = ',';
+
     public static final char TEXT_QUALIFIER = '"';
+
     public static final TestAccount HEADER =
             new TestAccount(ACCOUNTID, FIRSTNAME,
             LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
+
     public static final Set<TestAccount> TEST_ACCOUNTS =
             new HashSet<TestAccount>();
+
     public static final Set<TestAccount> TEST_ACCOUNTS2 =
             new HashSet<TestAccount>();
+
     public static final Set<TestAccount> TEST_ACCOUNTS3 =
             new HashSet<TestAccount>();
+
     public static final Set<TestAccount> TEST_ACCOUNTS4 =
             new HashSet<TestAccount>();
 
     static {
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323435", "jPenelope",
-                "jCruz", "jxPenelope.Cruz@mail.com", "0", "password", "no"));
+                "jCruz", "jxPenelope.Cruz@mail.com", "0", "password", "no", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jkb3234416", "jKevin", "jBacon",
                 "jxKevin.Bacon@mail.com", "1", "password", "no"));
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323436", "jPenelope",
@@ -87,7 +104,7 @@ public class TestAccountsValue {
         TEST_ACCOUNTS2.add(new TestAccount("___bil@bob@bob.com", "jBillyBoaab",
                 "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "no"));
     }
-    
+
     static {
         TEST_ACCOUNTS3.add(new TestAccount("__jpc4323435", "jAl", "jBano",
                 "jxPenelope.Cruz@mail.com", "0", "password", "no"));
@@ -108,7 +125,7 @@ public class TestAccountsValue {
         TEST_ACCOUNTS3.add(new TestAccount("__bil@bob@bob.com", "jBillyBobMin",
                 "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "no"));
     }
-    
+
     static {
         TEST_ACCOUNTS4.add(new TestAccount("_jpc4323435", "jAl", "jMarco",
                 "jxPenelope.Cruz@mail.com", "0", "password", "no"));

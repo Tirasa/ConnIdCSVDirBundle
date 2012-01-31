@@ -38,6 +38,8 @@ public class FileToDB {
 
     private FileSystem fileSystem = null;
 
+    public static String DEFAULT_PREFIX = "DEFAULT";
+
     public FileToDB(final CSVDirConfiguration conf) {
         this.conf = conf;
         fileSystem = new FileSystem(conf);
@@ -51,7 +53,7 @@ public class FileToDB {
     public String createDbForCreate(final Connection conn) {
         File file = fileSystem.getLastModifiedCsvFile();
         if (file == null) {
-            file = new File("createFile" + Utilities.randomNumber() + ".csv");
+            file = new File(DEFAULT_PREFIX + Utilities.randomNumber() + ".csv");
         }
         return bindFileTable(file, conn);
     }

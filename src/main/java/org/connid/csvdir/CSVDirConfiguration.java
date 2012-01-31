@@ -24,6 +24,7 @@
 
 import java.nio.charset.Charset;
 
+import java.nio.charset.IllegalCharsetNameException;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.spi.AbstractConfiguration;
 import org.identityconnectors.framework.spi.ConfigurationProperty;
@@ -90,6 +91,29 @@ public class CSVDirConfiguration extends AbstractConfiguration {
      * Specify it first line file must be ignored.
      */
     private Boolean ignoreHeader = Boolean.TRUE;
+
+    /*
+     * Status column name.
+     */
+    private String statusColumn;
+
+    /**
+     * Value for 'statusColumn' field to indicate disabled entries.
+     * Default 'true'.
+     */
+    private String enabledStatusValue = "true";
+
+    /**
+     * Value for 'statusColumn' field to indicate disabled entries.
+     * Default 'false'.
+     */
+    private String disabledStatusValue = "false";
+
+    /**
+     * Default value for 'statusColumn' field.
+     * Default 'true'.
+     */
+    private String defaultStatusValue = "true";
 
     @ConfigurationProperty(displayMessageKey = "sourcePath.display",
     helpMessageKey = "sourcePath.help", required = true, order = 1)
@@ -163,6 +187,30 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         return keyseparator;
     }
 
+    @ConfigurationProperty(displayMessageKey = "defaultStatusValue.display",
+    helpMessageKey = "defaultStatusValue.help", required = false, order = 13)
+    public String getDefaultStatusValue() {
+        return defaultStatusValue;
+    }
+
+    @ConfigurationProperty(displayMessageKey = "disabledStatusValue.display",
+    helpMessageKey = "disabledStatusValue.help", required = false, order = 14)
+    public String getDisabledStatusValue() {
+        return disabledStatusValue;
+    }
+
+    @ConfigurationProperty(displayMessageKey = "enabledStatusValue.display",
+    helpMessageKey = "enabledStatusValue.help", required = false, order = 15)
+    public String getEnabledStatusValue() {
+        return enabledStatusValue;
+    }
+
+    @ConfigurationProperty(displayMessageKey = "statusColumn.display",
+    helpMessageKey = "statusColumn.help", required = false, order = 16)
+    public String getStatusColumn() {
+        return statusColumn;
+    }
+
     public void setKeyseparator(String keyseparator) {
         this.keyseparator = keyseparator;
     }
@@ -217,6 +265,22 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         if (quotationRequired != null) {
             this.quotationRequired = quotationRequired;
         }
+    }
+
+    public void setDefaultStatusValue(String defaultStatusValue) {
+        this.defaultStatusValue = defaultStatusValue;
+    }
+
+    public void setDisabledStatusValue(String disabledStatusValue) {
+        this.disabledStatusValue = disabledStatusValue;
+    }
+
+    public void setEnabledStatusValue(String enabledStatusValue) {
+        this.enabledStatusValue = enabledStatusValue;
+    }
+
+    public void setStatusColumn(String statusColumn) {
+        this.statusColumn = statusColumn;
     }
 
     /**

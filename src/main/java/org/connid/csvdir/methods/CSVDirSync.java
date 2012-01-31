@@ -25,14 +25,12 @@ package org.connid.csvdir.methods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.regex.Pattern;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
@@ -40,7 +38,6 @@ import org.identityconnectors.framework.common.objects.SyncDeltaBuilder;
 import org.identityconnectors.framework.common.objects.SyncDeltaType;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
 public class CSVDirSync extends CommonOperation {
@@ -52,7 +49,7 @@ public class CSVDirSync extends CommonOperation {
 
     private static long token = 0L;
 
-    private CSVDirConfiguration configuration = null;
+    private CSVDirConfiguration conf = null;
 
     private CSVDirConnection connection = null;
 
@@ -64,19 +61,19 @@ public class CSVDirSync extends CommonOperation {
 
     private OperationOptions options = null;
 
-    public CSVDirSync(final CSVDirConfiguration configuration,
+    public CSVDirSync(final CSVDirConfiguration conf,
             final ObjectClass objectClass,
             SyncToken syncToken,
             final SyncResultsHandler handler,
             final OperationOptions options)
             throws
             ClassNotFoundException, SQLException {
-        this.configuration = configuration;
+        this.conf = conf;
         this.objectClass = objectClass;
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
-        connection = CSVDirConnection.openConnection(configuration);
+        connection = CSVDirConnection.openConnection(conf);
     }
 
     public long execute() {
@@ -117,7 +114,7 @@ public class CSVDirSync extends CommonOperation {
         CSVDirConnection conn = null;
 
         try {
-            conn = CSVDirConnection.openConnection(configuration);
+            conn = CSVDirConnection.openConnection(conf);
 
             buildSyncDelta(conn.modifiedCsvFiles(
                     Long.valueOf(syncToken.getValue().toString())), handler);
@@ -139,40 +136,19 @@ public class CSVDirSync extends CommonOperation {
         return token;
     }
 
-    private void buildSyncDelta(final ResultSet rs,
+    private void buildSyncDelta(
+            final ResultSet rs,
             final SyncResultsHandler handler)
             throws SQLException {
 
-        final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
-
-        Boolean handled = Boolean.TRUE;
+        boolean handled = true;
 
         while (rs.next() && handled) {
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                String name = rs.getMetaData().getColumnName(i);
-                String value = rs.getString(name);
-                final String[] allValues = value.split(
-                        Pattern.quote(configuration.getKeyseparator()), -1);
+            final ConnectorObjectBuilder bld = buildConnectorObject(conf, rs);
 
-                if (name.equalsIgnoreCase(
-                        configuration.getPasswordColumnName())) {
-                    bld.addAttribute(AttributeBuilder.buildPassword(
-                            value.toCharArray()));
-                } else {
-                    bld.addAttribute(name, Arrays.asList(allValues));
-                }
-            }
-
-            final Uid uid = new Uid(
-                    createUid(configuration.getKeyColumnNames(), rs,
-                    configuration.getKeyseparator()));
-
-            bld.setUid(uid);
-            bld.setName(uid.getUidValue());
-
-            final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(bld, uid);
+            final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(bld);
             choseRightDeltaType(rs, syncDeltaBuilder);
-            handler.handle(syncDeltaBuilder.build());
+            handled = handler.handle(syncDeltaBuilder.build());
         }
     }
 
@@ -180,7 +156,7 @@ public class CSVDirSync extends CommonOperation {
             final SyncDeltaBuilder syncDeltaBuilder)
             throws SQLException {
         if (Boolean.valueOf(getValueFromColumnName(rs,
-                configuration.getDeleteColumnName()))) {
+                conf.getDeleteColumnName()))) {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.DELETE);
         } else {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.CREATE_OR_UPDATE);
@@ -188,10 +164,12 @@ public class CSVDirSync extends CommonOperation {
     }
 
     private SyncDeltaBuilder createSyncDelta(
-            final ConnectorObjectBuilder connObjectBuilder, final Uid uid) {
+            final ConnectorObjectBuilder connObjectBuilder) {
         final SyncDeltaBuilder syncDeltaBuilder = new SyncDeltaBuilder();
-        syncDeltaBuilder.setObject(connObjectBuilder.build());
-        syncDeltaBuilder.setUid(uid);
+
+        ConnectorObject object = connObjectBuilder.build();
+        syncDeltaBuilder.setObject(object);
+        syncDeltaBuilder.setUid(object.getUid());
         syncDeltaBuilder.setToken(getLatestSyncToken(ObjectClass.ACCOUNT));
         return syncDeltaBuilder;
     }

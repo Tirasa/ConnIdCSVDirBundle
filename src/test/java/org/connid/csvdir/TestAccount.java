@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.identityconnectors.common.EqualsHashCodeBuilder;
 import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 
 public class TestAccount {
@@ -46,6 +45,27 @@ public class TestAccount {
 
     private String _deleted;
 
+    private String _status;
+
+    public TestAccount(
+            final String accountId,
+            final String firstName,
+            final String lastName,
+            final String email,
+            final String changeNumber,
+            final String password,
+            final String deleted,
+            final String status) {
+        _accountId = accountId;
+        _firstName = firstName;
+        _lastName = lastName;
+        _email = email;
+        _changeNumber = changeNumber;
+        _password = password;
+        _deleted = deleted;
+        _status = status;
+    }
+
     public TestAccount(final String accountId, final String firstName,
             final String lastName, final String email,
             final String changeNumber, final String password,
@@ -57,6 +77,7 @@ public class TestAccount {
         _changeNumber = changeNumber;
         _password = password;
         _deleted = deleted;
+        _status = "true";
     }
 
     public TestAccount(final ConnectorObject obj) {
@@ -65,7 +86,7 @@ public class TestAccount {
             final String value =
                     attr.getValue() != null && !attr.getValue().isEmpty()
                     ? attr.getValue().get(0).toString() : null;
-            
+
             if (TestAccountsValue.CHANGE_NUMBER.equalsIgnoreCase(attr.getName())) {
                 _changeNumber = value;
             } else if (TestAccountsValue.FIRSTNAME.equalsIgnoreCase(
@@ -109,6 +130,10 @@ public class TestAccount {
 
     public String getPassword() {
         return _password;
+    }
+
+    public String getStatus() {
+        return _status;
     }
 
     public EqualsHashCodeBuilder getEqHash() {
@@ -184,6 +209,8 @@ public class TestAccount {
         buf.append(getField(getPassword(), fieldd, textq));
         buf.append(fieldd);
         buf.append(getField(getDeleted(), fieldd, textq));
+        buf.append(fieldd);
+        buf.append(getField(getStatus(), fieldd, textq));
 
         return buf.toString();
     }

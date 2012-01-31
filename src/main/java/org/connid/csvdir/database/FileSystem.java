@@ -31,7 +31,7 @@ public class FileSystem {
 
     private static final Log log = Log.getLog(FileSystem.class);
 
-    private CSVDirConfiguration configuration;
+    private CSVDirConfiguration conf;
 
     private File sourcePath = null;
 
@@ -39,15 +39,14 @@ public class FileSystem {
 
     private long highestTimeStamp;
 
-    public FileSystem(final CSVDirConfiguration csvdc) {
-        configuration = csvdc;
-        sourcePath = new File(configuration.getSourcePath());
-        fileFilter = new FileFilter() {
+    public FileSystem(final CSVDirConfiguration conf) {
+        this.conf = conf;
+        this.sourcePath = new File(conf.getSourcePath());
+        this.fileFilter = new FileFilter() {
 
             @Override
             public boolean accept(final File file) {
-                return !file.isDirectory() && file.getName().matches(
-                        configuration.getFileMask());
+                return isMatched(file);
             }
         };
     }
@@ -79,9 +78,7 @@ public class FileSystem {
 
             @Override
             public boolean accept(final File file) {
-                return !file.isDirectory()
-                        && file.getName().matches(configuration.getFileMask())
-                        && file.lastModified() > timeStamp;
+                return isMatched(file) && file.lastModified() > timeStamp;
             }
         });
 
@@ -104,5 +101,12 @@ public class FileSystem {
 
     public final long getHighestTimeStamp() {
         return highestTimeStamp;
+    }
+
+    private boolean isMatched(File file) {
+        return !file.isDirectory()
+                && (file.getName().matches(conf.getFileMask())
+                || file.getName().matches(
+                FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
     }
 }

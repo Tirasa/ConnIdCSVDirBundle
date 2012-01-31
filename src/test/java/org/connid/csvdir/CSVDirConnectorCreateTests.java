@@ -55,8 +55,9 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
         Name name = new Name("___mperro123;pmassi");
 
-        Uid newAccount = connector.create(ObjectClass.ACCOUNT,
-                createSetOfAttributes(name), null);
+        Uid newAccount = connector.create(
+                ObjectClass.ACCOUNT, createSetOfAttributes(name), null);
+
         Assert.assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
@@ -88,7 +89,6 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
                         Assert.assertEquals("password", new String(clearChars));
                     }
                 });
-
         // --------------------------------
 
         final Uid uid = connector.authenticate(

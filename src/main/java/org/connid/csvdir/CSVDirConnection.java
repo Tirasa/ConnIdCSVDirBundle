@@ -163,14 +163,14 @@ public class CSVDirConnection {
             stm = conn.prepareStatement(query);
             LOG.ok("Execute update {0}", stm.toString());
             return stm.executeUpdate();
-        } catch (SQLException ex) {
-            LOG.error(ex, "Error during sql query");
-            throw new IllegalStateException(ex);
+        } catch (SQLException e) {
+            LOG.error(e, "Error during sql query");
+            throw new IllegalStateException(e);
         } finally {
             try {
                 stm.close();
-            } catch (SQLException ex) {
-                LOG.error(ex, "While closing sql statement");
+            } catch (SQLException e) {
+                LOG.error(e, "While closing sql statement");
             }
         }
     }

@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
@@ -37,8 +36,6 @@ import org.identityconnectors.dbcommon.FilterWhereBuilder;
 import org.identityconnectors.dbcommon.SQLParam;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
-import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
@@ -52,7 +49,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirExecuteQuery.class);
 
-    private CSVDirConfiguration configuration = null;
+    private CSVDirConfiguration conf = null;
 
     private CSVDirConnection conn = null;
 
@@ -71,7 +68,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
             final OperationOptions options)
             throws
             ClassNotFoundException, SQLException {
-        this.configuration = configuration;
+        this.conf = configuration;
         this.oclass = oclass;
         this.where = where;
         this.handler = handler;
@@ -128,39 +125,12 @@ public class CSVDirExecuteQuery extends CommonOperation {
         try {
             rs = conn.allCsvFiles(whereClause, params);
 
-            final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
-
-            Boolean handled = Boolean.TRUE;
+            boolean handled = true;
 
             while (rs.next() && handled) {
-                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                    String name = rs.getMetaData().getColumnName(i);
-                    String value = rs.getString(name);
-
-                    final String[] allValues = value == null
-                            ? new String[]{}
-                            : value.split(
-                            Pattern.quote(configuration.getKeyseparator()), -1);
-
-                    if (name.equalsIgnoreCase(
-                            configuration.getPasswordColumnName())) {
-                        bld.addAttribute(AttributeBuilder.buildPassword(
-                                value.toCharArray()));
-                    } else {
-                        bld.addAttribute(name, Arrays.asList(allValues));
-                    }
-                }
-
-                final String uid = createUid(
-                        configuration.getKeyColumnNames(),
-                        rs,
-                        configuration.getKeyseparator());
-
-                bld.setUid(uid);
-                bld.setName(uid);
 
                 // create the connector object..
-                handled = handler.handle(bld.build());
+                handled = handler.handle(buildConnectorObject(conf, rs).build());
             }
         } catch (Exception e) {
             LOG.error(e, "Search query failed");
@@ -187,7 +157,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
         if (options != null && options.getAttributesToGet() != null) {
             attributes = options.getAttributesToGet();
         } else {
-            attributes = configuration.getFields();
+            attributes = conf.getFields();
         }
 
         attributesToGet.addAll(Arrays.asList(attributes));
