@@ -23,149 +23,141 @@
  */package org.connid.csvdir.database;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.utilities.Utilities;
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.framework.spi.Connector;
 
 public class FileToDB {
-    
-    private CSVDirConfiguration configuration = null;
-    private FileSystem fileSystem = null;
-    private File fileToUpdate = null;
 
-    public FileToDB(final CSVDirConfiguration configuration) {
-        this.configuration = configuration;
-        fileSystem = new FileSystem(configuration);
+    private CSVDirConfiguration conf = null;
+
+    private FileSystem fileSystem = null;
+
+    public FileToDB(final CSVDirConfiguration conf) {
+        this.conf = conf;
+        fileSystem = new FileSystem(conf);
     }
 
     /**
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(FileToDB.class);
-    
-    public String createDbForCreate(Connection conn) {
-        final StringBuilder tableHeader = createTableHeader();
-        String tableName = "";
-        try {
-            tableName = processFiles(tableHeader, conn);
-        } catch (Exception e) {
-            LOG.error(e, "While creating database");
+
+    public String createDbForCreate(final Connection conn) {
+        File file = fileSystem.getLastModifiedCsvFile();
+        if (file == null) {
+            file = new File("createFile" + Utilities.randomNumber() + ".csv");
         }
-        return tableName;
+        return bindFileTable(file, conn);
     }
 
-    private String processFiles(
-            final StringBuilder tableHeader, final Connection conn)
-            throws IOException, SQLException {
+    public String createDbForUpdate(
+            final Connection conn, final File file) {
+        return bindFileTable(file, conn);
+    }
 
-        final StringBuilder createTable = new StringBuilder();
-        final StringBuilder linkTable = new StringBuilder();
+    public List<String> createDbForSync(
+            final File[] fileToProcess,
+            final Connection conn,
+            final String viewname) {
+        return bindFileTables(fileToProcess, conn, viewname);
+    }
 
-        File[] files = fileSystem.
-                getModifiedCsvFiles(fileSystem.getHighestTimeStamp());
-        if (files.length == 0) {
-            fileToUpdate = new File("createFile"
-                    + Utilities.randomNumber() + ".csv");
+    private StringBuilder createTableHeader() {
+        final StringBuilder tableHeader = new StringBuilder();
+        for (String field : conf.getFields()) {
+            tableHeader.append(field.trim()).append(" ").append("VARCHAR(255), ");
+        }
+        tableHeader.append("PRIMARY KEY (");
+
+        final String[] keys = conf.getKeyColumnNames();
+        for (int i = 0; i < keys.length; i++) {
+            if (i > 0) {
+                tableHeader.append(",");
+            }
+            tableHeader.append(keys[i]);
+        }
+        tableHeader.append(")");
+
+        return tableHeader;
+    }
+
+    private List<String> bindFileTables(
+            final File[] files,
+            final Connection conn,
+            final String viewname) {
+
+        final StringBuilder view = new StringBuilder();
+
+        final List<String> tables = new ArrayList<String>();
+
+        for (File file : files) {
+            final String tableName = bindFileTable(file, conn);
+
+            if (tableName != null) {
+                tables.add(tableName);
+
+                if (view.length() != 0) {
+                    view.append(" UNION ");
+                }
+                view.append("SELECT * FROM ").append(tableName);
+            }
+        }
+
+        if (view.length() != 0) {
+            try {
+                view.insert(0, "CREATE VIEW " + viewname + " AS ");
+
+                LOG.ok("Execute: {0}", view.toString());
+                conn.createStatement().execute(view.toString());
+            } catch (SQLException e) {
+                LOG.error(e, "While creating view {0}", viewname);
+            }
         } else {
-            fileToUpdate = files[0];
+            try {
+                LOG.ok("Execute: CREATE TEXT TABLE NOENTRIES");
+
+                final StringBuilder tableHeader = createTableHeader();
+                final StringBuilder createTable = new StringBuilder();
+
+                createTable.delete(0, createTable.length());
+                createTable.append("CREATE TEXT TABLE NOENTRIES");
+                createTable.append(" (").append(tableHeader).append(") ");
+                conn.createStatement().execute(createTable.toString());
+
+                tables.add("NOENTRIES");
+
+                conn.createStatement().execute(
+                        "CREATE VIEW " + viewname + " AS SELECT * FROM NOENTRIES");
+            } catch (SQLException e) {
+                LOG.error(e, "While creating table NOENTRIES");
+            }
         }
-        
-        //TODO: controllare
-//        if (configuration.getQuotationRequired()) {
-//            final PrintWriter wrt = new PrintWriter(new BufferedWriter(
-//				new FileWriter(fileToUpdate, true)));
-//            for (String field : configuration.getFields()) {
-//                wrt.println(field);
-//            }
-//            wrt.close();
-//        }
 
-        LOG.ok("File to load {0}", fileToUpdate.getAbsolutePath());
+        return tables;
+    }
 
-        String tableName = "CSV_TABLE" + Utilities.randomNumber();
+    private String bindFileTable(
+            final File file,
+            final Connection conn) {
+
+        if (LOG.isOk()) {
+            LOG.ok("File to load {0}", file.getAbsolutePath());
+        }
 
         try {
-            createTable.delete(0, createTable.length());
-            createTable.append("CREATE TEXT TABLE ").append(tableName);
-            createTable.append(" (").append(tableHeader).append(") ");
-            linkTable.delete(0, createTable.length());
-            linkTable.append("SET TABLE ").append(tableName).
-                    append(" SOURCE ").
-                    append("\"").
-                    append(File.separator).append(fileToUpdate.getName()).
-                    append(";ignore_first=").
-                    append(configuration.getIgnoreHeader()).
-                    append(";all_quoted=").
-                    append(configuration.getQuotationRequired()).
-                    append(";fs=").
-                    append(configuration.getFieldDelimiter()).
-                    append(";lvs=").
-                    append(configuration.getTextQualifier() == '"'
-                    ? "\\quote" : configuration.getTextQualifier()).
-                    append(";encoding=").
-                    append(configuration.getEncoding()).
-                    append("\"");
+            final StringBuilder tableHeader = createTableHeader();
 
-            LOG.ok("Execute: {0}", createTable.toString());
-            conn.createStatement().execute(createTable.toString());
-            
-            LOG.ok("Execute: {0}", linkTable.toString());
-            conn.createStatement().execute(linkTable.toString());
-        } catch (SQLException e) {
-            LOG.error(e, "While creating text table");
-        }
-        return tableName;
-    }
-    
-    private PrintWriter writeOutFileData(final File file)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        return new PrintWriter(
-                new OutputStreamWriter(new FileOutputStream(file),
-                "UTF-8"));
-    }
-    
-    public String createDbForUpdate(Connection conn, File file) {
-        final StringBuilder tableHeader = createTableHeader();
-        String tableName = "";
-        try {
-            tableName = processFilesForUpdate(tableHeader, conn, file);
-        } catch (Exception e) {
-            LOG.error(e, "While creating database");
-        }
-        return tableName;
-    }
-    
-    private String processFilesForUpdate(
-            final StringBuilder tableHeader, final Connection conn, final File file)
-            throws IOException, SQLException {
+            final String tableName = "CSV_TABLE" + Utilities.randomNumber();
 
-        final StringBuilder createTable = new StringBuilder();
-        final StringBuilder linkTable = new StringBuilder();
-        
-        //TODO: controllare
-//        if (configuration.getQuotationRequired()) {
-//            final PrintWriter wrt = new PrintWriter(new BufferedWriter(
-//				new FileWriter(fileToUpdate, true)));
-//            for (String field : configuration.getFields()) {
-//                wrt.println(field);
-//            }
-//            wrt.close();
-//        }
+            final StringBuilder createTable = new StringBuilder();
+            final StringBuilder linkTable = new StringBuilder();
 
-        LOG.ok("File to load {0}", file.getAbsolutePath());
-
-        String tableName = "CSV_TABLE" + Utilities.randomNumber();
-
-        try {
             createTable.delete(0, createTable.length());
             createTable.append("CREATE TEXT TABLE ").append(tableName);
             createTable.append(" (").append(tableHeader).append(") ");
@@ -175,132 +167,28 @@ public class FileToDB {
                     append("\"").
                     append(File.separator).append(file.getName()).
                     append(";ignore_first=").
-                    append(configuration.getIgnoreHeader()).
+                    append(conf.getIgnoreHeader()).
                     append(";all_quoted=").
-                    append(configuration.getQuotationRequired()).
+                    append(conf.getQuotationRequired()).
                     append(";fs=").
-                    append(configuration.getFieldDelimiter()).
+                    append(conf.getFieldDelimiter()).
                     append(";lvs=").
-                    append(configuration.getTextQualifier() == '"'
-                    ? "\\quote" : configuration.getTextQualifier()).
+                    append(conf.getTextQualifier() == '"'
+                    ? "\\quote" : conf.getTextQualifier()).
                     append(";encoding=").
-                    append(configuration.getEncoding()).
+                    append(conf.getEncoding()).
                     append("\"");
 
             LOG.ok("Execute: {0}", createTable.toString());
             conn.createStatement().execute(createTable.toString());
-            
+
             LOG.ok("Execute: {0}", linkTable.toString());
             conn.createStatement().execute(linkTable.toString());
+
+            return tableName;
         } catch (SQLException e) {
             LOG.error(e, "While creating text table");
-        }
-        return tableName;
-    }
-    
-    public void createDbForSync(final File[] fileToProcess,
-            final Connection conn,
-            final List<String> tables, final String viewname) {
-        StringBuilder tableHeader = createTableHeader();
-        try {
-            processAllFiles(fileToProcess, tableHeader, conn, tables, viewname);
-        } catch (Exception e) {
-            LOG.error(e, "While creating database");
-        }
-    }
-    
-    private StringBuilder createTableHeader() {
-        final StringBuilder tableHeader = new StringBuilder();
-        for (String field : configuration.getFields()) {
-            tableHeader.append(field.trim()).append(" ").
-                    append("VARCHAR(255), ");
-        }
-        tableHeader.append("PRIMARY KEY (");
-        final String[] keys = configuration.getKeyColumnNames();
-        for (int i = 0; i < keys.length; i++) {
-            if (i > 0) {
-                tableHeader.append(",");
-            }
-            tableHeader.append(keys[i]);
-        }
-        tableHeader.append(")");
-        return tableHeader;
-    }
-
-    private void processAllFiles(
-            final File[] fileToProcess,
-            final StringBuilder tableHeader, final Connection conn,
-            final List<String> tables, final String viewname)
-            throws IOException, SQLException {
-
-        String tableName;
-        final StringBuilder createTable = new StringBuilder();
-        final StringBuilder linkTable = new StringBuilder();
-        final StringBuilder view = new StringBuilder();
-
-        for (File csvFile : fileToProcess) {
-            LOG.ok("File to load {0}", csvFile.getAbsolutePath());
-
-            tableName = "CSV_TABLE" + Utilities.randomNumber();
-
-            try {
-                createTable.delete(0, createTable.length());
-                createTable.append("CREATE TEXT TABLE ").append(tableName);
-                createTable.append(" (").append(tableHeader).append(") ");
-                linkTable.delete(0, createTable.length());
-                linkTable.append("SET TABLE ").append(tableName).
-                        append(" SOURCE ").
-                        append("\"").
-                        append(File.separator).append(csvFile.getName()).
-                        append(";ignore_first=").
-                        append(configuration.getIgnoreHeader()).
-                        append(";all_quoted=").
-                        append(configuration.getQuotationRequired()).
-                        append(";fs=").
-                        append(configuration.getFieldDelimiter()).
-                        append(";lvs=").
-                        append(configuration.getTextQualifier() == '"'
-                        ? "\\quote" : configuration.getTextQualifier()).
-                        append(";encoding=").
-                        append(configuration.getEncoding()).
-                        append("\"");
-
-                LOG.ok("Execute: {0}", createTable.toString());
-                conn.createStatement().execute(createTable.toString());
-
-                tables.add(tableName);
-
-                LOG.ok("Execute: {0}", linkTable.toString());
-                conn.createStatement().execute(linkTable.toString());
-
-                if (view.length() != 0) {
-                    view.append(" UNION ");
-                }
-                view.append("SELECT * FROM ").append(tableName);
-            } catch (SQLException e) {
-                LOG.error(e, "While creating text table");
-            }
-        }
-
-        LOG.ok("Create view {0}", viewname);
-
-        if (view.length() != 0) {
-            view.insert(0, "CREATE VIEW " + viewname + " AS ");
-
-            LOG.ok("Execute: {0}", view.toString());
-            conn.createStatement().execute(view.toString());
-        } else {
-            LOG.ok("Execute: CREATE TEXT TABLE NOENTRIES");
-
-            createTable.delete(0, createTable.length());
-            createTable.append("CREATE TEXT TABLE NOENTRIES");
-            createTable.append(" (").append(tableHeader).append(") ");
-            conn.createStatement().execute(createTable.toString());
-
-            tables.add("NOENTRIES");
-
-            conn.createStatement().execute(
-                    "CREATE VIEW " + viewname + " AS SELECT * FROM NOENTRIES");
+            return null;
         }
     }
 }

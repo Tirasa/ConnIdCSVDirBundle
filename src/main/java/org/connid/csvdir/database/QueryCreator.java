@@ -28,57 +28,71 @@ import org.connid.csvdir.utilities.QueryTemplate;
 import org.identityconnectors.framework.common.objects.Uid;
 
 public class QueryCreator {
-    
-    public static String updateQuery(final Map<String, String> valuesMap,
-            final Uid uid, final String keySeparator,
-            final String[] keys, final String tableName) {
-        QueryTemplate queryTemplate =
+
+    public static String updateQuery(
+            final Map<String, String> valuesMap,
+            final Uid uid,
+            final String keySeparator,
+            final String[] keys,
+            final String tableName) {
+
+        final QueryTemplate queryTemplate =
                 new QueryTemplate("UPDATE {0} SET {1} WHERE {2}");
 
-        StringBuilder set = new StringBuilder();
+        final StringBuilder set = new StringBuilder();
 
         for (String value : valuesMap.keySet()) {
-            set.append(value + "=" + valuesMap.get(value));
+            set.append(value).append("=").append(valuesMap.get(value));
         }
 
-        String[] uidKeys = uid.getUidValue().split(keySeparator);
+        final String[] uidKeys = uid.getUidValue().split(keySeparator);
 
-        StringBuilder where = new StringBuilder();
+        final StringBuilder where = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i] + "=" + "\'" + uidKeys[i] + "\'");
+            where.append(keys[i]).append("=").
+                    append("\'").append(uidKeys[i]).append("\'");
             if (i < keys.length - 1) {
                 where.append(" AND ");
             }
         }
         return queryTemplate.apply(tableName, set.toString(), where.toString());
     }
-    
-    public static String deleteQuery(final Uid uid,
-            final String keySeparator, final String[] keys,
+
+    public static String deleteQuery(
+            final Uid uid,
+            final String keySeparator,
+            final String[] keys,
             final String tableName) {
-        QueryTemplate queryTemplate =
+
+        final QueryTemplate queryTemplate =
                 new QueryTemplate("DELETE FROM {0} WHERE {1}");
 
-        String[] uidKeys =
+        final String[] uidKeys =
                 uid.getUidValue().split(keySeparator);
 
-        StringBuilder where = new StringBuilder();
+        final StringBuilder where = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i] + "=" + "\'" + uidKeys[i] + "\'");
+            where.append(keys[i]).append("=").
+                    append("\'").append(uidKeys[i]).append("\'");
+
             if (i < keys.length - 1) {
                 where.append(" AND ");
             }
         }
         return queryTemplate.apply(tableName, where.toString());
     }
-    
-    public static String insertQuery(final Map<String, String> valuesMap,
-            final String[] fields, final String tableName) {
-        QueryTemplate queryTemplate =
+
+    public static String insertQuery(
+            final Map<String, String> valuesMap,
+            final String[] fields,
+            final String tableName) {
+        
+        final QueryTemplate queryTemplate =
                 new QueryTemplate("INSERT INTO {0} VALUES({1})");
-        StringBuilder columnName = new StringBuilder(tableName + "(");
+        
+        final StringBuilder columnName = new StringBuilder(tableName + "(");
         for (int i = 0; i < fields.length; i++) {
             columnName.append(fields[i]);
             if (i < fields.length - 1) {
@@ -86,7 +100,8 @@ public class QueryCreator {
             }
         }
         columnName.append(")");
-        StringBuilder values = new StringBuilder();
+        
+        final StringBuilder values = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
             values.append(valuesMap.get("\"" + fields[i] + "\""));
             if (i < fields.length - 1) {

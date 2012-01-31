@@ -114,22 +114,22 @@ public class CSVDirSync extends CommonOperation {
             syncToken = new SyncToken(0);
         }
 
-        CSVDirConnection connection = null;
+        CSVDirConnection conn = null;
 
         try {
-            connection = CSVDirConnection.openConnection(configuration);
+            conn = CSVDirConnection.openConnection(configuration);
 
-            buildSyncDelta(connection.modifiedCsvFiles(
+            buildSyncDelta(conn.modifiedCsvFiles(
                     Long.valueOf(syncToken.getValue().toString())), handler);
 
-            token = connection.getFileSystem().getHighestTimeStamp();
+            token = conn.getFileSystem().getHighestTimeStamp();
         } catch (Exception e) {
             LOG.error(e, "error during syncronization");
             throw new ConnectorIOException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");

@@ -54,7 +54,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
 
     private CSVDirConfiguration configuration = null;
 
-    private CSVDirConnection connection = null;
+    private CSVDirConnection conn = null;
 
     private ObjectClass oclass = null;
 
@@ -76,7 +76,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
         this.where = where;
         this.handler = handler;
         this.options = options;
-        connection = CSVDirConnection.openConnection(configuration);
+        conn = CSVDirConnection.openConnection(configuration);
     }
 
     public void execute() {
@@ -87,8 +87,8 @@ public class CSVDirExecuteQuery extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -115,31 +115,28 @@ public class CSVDirExecuteQuery extends CommonOperation {
 
         LOG.ok("Column Names {0} To Get", columnNamesToGet);
 
-        final String whereClause =
-                where != null ? where.getWhereClause() : null;
+        final String whereClause = where != null ? where.getWhereClause() : null;
 
         LOG.ok("Where Clause {0}", whereClause);
 
-        final List<SQLParam> params =
-                where != null ? where.getParams() : null;
+        final List<SQLParam> params = where != null ? where.getParams() : null;
 
         LOG.ok("Where Params {0}", params);
 
         ResultSet rs = null;
 
         try {
-            rs = connection.allCsvFiles(whereClause, params);
+            rs = conn.allCsvFiles(whereClause, params);
 
             final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
-            String name = "";
-            String value = "";
 
             Boolean handled = Boolean.TRUE;
 
             while (rs.next() && handled) {
                 for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                    name = rs.getMetaData().getColumnName(i);
-                    value = rs.getString(name);
+                    String name = rs.getMetaData().getColumnName(i);
+                    String value = rs.getString(name);
+
                     final String[] allValues = value == null
                             ? new String[]{}
                             : value.split(
@@ -172,10 +169,6 @@ public class CSVDirExecuteQuery extends CommonOperation {
             try {
                 if (rs != null) {
                     rs.close();
-                }
-
-                if (connection != null) {
-                    connection.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");

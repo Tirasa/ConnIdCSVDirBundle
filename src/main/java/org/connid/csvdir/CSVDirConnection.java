@@ -31,12 +31,14 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.connid.csvdir.database.QueryCreator;
 import org.connid.csvdir.utilities.Utilities;
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.dbcommon.DatabaseConnection;
 import org.identityconnectors.dbcommon.SQLParam;
 import org.identityconnectors.dbcommon.SQLUtil;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
@@ -48,21 +50,29 @@ public class CSVDirConnection {
      * Setup logging for the {@link DatabaseConnection}.
      */
     private static final Log LOG = Log.getLog(CSVDirConnection.class);
+
     private String viewname = null;
+
     private String query = null;
+
     private String URL = "jdbc:hsqldb:file:";
-    private List<String> tables = new ArrayList<String>();
+
+    private Set<String> tables = new HashSet<String>();
+
     private Connection conn;
-    private final CSVDirConfiguration configuration;
+
+    private final CSVDirConfiguration conf;
+
     private FileSystem fileSystem;
+
     private FileToDB fileToDB;
 
-    private CSVDirConnection(final CSVDirConfiguration configuration)
+    private CSVDirConnection(final CSVDirConfiguration conf)
             throws ClassNotFoundException, SQLException {
 
-        this.configuration = configuration;
-        URL += configuration.getSourcePath() + File.separator + "dbuser";
-        fileSystem = new FileSystem(configuration);
+        this.conf = conf;
+        URL += conf.getSourcePath() + File.separator + "dbuser";
+        fileSystem = new FileSystem(conf);
 
         Class.forName("org.hsqldb.jdbcDriver");
         conn = DriverManager.getConnection(URL, "sa", "");
@@ -71,7 +81,7 @@ public class CSVDirConnection {
         viewname = "USER_EX" + Utilities.randomNumber();
         query = "SELECT * FROM " + viewname;
 
-        fileToDB = new FileToDB(configuration);
+        fileToDB = new FileToDB(conf);
     }
 
     public static CSVDirConnection openConnection(
@@ -81,90 +91,74 @@ public class CSVDirConnection {
         return new CSVDirConnection(configuration);
     }
 
-    public void closeConnection() throws SQLException {
+    public void closeConnection()
+            throws SQLException {
         if (conn != null) {
-
             LOG.ok("Closing connection ...");
-
             dropTableAndViewIfExists();
             tables.clear();
-
             conn.close();
         }
     }
 
-    public void deleteAccount(Uid uid) {
+    public int deleteAccount(final Uid uid) {
+
         File[] files = fileSystem.getAllCsvFiles();
+
         if (files.length == 0) {
-            throw new ConnectorException("No file to delete");
+            throw new ConnectorException("Empty table");
         }
 
-        String tableName = "";
-
-        for (File file : files) {
-            tableName = fileToDB.createDbForUpdate(conn, file);
-            PreparedStatement stm = null;
-            try {
-                stm = conn.prepareStatement(
-                        QueryCreator.deleteQuery(uid,
-                        configuration.getKeyseparator(),
-                        configuration.getKeyColumnNames(), tableName));
-                LOG.ok("Execute update {0}", stm.toString());
-                stm.executeUpdate();
-            } catch (SQLException ex) {
-                LOG.error(ex, "Error during sql query");
-                throw new IllegalStateException(ex);
-            } finally {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    LOG.error(ex, "While closing sql statement");
-                }
-            }
-        }
-    }
-
-    public int updateAccount(Map map, Uid uid) {
         int returnValue = 0;
-        File[] files = fileSystem.getAllCsvFiles();
-        if (files.length == 0) {
-            throw new ConnectorException("No file to update");
-        }
-
-        String tableName = "";
 
         for (File file : files) {
-            tableName = fileToDB.createDbForUpdate(conn, file);
-            PreparedStatement stm = null;
-            try {
-                stm = conn.prepareStatement(
-                        QueryCreator.updateQuery(map, uid,
-                        configuration.getKeyseparator(),
-                        configuration.getKeyColumnNames(), tableName));
-                LOG.ok("Execute update {0}", stm.toString());
-                returnValue = stm.executeUpdate();
-            } catch (SQLException ex) {
-                LOG.error(ex, "Error during sql query");
-                throw new IllegalStateException(ex);
-            } finally {
-                try {
-                    stm.close();
-                } catch (SQLException ex) {
-                    LOG.error(ex, "While closing sql statement");
-                }
-            }
+            final String tableName = fileToDB.createDbForUpdate(conn, file);
+
+            returnValue += execute(QueryCreator.deleteQuery(
+                    uid,
+                    conf.getKeyseparator(),
+                    conf.getKeyColumnNames(),
+                    tableName));
+
         }
         return returnValue;
     }
 
-    public String createTableToWrite() {
-        String tableName = fileToDB.createDbForCreate(conn);
-        tables.add(tableName);
-        return tableName;
+    public int updateAccount(
+            final Map<String, String> attrToBeReplaced, final Uid uid) {
+
+        File[] files = fileSystem.getAllCsvFiles();
+        if (files.length == 0) {
+            throw new ConnectorException("Empty table");
+        }
+
+        int returnValue = 0;
+
+        for (File file : files) {
+            final String tableName = fileToDB.createDbForUpdate(conn, file);
+
+            returnValue += execute(QueryCreator.updateQuery(
+                    attrToBeReplaced,
+                    uid,
+                    conf.getKeyseparator(),
+                    conf.getKeyColumnNames(),
+                    tableName));
+        }
+        return returnValue;
     }
 
-    public int insertAccount(String query) {
+    public int insertAccount(final Map<String, String> attributes) {
+        final String tableName = fileToDB.createDbForCreate(conn);
+
+        return execute(QueryCreator.insertQuery(
+                attributes,
+                conf.getFields(),
+                tableName));
+    }
+
+    private int execute(final String query) {
         PreparedStatement stm = null;
+
         try {
             stm = conn.prepareStatement(query);
             LOG.ok("Execute update {0}", stm.toString());
@@ -182,8 +176,12 @@ public class CSVDirConnection {
     }
 
     public final ResultSet modifiedCsvFiles(final long syncToken) {
-        fileToDB.createDbForSync(fileSystem.getModifiedCsvFiles(syncToken),
-                conn, tables, viewname);
+        List<String> tableNames = fileToDB.createDbForSync(
+                fileSystem.getModifiedCsvFiles(syncToken),
+                conn, viewname);
+
+        tables.addAll(tableNames);
+
         try {
             return doQuery(conn.prepareStatement(query));
         } catch (SQLException ex) {
@@ -193,8 +191,11 @@ public class CSVDirConnection {
     }
 
     public ResultSet allCsvFiles() {
-        fileToDB.createDbForSync(fileSystem.getAllCsvFiles(), conn, tables,
-                viewname);
+        List<String> tableNames = fileToDB.createDbForSync(
+                fileSystem.getAllCsvFiles(), conn, viewname);
+
+        tables.addAll(tableNames);
+
         try {
             return doQuery(conn.prepareStatement(query));
         } catch (SQLException ex) {
@@ -204,8 +205,11 @@ public class CSVDirConnection {
     }
 
     public ResultSet allCsvFiles(String where, final List<SQLParam> params) {
-        fileToDB.createDbForSync(fileSystem.getAllCsvFiles(), conn, tables,
-                viewname);
+        List<String> tableNames = fileToDB.createDbForSync(
+                fileSystem.getAllCsvFiles(), conn, viewname);
+
+        tables.addAll(tableNames);
+
         PreparedStatement stm = null;
         try {
             stm = conn.prepareStatement(

@@ -39,15 +39,15 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorUpdateTests extends
-        CSVDirConnectorTestsSharedMethods{
-    
+public class CSVDirConnectorUpdateTests extends CSVDirConnectorTestsSharedMethods {
+
     private static final String NEWMAIL = "newmail@newmail.com";
-    
+
     @Test
-    public final void updateTest() throws IOException {
+    public final void updateTest()
+            throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
-        
+
         final ConnectorFacadeFactory factory =
                 ConnectorFacadeFactory.getInstance();
 
@@ -59,37 +59,38 @@ public class CSVDirConnectorUpdateTests extends
 
         Uid uid = new Uid("____jpc4323435;jPenelope");
 
-        ConnectorObject object = facade.getObject(
-                ObjectClass.ACCOUNT, uid, null);
+        ConnectorObject object = facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
         Assert.assertNotNull(object);
         Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
-        
+
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
-        Uid updatedAccount = connector.update(ObjectClass.ACCOUNT, uid,
-                createSetOfAttributes(), null);
+
+        Uid updatedAccount = connector.update(
+                ObjectClass.ACCOUNT, uid, createSetOfAttributes(), null);
+
         Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
-        
-        ConnectorObject objectUpdated = facade.getObject(
-                ObjectClass.ACCOUNT, uid, null);
-        
+
+        ConnectorObject objectUpdated =
+                facade.getObject(ObjectClass.ACCOUNT, uid, null);
+
         Assert.assertNotNull(object);
-        Assert.assertEquals(objectUpdated.getAttributeByName(TestAccountsValue.
-                EMAIL).getValue().get(0), NEWMAIL);
-        
+        Assert.assertEquals(objectUpdated.getAttributeByName(
+                TestAccountsValue.EMAIL).getValue().get(0), NEWMAIL);
+
         connector.dispose();
     }
 
     private Set<Attribute> createSetOfAttributes() {
         Set<Attribute> attributes = new HashSet<Attribute>();
-        attributes.add(AttributeBuilder.build(TestAccountsValue.
-                EMAIL, NEWMAIL));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, NEWMAIL));
         return attributes;
     }
-    
-    @Test (expected = ConnectorException.class)
-    public final void updateTestOfNotExistsUser() throws IOException {
+
+    @Test(expected = ConnectorException.class)
+    public final void updateTestOfNotExistsUser()
+            throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         Uid uid = new Uid("____jpc4323435;jPenelo");
 
@@ -98,7 +99,7 @@ public class CSVDirConnectorUpdateTests extends
         Uid updatedAccount = connector.update(ObjectClass.ACCOUNT, uid,
                 createSetOfAttributes(), null);
         Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
-        
+
         connector.dispose();
     }
 }

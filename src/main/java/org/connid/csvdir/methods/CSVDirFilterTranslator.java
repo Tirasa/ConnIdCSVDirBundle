@@ -494,7 +494,7 @@ public class CSVDirFilterTranslator
         return params;
     }
 
-    public String[] getColumnName(String attributeName) {
+    protected String[] getColumnName(String attributeName) {
         if (Name.NAME.equalsIgnoreCase(attributeName)) {
             return ((CSVDirConfiguration)
                     connector.getConfiguration()).getKeyColumnNames();

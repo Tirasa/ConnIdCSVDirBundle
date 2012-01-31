@@ -24,6 +24,8 @@
 
 import org.connid.csvdir.methods.CSVDirFilterTranslator;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.connid.csvdir.methods.CSVDirCreate;
 import org.connid.csvdir.methods.CSVDirDelete;
@@ -33,20 +35,28 @@ import org.connid.csvdir.methods.CSVDirSync;
 import org.connid.csvdir.methods.CSVDirUpdate;
 
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.dbcommon.FilterWhereBuilder;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
+import org.identityconnectors.framework.common.exceptions.InvalidCredentialException;
 import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.common.objects.filter.FilterTranslator;
 import org.identityconnectors.framework.spi.Configuration;
 import org.identityconnectors.framework.spi.Connector;
 import org.identityconnectors.framework.spi.ConnectorClass;
+import org.identityconnectors.framework.spi.operations.AuthenticateOp;
 import org.identityconnectors.framework.spi.operations.CreateOp;
 import org.identityconnectors.framework.spi.operations.DeleteOp;
 import org.identityconnectors.framework.spi.operations.SchemaOp;
@@ -61,7 +71,7 @@ import org.identityconnectors.framework.spi.operations.UpdateOp;
 displayNameKey = "FlatFile")
 public class CSVDirConnector implements
         Connector, SearchOp<FilterWhereBuilder>, SchemaOp, SyncOp, CreateOp,
-        UpdateOp, DeleteOp {
+        UpdateOp, DeleteOp, AuthenticateOp {
 
     /**
      * Setup {@link Connector} based logging.
@@ -195,5 +205,66 @@ public class CSVDirConnector implements
             LOG.error(ex, "error delete operation");
             throw new ConnectorIOException(ex);
         }
+    }
+
+    @Override
+    public Uid authenticate(
+            final ObjectClass objectClass,
+            final String username,
+            final GuardedString password,
+            final OperationOptions options) {
+
+        final List<Uid> res = new ArrayList<Uid>();
+
+        final CSVDirFilterTranslator translator =
+                new CSVDirFilterTranslator(this, objectClass, options);
+
+        password.access(new GuardedString.Accessor() {
+
+            @Override
+            public void access(final char[] clearChars) {
+                final Filter uid = FilterBuilder.equalTo(
+                        AttributeBuilder.build(Uid.NAME, username));
+
+                final Filter pwd = FilterBuilder.equalTo(
+                        AttributeBuilder.build(
+                        configuration.getPasswordColumnName(),
+                        new String(clearChars)));
+
+                final Filter filter = FilterBuilder.and(uid, pwd);
+
+                final List<Uid> results = new ArrayList<Uid>();
+
+                final ResultsHandler handler = new ResultsHandler() {
+
+                    @Override
+                    public boolean handle(ConnectorObject obj) {
+                        if (obj != null && obj.getUid() != null) {
+                            results.add(obj.getUid());
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                };
+
+                final OperationOptionsBuilder op = new OperationOptionsBuilder();
+                op.setAttributesToGet();
+
+                executeQuery(
+                        objectClass,
+                        translator.translate(filter).get(0),
+                        handler,
+                        op.build());
+
+                if (results.isEmpty()) {
+                    throw new InvalidCredentialException("User not found");
+                }
+
+                res.addAll(results);
+            }
+        });
+
+        return res.get(0);
     }
 }

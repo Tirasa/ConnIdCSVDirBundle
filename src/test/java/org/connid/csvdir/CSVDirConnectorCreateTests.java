@@ -26,25 +26,79 @@ package org.connid.csvdir;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.framework.api.APIConfiguration;
+import org.identityconnectors.framework.api.ConnectorFacade;
+import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.AttributeUtil;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethods {
 
     @Test
-    public final void createTest() {
+    public final void createTest()
+            throws IOException {
+
+        createFile("createAccountTest", TestAccountsValue.TEST_ACCOUNTS);
+
         final CSVDirConnector connector = new CSVDirConnector();
-        connector.init(createConfiguration("thousands.*\\.csv"));
-        Name name = new Name("___mperro123;pmassi;mperrone");
+        connector.init(createConfiguration("createAccountTest.*\\.csv"));
+        Name name = new Name("___mperro123;pmassi");
+
         Uid newAccount = connector.create(ObjectClass.ACCOUNT,
                 createSetOfAttributes(name), null);
         Assert.assertEquals(name.getNameValue(), newAccount.getUidValue());
+
+        // --------------------------------
+        // check creation result
+        // --------------------------------
+        final ConnectorFacadeFactory factory =
+                ConnectorFacadeFactory.getInstance();
+
+        final APIConfiguration impl = TestHelpers.createTestConfiguration(
+                CSVDirConnector.class, createConfiguration(".*\\.csv"));
+
+        final ConnectorFacade facade = factory.newInstance(impl);
+
+        final ConnectorObject object =
+                facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
+
+        Assert.assertNotNull(object);
+
+        final Attribute password = AttributeUtil.find(
+                OperationalAttributes.PASSWORD_NAME, object.getAttributes());
+
+        Assert.assertNotNull(password.getValue().get(0));
+
+        ((GuardedString) password.getValue().get(0)).access(
+                new GuardedString.Accessor() {
+
+                    @Override
+                    public void access(char[] clearChars) {
+                        Assert.assertEquals("password", new String(clearChars));
+                    }
+                });
+
+        // --------------------------------
+
+        final Uid uid = connector.authenticate(
+                ObjectClass.ACCOUNT,
+                "___mperro123;pmassi",
+                new GuardedString("password".toCharArray()),
+                null);
+
+        Assert.assertNotNull(uid);
+
         connector.dispose();
     }
 
@@ -75,8 +129,8 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
         Name name = new Name("____jpc4323435;jPenelope");
-        Uid newAccount = connector.create(ObjectClass.ACCOUNT,
-                createSetOfAttributes(name), null);
+        connector.create(
+                ObjectClass.ACCOUNT, createSetOfAttributes(name), null);
         connector.dispose();
     }
 }

@@ -30,9 +30,13 @@ import org.identityconnectors.common.logging.Log;
 public class FileSystem {
 
     private static final Log log = Log.getLog(FileSystem.class);
+
     private CSVDirConfiguration configuration;
+
     private File sourcePath = null;
+
     private FileFilter fileFilter = null;
+
     private long highestTimeStamp;
 
     public FileSystem(final CSVDirConfiguration csvdc) {
@@ -47,10 +51,27 @@ public class FileSystem {
             }
         };
     }
-    
+
     public final File[] getAllCsvFiles() {
         final File[] csvFiles = sourcePath.listFiles(fileFilter);
         return returnNewArrayIfCsvFilesIsEmpty(csvFiles);
+    }
+
+    public final File getLastModifiedCsvFile() {
+        final File[] csvFiles = getAllCsvFiles();
+
+        long tm = 0L;
+
+        File lastModifiedFile = null;
+
+        for (File file : csvFiles) {
+            if (file.lastModified() > tm) {
+                tm = file.lastModified();
+                lastModifiedFile = file;
+            }
+        }
+
+        return lastModifiedFile;
     }
 
     public final File[] getModifiedCsvFiles(final long timeStamp) {

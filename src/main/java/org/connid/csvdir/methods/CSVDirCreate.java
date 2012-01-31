@@ -25,18 +25,21 @@ package org.connid.csvdir.methods;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.connid.csvdir.CSVDirConfiguration;
 import org.connid.csvdir.CSVDirConnection;
-import org.connid.csvdir.database.QueryCreator;
 import org.identityconnectors.common.logging.Log;
+import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.common.security.GuardedString.Accessor;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.spi.Connector;
 
 public class CSVDirCreate extends CommonOperation {
 
@@ -44,17 +47,20 @@ public class CSVDirCreate extends CommonOperation {
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirCreate.class);
-    
-    private CSVDirConnection connection = null;
-    private CSVDirConfiguration configuration = null;
+
+    private CSVDirConnection conn = null;
+
+    private CSVDirConfiguration conf = null;
+
     private Set<Attribute> attrs = null;
 
-    public CSVDirCreate(final CSVDirConfiguration configuration,
+    public CSVDirCreate(
+            final CSVDirConfiguration conf,
             final Set<Attribute> set)
             throws SQLException, ClassNotFoundException {
-        this.configuration = configuration;
+        this.conf = conf;
         this.attrs = set;
-        connection = CSVDirConnection.openConnection(configuration);
+        conn = CSVDirConnection.openConnection(conf);
     }
 
     public Uid execute() {
@@ -65,8 +71,8 @@ public class CSVDirCreate extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -74,10 +80,11 @@ public class CSVDirCreate extends CommonOperation {
         }
     }
 
-    private Uid executeImpl() throws SQLException {
-        
+    private Uid executeImpl()
+            throws SQLException {
+
         String uidString = "";
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> attributes = new HashMap<String, String>();
 
         if (AttributeUtil.getNameFromAttributes(attrs) == null) {
             throw new IllegalArgumentException("No Name attribute provided"
@@ -85,25 +92,44 @@ public class CSVDirCreate extends CommonOperation {
         }
 
         for (Attribute attr : attrs) {
-            if (attr.is(Name.NAME)) {
-                uidString = (String) attr.getValue().get(0);
-            } else {
-                List<Object> values = attr.getValue();
-                if ((values != null) || (!values.isEmpty())) {
-                    map.put("\"" + attr.getName() + "\"", "\'"
-                            + (String) values.get(0) + "\'");
+            if ((attr.getValue() != null) && (!attr.getValue().isEmpty())) {
+                Object objValue = attr.getValue().get(0);
+
+                if (attr.is(Name.NAME)) {
+                    uidString = objValue.toString();
+                } else {
+                    final Set<String> name = new HashSet<String>();
+                    final Set<String> value = new HashSet<String>();
+
+                    if (attr.is(OperationalAttributes.PASSWORD_NAME)) {
+                        ((GuardedString) objValue).access(new Accessor() {
+
+                            @Override
+                            public void access(char[] clearChars) {
+                                name.add(conf.getPasswordColumnName());
+                                value.add(new String(clearChars));
+                            }
+                        });
+                    } else {
+                        name.add(attr.getName());
+                        value.add(objValue.toString());
+                    }
+
+                    attributes.put(
+                            "\"" + name.iterator().next() + "\"",
+                            "'" + value.iterator().next() + "'");
                 }
             }
         }
-        
-        if (userExists(uidString, connection, configuration)) {
+
+        if (userExists(uidString, conn, conf)) {
             throw new ConnectorException("User Exists");
         }
-        
-        connection.insertAccount(QueryCreator
-                .insertQuery(map, configuration.getFields(),
-                connection.createTableToWrite()));
+
+        conn.insertAccount(attributes);
+
         LOG.ok("Creation commited");
+
         return new Uid(uidString);
     }
 }
