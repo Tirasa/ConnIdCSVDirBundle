@@ -239,16 +239,16 @@ public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods 
         createFile("syncWithNoFilesForNewToken", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
-        connector.init(
-                createConfiguration("syncWithNoFilesForNewToken.*\\.csv"));
+        connector.init(createConfiguration("syncWithNoFilesForNewToken.*\\.csv"));
 
         final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
 
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
-                TestAccountsValue.TEST_ACCOUNTS.size());
+        Assert.assertEquals(
+                TestAccountsValue.TEST_ACCOUNTS.size(),
+                syncDeltaList.size());
 
         syncDeltaList.clear();
 

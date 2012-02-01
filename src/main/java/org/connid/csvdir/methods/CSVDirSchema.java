@@ -32,9 +32,10 @@ import org.identityconnectors.framework.common.objects.AttributeInfo;
 import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.OperationalAttributeInfos;
+import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.objects.SchemaBuilder;
+import org.identityconnectors.framework.spi.Connector;
 
 public class CSVDirSchema {
 
@@ -43,14 +44,14 @@ public class CSVDirSchema {
      */
     private static final Log LOG = Log.getLog(CSVDirSchema.class);
 
-    private CSVDirConfiguration configuration = null;
+    private CSVDirConfiguration conf = null;
 
     private Class connectorClass = null;
 
     public CSVDirSchema(
-            final Class connectorClass, final CSVDirConfiguration configuration) {
+            final Class connectorClass, final CSVDirConfiguration conf) {
         this.connectorClass = connectorClass;
-        this.configuration = configuration;
+        this.conf = conf;
     }
 
     public Schema execute() {
@@ -64,25 +65,28 @@ public class CSVDirSchema {
 
     private Schema executeImpl() {
         final SchemaBuilder bld = new SchemaBuilder(connectorClass);
-        final String[] keyColumns = configuration.getKeyColumnNames();
+        final String[] keyColumns = conf.getKeyColumnNames();
 
         final Set<AttributeInfo> attrInfos = new HashSet<AttributeInfo>();
-        AttributeInfoBuilder abld = new AttributeInfoBuilder();
 
-        for (String fieldName : configuration.getFields()) {
-            if (!fieldName.equals(configuration.getDeleteColumnName())) {
-                if (fieldName.equalsIgnoreCase(
-                        configuration.getPasswordColumnName())) {
-                    abld.setName(OperationalAttributeInfos.PASSWORD.getName());
+        for (String fieldName : conf.getFields()) {
+
+            if (!fieldName.equals(conf.getDeleteColumnName())) {
+                final AttributeInfoBuilder abld = new AttributeInfoBuilder();
+
+                if (fieldName.equalsIgnoreCase(conf.getPasswordColumnName())) {
+                    abld.setName(OperationalAttributes.PASSWORD_NAME);
+                }
+                if (fieldName.equalsIgnoreCase(conf.getStatusColumn())) {
+                    abld.setName(OperationalAttributes.ENABLE_NAME);
                 } else if (keyColumns != null
-                        && keyColumns.length == 1
+                        && keyColumns.length >= 1
                         && fieldName.equalsIgnoreCase(keyColumns[0])) {
                     abld.setName(Name.NAME);
                 } else {
                     abld.setName(fieldName.trim());
                 }
 
-                abld = new AttributeInfoBuilder();
                 abld.setCreateable(false);
                 abld.setUpdateable(false);
                 attrInfos.add(abld.build());

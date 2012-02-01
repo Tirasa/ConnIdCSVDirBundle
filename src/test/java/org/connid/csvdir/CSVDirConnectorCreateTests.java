@@ -24,6 +24,7 @@
 package org.connid.csvdir;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.identityconnectors.common.security.GuardedString;
@@ -49,7 +50,7 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
     public final void createTest()
             throws IOException {
 
-        createFile("createAccountTest", TestAccountsValue.TEST_ACCOUNTS);
+        createFile("createAccountTest", Collections.EMPTY_SET);
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
@@ -67,7 +68,8 @@ public class CSVDirConnectorCreateTests extends CSVDirConnectorTestsSharedMethod
                 ConnectorFacadeFactory.getInstance();
 
         final APIConfiguration impl = TestHelpers.createTestConfiguration(
-                CSVDirConnector.class, createConfiguration(".*\\.csv"));
+                CSVDirConnector.class,
+                createConfiguration("createAccountTest.*\\.csv"));
 
         final ConnectorFacade facade = factory.newInstance(impl);
 

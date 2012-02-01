@@ -36,6 +36,8 @@ import java.util.Set;
 
 public class CSVDirConnectorTestsSharedMethods {
 
+    private static boolean IGNORE_HEADER = false;
+
     public CSVDirConnectorTestsSharedMethods() {
     }
 
@@ -50,7 +52,7 @@ public class CSVDirConnectorTestsSharedMethods {
         config.setPasswordColumnName(TestAccountsValue.PASSWORD);
         config.setSourcePath(System.getProperty("java.io.tmpdir"));
         config.setQuotationRequired(Boolean.TRUE);
-        config.setIgnoreHeader(Boolean.TRUE);
+        config.setIgnoreHeader(IGNORE_HEADER);
         config.setKeyseparator(";");
         config.setFields(new String[]{
                     TestAccountsValue.ACCOUNTID,
@@ -67,7 +69,8 @@ public class CSVDirConnectorTestsSharedMethods {
     }
 
     protected File createFile(
-            final String name, final Set<TestAccount> testAccounts)
+            final String name,
+            final Set<TestAccount> testAccounts)
             throws IOException {
         final File file = File.createTempFile(name, ".csv");
         file.deleteOnExit();
@@ -75,21 +78,30 @@ public class CSVDirConnectorTestsSharedMethods {
         final PrintWriter wrt = writeOutFileData(file);
         writeOutEachUser(wrt, testAccounts);
         wrt.close();
+
         return file;
     }
 
-    private void writeOutEachUser(final PrintWriter wrt,
+    private void writeOutEachUser(
+            final PrintWriter wrt,
             final Set<TestAccount> testAccounts) {
-        wrt.println(TestAccountsValue.HEADER.toLine(
-                TestAccountsValue.FIELD_DELIMITER,
-                TestAccountsValue.TEXT_QUALIFIER));
+
+        if (IGNORE_HEADER) {
+            wrt.println(TestAccountsValue.HEADER.toLine(
+                    TestAccountsValue.FIELD_DELIMITER,
+                    TestAccountsValue.TEXT_QUALIFIER));
+        }
+
         for (TestAccount user : testAccounts) {
-            wrt.println(user.toLine(TestAccountsValue.FIELD_DELIMITER,
+            wrt.println(user.toLine(
+                    TestAccountsValue.FIELD_DELIMITER,
                     TestAccountsValue.TEXT_QUALIFIER));
         }
     }
 
-    protected File createSampleFile(String name, int THOUSANDS)
+    protected File createSampleFile(
+            final String name,
+            final int THOUSANDS)
             throws IOException {
         TestAccount account;
 
@@ -98,9 +110,11 @@ public class CSVDirConnectorTestsSharedMethods {
 
         final PrintWriter wrt = writeOutFileData(file);
 
-        wrt.println(TestAccountsValue.HEADER.toLine(
-                TestAccountsValue.FIELD_DELIMITER,
-                TestAccountsValue.TEXT_QUALIFIER));
+        if (IGNORE_HEADER) {
+            wrt.println(TestAccountsValue.HEADER.toLine(
+                    TestAccountsValue.FIELD_DELIMITER,
+                    TestAccountsValue.TEXT_QUALIFIER));
+        }
 
         for (int i = 0; i < THOUSANDS; i++) {
             account = new TestAccount(
@@ -122,9 +136,8 @@ public class CSVDirConnectorTestsSharedMethods {
 
     private PrintWriter writeOutFileData(final File file)
             throws FileNotFoundException {
-        return new PrintWriter(
-                new OutputStreamWriter(new FileOutputStream(file),
-                getUTF8Charset()));
+        return new PrintWriter(new OutputStreamWriter(
+                new FileOutputStream(file), getUTF8Charset()));
     }
 
     private Charset getUTF8Charset() {

@@ -71,7 +71,7 @@ public class CSVDirConnection {
             throws ClassNotFoundException, SQLException {
 
         this.conf = conf;
-        URL += conf.getSourcePath() + File.separator + "dbuser";
+        URL += conf.getSourcePath() + File.separator + "dbuser;shutdown=false";
         fileSystem = new FileSystem(conf);
 
         Class.forName("org.hsqldb.jdbcDriver");
@@ -81,7 +81,7 @@ public class CSVDirConnection {
         viewname = "USER_EX" + Utilities.randomNumber();
         query = "SELECT * FROM " + viewname;
 
-        fileToDB = new FileToDB(conf);
+        fileToDB = new FileToDB(this);
     }
 
     public static CSVDirConnection openConnection(
@@ -112,7 +112,9 @@ public class CSVDirConnection {
         int returnValue = 0;
 
         for (File file : files) {
-            final String tableName = fileToDB.createDbForUpdate(conn, file);
+            final String tableName = fileToDB.createDbForUpdate(file);
+
+            tables.add(tableName);
 
             returnValue += execute(QueryCreator.deleteQuery(
                     uid,
@@ -135,7 +137,9 @@ public class CSVDirConnection {
         int returnValue = 0;
 
         for (File file : files) {
-            final String tableName = fileToDB.createDbForUpdate(conn, file);
+            final String tableName = fileToDB.createDbForUpdate(file);
+
+            tables.add(tableName);
 
             returnValue += execute(QueryCreator.updateQuery(
                     attrToBeReplaced,
@@ -148,7 +152,9 @@ public class CSVDirConnection {
     }
 
     public int insertAccount(final Map<String, String> attributes) {
-        final String tableName = fileToDB.createDbForCreate(conn);
+        final String tableName = fileToDB.createDbForCreate();
+
+        tables.add(tableName);
 
         return execute(QueryCreator.insertQuery(
                 attributes,
@@ -176,9 +182,8 @@ public class CSVDirConnection {
     }
 
     public final ResultSet modifiedCsvFiles(final long syncToken) {
-        List<String> tableNames = fileToDB.createDbForSync(
-                fileSystem.getModifiedCsvFiles(syncToken),
-                conn, viewname);
+        final List<String> tableNames = fileToDB.createDbForSync(
+                fileSystem.getModifiedCsvFiles(syncToken));
 
         tables.addAll(tableNames);
 
@@ -191,8 +196,8 @@ public class CSVDirConnection {
     }
 
     public ResultSet allCsvFiles() {
-        List<String> tableNames = fileToDB.createDbForSync(
-                fileSystem.getAllCsvFiles(), conn, viewname);
+        final List<String> tableNames =
+                fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
 
         tables.addAll(tableNames);
 
@@ -205,8 +210,8 @@ public class CSVDirConnection {
     }
 
     public ResultSet allCsvFiles(String where, final List<SQLParam> params) {
-        List<String> tableNames = fileToDB.createDbForSync(
-                fileSystem.getAllCsvFiles(), conn, viewname);
+        final List<String> tableNames =
+                fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
 
         tables.addAll(tableNames);
 
@@ -258,5 +263,17 @@ public class CSVDirConnection {
 
     public String getViewname() {
         return viewname;
+    }
+
+    public Connection getConn() {
+        return conn;
+    }
+
+    public CSVDirConfiguration getConf() {
+        return conf;
+    }
+
+    public Set<String> getTables() {
+        return tables;
     }
 }

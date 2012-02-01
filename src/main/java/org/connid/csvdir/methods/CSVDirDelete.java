@@ -68,7 +68,7 @@ public class CSVDirDelete extends CommonOperation{
 
     private void executeImpl() throws SQLException {    
         if (!userExists(uid.getUidValue(), connection, configuration)) {
-            throw new ConnectorException("User not exists");
+            throw new ConnectorException("User does not exist");
         }
         connection.deleteAccount(uid);
         LOG.ok("Delete completed");
