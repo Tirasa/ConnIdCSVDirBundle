@@ -91,6 +91,7 @@ public class QueryCreator {
     public static String insertQuery(
             final Map<String, String> valuesMap,
             final String[] fields,
+            final String deletedField,
             final String tableName) {
 
         final QueryTemplate queryTemplate =
@@ -107,7 +108,12 @@ public class QueryCreator {
 
         final StringBuilder values = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
-            values.append("'").append(valuesMap.get(fields[i])).append("'");
+            if (fields[i].equals(deletedField)) {
+                values.append("'false'");
+            } else {
+                values.append("'").append(valuesMap.get(fields[i])).append("'");
+            }
+
             if (i < fields.length - 1) {
                 values.append(",");
             }

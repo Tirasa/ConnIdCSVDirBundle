@@ -80,17 +80,25 @@ public class CSVDirSchema {
                 if (fieldName.equalsIgnoreCase(conf.getStatusColumn())) {
                     abld.setName(OperationalAttributes.ENABLE_NAME);
                 } else if (keyColumns != null
-                        && keyColumns.length >= 1
+                        && keyColumns.length == 1
                         && fieldName.equalsIgnoreCase(keyColumns[0])) {
                     abld.setName(Name.NAME);
                 } else {
                     abld.setName(fieldName.trim());
                 }
 
-                abld.setCreateable(false);
-                abld.setUpdateable(false);
+                abld.setCreateable(true);
+                abld.setUpdateable(true);
                 attrInfos.add(abld.build());
             }
+        }
+
+        if (keyColumns == null || keyColumns.length > 1) {
+            final AttributeInfoBuilder abld = new AttributeInfoBuilder();
+            abld.setName(Name.NAME);
+            abld.setCreateable(true);
+            abld.setUpdateable(true);
+            attrInfos.add(abld.build());
         }
 
         // set it to object class account..

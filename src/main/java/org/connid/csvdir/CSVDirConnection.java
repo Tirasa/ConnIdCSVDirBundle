@@ -159,6 +159,7 @@ public class CSVDirConnection {
         return execute(QueryCreator.insertQuery(
                 attributes,
                 conf.getFields(),
+                conf.getDeleteColumnName(),
                 tableName));
     }
 
