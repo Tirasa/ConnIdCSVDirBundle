@@ -35,16 +35,16 @@
 
     <groupId>org.connid.bundles</groupId>
     <artifactId>org.connid.bundles.csvdir</artifactId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>ConnId Bundles: CSV Directory</name>
 
     <packaging>jar</packaging>
 
     <scm>
-        <connection>scm:svn:http://connid.googlecode.com/svn/bundles/csvdir/tags/org.connid.bundles.csvdir-0.2</connection>
-        <developerConnection>scm:svn:https://connid.googlecode.com/svn/bundles/csvdir/tags/org.connid.bundles.csvdir-0.2</developerConnection>
-        <url>http://connid.googlecode.com/svn/bundles/csvdir/tags/org.connid.bundles.csvdir-0.2</url>
+        <connection>scm:svn:http://connid.googlecode.com/svn/bundles/csvdir/trunk/</connection>
+        <developerConnection>scm:svn:https://connid.googlecode.com/svn/bundles/csvdir/trunk/</developerConnection>
+        <url>http://connid.googlecode.com/svn/bundles/csvdir/trunk/</url>
     </scm>
 
     <properties>
