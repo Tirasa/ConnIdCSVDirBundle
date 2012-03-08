@@ -32,6 +32,7 @@ import org.connid.csvdir.methods.CSVDirDelete;
 import org.connid.csvdir.methods.CSVDirExecuteQuery;
 import org.connid.csvdir.methods.CSVDirSchema;
 import org.connid.csvdir.methods.CSVDirSync;
+import org.connid.csvdir.methods.CSVDirTest;
 import org.connid.csvdir.methods.CSVDirUpdate;
 
 import org.identityconnectors.common.logging.Log;
@@ -62,6 +63,7 @@ import org.identityconnectors.framework.spi.operations.DeleteOp;
 import org.identityconnectors.framework.spi.operations.SchemaOp;
 import org.identityconnectors.framework.spi.operations.SearchOp;
 import org.identityconnectors.framework.spi.operations.SyncOp;
+import org.identityconnectors.framework.spi.operations.TestOp;
 import org.identityconnectors.framework.spi.operations.UpdateOp;
 
 /**
@@ -71,7 +73,7 @@ import org.identityconnectors.framework.spi.operations.UpdateOp;
 displayNameKey = "FlatFile")
 public class CSVDirConnector implements
         Connector, SearchOp<FilterWhereBuilder>, SchemaOp, SyncOp, CreateOp,
-        UpdateOp, DeleteOp, AuthenticateOp {
+        UpdateOp, DeleteOp, AuthenticateOp, TestOp {
 
     /**
      * Setup {@link Connector} based logging.
@@ -266,5 +268,17 @@ public class CSVDirConnector implements
         });
 
         return res.get(0);
+    }
+
+    @Override
+    public final void test() {
+        LOG.info("Connection test");
+        try {
+            new CSVDirTest(configuration).test();
+        } catch (ClassNotFoundException ex) {
+            LOG.error("Test failed", ex);
+        } catch (SQLException ex) {
+            LOG.error("Test failed", ex);
+        }
     }
 }
