@@ -36,7 +36,7 @@ import org.junit.Test;
  * Attempts to test that the configuration options can validate the input given
  * them. It also attempt to make sure the properties are correct.
  */
-public class CSVDirConfigurationTests {
+public class CSVDirConfigurationTests extends AbstractTest {
 
     /**
      * Tests setting and validating the parameters provided.
@@ -70,7 +70,7 @@ public class CSVDirConfigurationTests {
         config.setFields(new String[]{"accountid", "password", "deleted"});
 
         // create a temp file
-        File csv = File.createTempFile("sample", ".csv");
+        File csv = File.createTempFile("sample", ".csv", testSourceDir);
         csv.deleteOnExit();
 
         config.setSourcePath(csv.getParent());

@@ -44,8 +44,7 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorCreateTests extends
-        CSVDirConnectorTestsSharedMethods {
+public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
     public final void createTest()

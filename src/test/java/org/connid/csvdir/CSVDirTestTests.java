@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.Collections;
 import org.junit.Test;
 
-public class CSVDirTestTests extends CSVDirConnectorTestsSharedMethods {
+public class CSVDirTestTests extends AbstractTest {
 
     @Test
     public final void test() throws IOException {

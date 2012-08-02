@@ -23,26 +23,43 @@
  */
 package org.connid.csvdir;
 
+import static org.junit.Assert.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.Properties;
 import java.util.Set;
+import org.junit.Before;
 
-public class CSVDirConnectorTestsSharedMethods {
+public abstract class AbstractTest {
 
     private static boolean IGNORE_HEADER = false;
 
-    public CSVDirConnectorTestsSharedMethods() {
+    protected File testSourceDir;
+
+    @Before
+    public void readTestProperties() {
+        Properties props = new java.util.Properties();
+        try {
+            InputStream propStream = getClass().getResourceAsStream("/test.properties");
+            props.load(propStream);
+            testSourceDir = new File(props.getProperty("testSourcePath"));
+        } catch (Exception e) {
+            fail("Could not load test.properties: " + e.getMessage());
+        }
+        assertNotNull(testSourceDir);
+        assertTrue(testSourceDir.exists()? testSourceDir.isDirectory(): testSourceDir.mkdir());
     }
 
-    protected CSVDirConfiguration createConfiguration(
-            final String mask) {
+    protected CSVDirConfiguration createConfiguration(final String mask) {
         // create the connector configuration..
         final CSVDirConfiguration config = new CSVDirConfiguration();
         config.setFileMask(mask);
@@ -50,7 +67,7 @@ public class CSVDirConnectorTestsSharedMethods {
                     TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME});
         config.setDeleteColumnName(TestAccountsValue.DELETED);
         config.setPasswordColumnName(TestAccountsValue.PASSWORD);
-        config.setSourcePath(System.getProperty("java.io.tmpdir"));
+        config.setSourcePath(testSourceDir.getPath());
         config.setQuotationRequired(Boolean.TRUE);
         config.setIgnoreHeader(IGNORE_HEADER);
         config.setKeyseparator(";");
@@ -68,11 +85,10 @@ public class CSVDirConnectorTestsSharedMethods {
         return config;
     }
 
-    protected File createFile(
-            final String name,
-            final Set<TestAccount> testAccounts)
+    protected File createFile(final String name, final Set<TestAccount> testAccounts)
             throws IOException {
-        final File file = File.createTempFile(name, ".csv");
+
+        final File file = File.createTempFile(name, ".csv", testSourceDir);
         file.deleteOnExit();
 
         final PrintWriter wrt = writeOutFileData(file);
@@ -99,13 +115,10 @@ public class CSVDirConnectorTestsSharedMethods {
         }
     }
 
-    protected File createSampleFile(
-            final String name,
-            final int THOUSANDS)
+    protected File createSampleFile(final String name, final int THOUSANDS)
             throws IOException {
-        TestAccount account;
 
-        final File file = File.createTempFile(name, ".csv");
+        final File file = File.createTempFile(name, ".csv", testSourceDir);
         file.deleteOnExit();
 
         final PrintWriter wrt = writeOutFileData(file);
@@ -117,7 +130,7 @@ public class CSVDirConnectorTestsSharedMethods {
         }
 
         for (int i = 0; i < THOUSANDS; i++) {
-            account = new TestAccount(
+            TestAccount account = new TestAccount(
                     "accountid" + i,
                     "firstname",
                     "lastname",

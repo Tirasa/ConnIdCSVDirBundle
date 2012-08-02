@@ -39,7 +39,7 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorUpdateTests extends CSVDirConnectorTestsSharedMethods {
+public class CSVDirConnectorUpdateTests extends AbstractTest {
 
     private static final String NEWMAIL = "newmail@newmail.com";
 

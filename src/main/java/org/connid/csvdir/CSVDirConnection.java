@@ -23,8 +23,6 @@
  */
 package org.connid.csvdir;
 
-import org.connid.csvdir.database.FileSystem;
-import org.connid.csvdir.database.FileToDB;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -35,8 +33,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.connid.csvdir.database.FileSystem;
+import org.connid.csvdir.database.FileToDB;
 import org.connid.csvdir.database.QueryCreator;
 import org.connid.csvdir.utilities.Utilities;
+import org.hsqldb.jdbcDriver;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.dbcommon.DatabaseConnection;
 import org.identityconnectors.dbcommon.SQLParam;
@@ -51,11 +52,15 @@ public class CSVDirConnection {
      */
     private static final Log LOG = Log.getLog(CSVDirConnection.class);
 
+    private static final String HSQLDB_JDBC_URL_PREFIX = "jdbc:hsqldb:file:";
+
+    private static final String HSQLDB_DB_NAME = "csvdir_db";
+
     private String viewname = null;
 
     private String query = null;
 
-    private String URL = "jdbc:hsqldb:file:";
+    private String jdbcUrl = "jdbc:hsqldb:file:";
 
     private Set<String> tables = new HashSet<String>();
 
@@ -71,11 +76,11 @@ public class CSVDirConnection {
             throws ClassNotFoundException, SQLException {
 
         this.conf = conf;
-        URL += conf.getSourcePath() + File.separator + "dbuser;shutdown=false";
+        jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator + HSQLDB_DB_NAME + ";shutdown=false";
         fileSystem = new FileSystem(conf);
 
-        Class.forName("org.hsqldb.jdbcDriver");
-        conn = DriverManager.getConnection(URL, "sa", "");
+        Class.forName(jdbcDriver.class.getName());
+        conn = DriverManager.getConnection(jdbcUrl, "sa", "");
         conn.setAutoCommit(true);
 
         viewname = "USER_EX" + Utilities.randomNumber();
@@ -247,14 +252,12 @@ public class CSVDirConnection {
             throws SQLException {
         LOG.ok("Drop view {0}", viewname);
 
-        conn.createStatement().execute(
-                "DROP VIEW " + viewname + " IF EXISTS CASCADE");
+        conn.createStatement().execute("DROP VIEW " + viewname + " IF EXISTS CASCADE");
 
         for (String table : tables) {
             LOG.ok("Drop table {0}", table);
 
-            conn.createStatement().execute(
-                    "DROP TABLE " + table + " IF EXISTS CASCADE");
+            conn.createStatement().execute("DROP TABLE " + table + " IF EXISTS CASCADE");
         }
     }
 

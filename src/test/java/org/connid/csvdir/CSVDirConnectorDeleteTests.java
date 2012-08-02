@@ -35,13 +35,12 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorDeleteTests extends
-        CSVDirConnectorTestsSharedMethods{
-    
+public class CSVDirConnectorDeleteTests extends AbstractTest {
+
     @Test
     public final void deleteTest() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
-        
+
         final ConnectorFacadeFactory factory =
                 ConnectorFacadeFactory.getInstance();
 
@@ -58,19 +57,19 @@ public class CSVDirConnectorDeleteTests extends
 
         Assert.assertNotNull(object);
         Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
-        
+
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
         connector.delete(ObjectClass.ACCOUNT, uid, null);
-        
+
         ConnectorObject deleteObject = facade.getObject(
                 ObjectClass.ACCOUNT, uid, null);
-        
+
         Assert.assertNull(deleteObject);
         connector.dispose();
     }
-    
-    @Test (expected = ConnectorException.class)
+
+    @Test(expected = ConnectorException.class)
     public final void deleteTestOfNotExistsUser() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         Uid uid = new Uid("____jpc4323435,jPenelo");

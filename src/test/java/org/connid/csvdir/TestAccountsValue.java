@@ -28,8 +28,6 @@ import java.util.Set;
 
 public class TestAccountsValue {
 
-    public static final String FILENAME = "test.csv";
-
     public static final String CHANGE_NUMBER = "changeNumber";
 
     public static final String ACCOUNTID = "accountid";

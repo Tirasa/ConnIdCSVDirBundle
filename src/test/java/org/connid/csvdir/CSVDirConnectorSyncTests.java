@@ -50,7 +50,7 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorSyncTests extends CSVDirConnectorTestsSharedMethods {
+public class CSVDirConnectorSyncTests extends AbstractTest {
 
     private static double THOUSANDS = 0.1;
 

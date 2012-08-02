@@ -32,7 +32,7 @@ import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CSVDirConnectorSchemaTests extends CSVDirConnectorTestsSharedMethods {
+public class CSVDirConnectorSchemaTests extends AbstractTest {
 
     @Test
     public final void schemaTest()
