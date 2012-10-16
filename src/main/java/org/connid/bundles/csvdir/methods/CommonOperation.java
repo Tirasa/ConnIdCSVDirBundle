@@ -85,7 +85,7 @@ public class CommonOperation {
     }
 
     protected Map<String, String> getAttributeMap(
-            final CSVDirConfiguration conf, final Set<Attribute> attrs) {
+            final CSVDirConfiguration conf, final Set<Attribute> attrs, final Name name) {
 
         final Map<String, String> attributes = new HashMap<String, String>();
 
@@ -98,7 +98,10 @@ public class CommonOperation {
                     ? attr.getValue().get(0) : null;
 
             if (attr.is(Name.NAME)) {
-                // ignore attribute
+                final String[] keys = conf.getKeyColumnNames();
+                if (conf.getKeyColumnNames().length == 1) {
+                    attributes.put(keys[0], name.getNameValue());
+                }
             } else if (attr.is(OperationalAttributes.ENABLE_NAME)) {
                 status = objValue != null ? (Boolean) objValue : null;
             } else {
@@ -110,7 +113,6 @@ public class CommonOperation {
 
                     if (objValue != null) {
                         ((GuardedString) objValue).access(new Accessor() {
-
                             @Override
                             public void access(char[] clearChars) {
                                 value.add(new String(clearChars));

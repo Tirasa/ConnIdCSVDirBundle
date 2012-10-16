@@ -31,6 +31,7 @@ import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -88,7 +89,7 @@ public class CSVDirUpdate extends CommonOperation {
             throw new ConnectorException("User doesn't exist");
         }
 
-        connection.updateAccount(getAttributeMap(conf, attrs), uid);
+        connection.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
 
         LOG.ok("Creation commited");
         return uid;

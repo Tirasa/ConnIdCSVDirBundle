@@ -88,7 +88,7 @@ public class CSVDirCreate extends CommonOperation {
             throw new ConnectorException("User Exists");
         }
 
-        conn.insertAccount(getAttributeMap(conf, attrs));
+        conn.insertAccount(getAttributeMap(conf, attrs, name));
 
         LOG.ok("Creation commited");
 
