@@ -130,6 +130,11 @@ public class FileToDB {
                 createTable.delete(0, createTable.length());
                 createTable.append("CREATE TEXT TABLE NOENTRIES");
                 createTable.append(" (").append(tableHeader).append(") ");
+
+                // drop if exists
+                conn.getConn().createStatement().execute("DROP TABLE NOENTRIES IF EXISTS CASCADE");
+
+                // create noentries table
                 conn.getConn().createStatement().execute(createTable.toString());
 
                 tables.add("NOENTRIES");
