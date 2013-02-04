@@ -180,7 +180,9 @@ public class CSVDirConnection {
             throw new IllegalStateException(e);
         } finally {
             try {
-                stm.close();
+                if (stm != null) {
+                    stm.close();
+                }
             } catch (SQLException e) {
                 LOG.error(e, "While closing sql statement");
             }
@@ -235,7 +237,9 @@ public class CSVDirConnection {
             throw new IllegalStateException(e);
         } finally {
             try {
-                stm.close();
+                if (stm != null) {
+                    stm.close();
+                }
             } catch (SQLException ex) {
                 LOG.error(ex, "While closing sql statement");
             }
