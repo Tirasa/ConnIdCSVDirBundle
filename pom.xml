@@ -119,7 +119,7 @@
     <!-- TEST -->
     <dependency>
       <groupId>org.connid</groupId>
-      <artifactId>test-common</artifactId>
+      <artifactId>connid-test-common</artifactId>
       <version>${base.version}</version>
       <scope>test</scope>
     </dependency>
