@@ -23,6 +23,9 @@
  */
 package org.connid.bundles.csvdir;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,7 +44,6 @@ import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class CSVDirConnectorCreateTests extends AbstractTest {
@@ -50,7 +52,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
     public final void createTest()
             throws IOException {
 
-        createFile("createAccountTest", Collections.EMPTY_SET);
+        createFile("createAccountTest", Collections.<TestAccount>emptySet());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
@@ -59,7 +61,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         Uid newAccount = connector.create(
                 ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
 
-        Assert.assertEquals(name.getNameValue(), newAccount.getUidValue());
+        assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
         // check creation result
@@ -76,18 +78,19 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final ConnectorObject object =
                 facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
 
-        Assert.assertNotNull(object);
+        assertNotNull(object);
 
         final Attribute password = AttributeUtil.find(
                 OperationalAttributes.PASSWORD_NAME, object.getAttributes());
 
-        Assert.assertNotNull(password.getValue().get(0));
+        assertNotNull(password.getValue().get(0));
 
         ((GuardedString) password.getValue().get(0)).access(
                 new GuardedString.Accessor() {
+
                     @Override
                     public void access(char[] clearChars) {
-                        Assert.assertEquals("password", new String(clearChars));
+                        assertEquals("password", new String(clearChars));
                     }
                 });
         // --------------------------------
@@ -98,7 +101,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
                 new GuardedString("password".toCharArray()),
                 null);
 
-        Assert.assertNotNull(uid);
+        assertNotNull(uid);
 
         connector.dispose();
     }
@@ -120,7 +123,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
     public final void connid_ISSUE51()
             throws IOException {
 
-        createFile("createAccountTest", Collections.EMPTY_SET);
+        createFile("createAccountTest", Collections.<TestAccount>emptySet());
 
         final CSVDirConnector connector = new CSVDirConnector();
         CSVDirConfiguration configuration = createConfiguration("createAccountTest.*\\.csv");
@@ -132,7 +135,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         Uid newAccount = connector.create(
                 ObjectClass.ACCOUNT, setAccountIdISSUE51(createSetOfAttributes(name)), null);
 
-        Assert.assertEquals(name.getNameValue(), newAccount.getUidValue());
+        assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
         // check creation result
@@ -151,25 +154,26 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final ConnectorObject object =
                 facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
 
-        Assert.assertNotNull(object);
+        assertNotNull(object);
 
         final Attribute password = AttributeUtil.find(
                 OperationalAttributes.PASSWORD_NAME, object.getAttributes());
 
-        Assert.assertNotNull(password.getValue().get(0));
+        assertNotNull(password.getValue().get(0));
 
         ((GuardedString) password.getValue().get(0)).access(
                 new GuardedString.Accessor() {
+
                     @Override
                     public void access(char[] clearChars) {
-                        Assert.assertEquals("password", new String(clearChars));
+                        assertEquals("password", new String(clearChars));
                     }
                 });
         // --------------------------------
 
         final Name accountid = AttributeUtil.getNameFromAttributes(object.getAttributes());
 
-        Assert.assertEquals("___mperro1234", accountid.getNameValue());
+        assertEquals("___mperro1234", accountid.getNameValue());
 
         final Uid uid = connector.authenticate(
                 ObjectClass.ACCOUNT,
@@ -177,7 +181,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
                 new GuardedString("password".toCharArray()),
                 null);
 
-        Assert.assertNotNull(uid);
+        assertNotNull(uid);
 
         connector.dispose();
     }

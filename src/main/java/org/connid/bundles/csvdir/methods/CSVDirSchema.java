@@ -46,10 +46,9 @@ public class CSVDirSchema {
 
     private CSVDirConfiguration conf = null;
 
-    private Class connectorClass = null;
+    private Class<? extends Connector> connectorClass = null;
 
-    public CSVDirSchema(
-            final Class connectorClass, final CSVDirConfiguration conf) {
+    public CSVDirSchema(final Class<? extends Connector> connectorClass, final CSVDirConfiguration conf) {
         this.connectorClass = connectorClass;
         this.conf = conf;
     }

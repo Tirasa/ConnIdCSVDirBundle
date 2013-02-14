@@ -23,10 +23,15 @@
  */
 package org.connid.bundles.csvdir;
 
-import org.connid.bundles.csvdir.CSVDirConnector;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,14 +53,13 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class CSVDirConnectorSyncTests extends AbstractTest {
 
     private static double THOUSANDS = 0.1;
 
-    static class NoFilter implements Filter {
+    private static class NoFilter implements Filter {
 
         @Override
         public boolean accept(final ConnectorObject obj) {
@@ -64,8 +68,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
     }
 
     @Test
-    public void search()
-            throws IOException {
+    public void search() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -83,16 +86,14 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         final Filter filter = FilterBuilder.or(firstnameFilter, surnameFilter);
         // -----------------------
 
+        final List<ConnectorObject> results = TestHelpers.searchToList(connector, ObjectClass.ACCOUNT, filter);
+
         final Set<TestAccount> actual = new HashSet<TestAccount>();
-
-        final List<ConnectorObject> results = TestHelpers.searchToList(
-                connector, ObjectClass.ACCOUNT, filter);
-
         for (ConnectorObject obj : results) {
             actual.add(new TestAccount(obj));
         }
 
-        Assert.assertEquals(actual.size(), 4);
+        assertEquals(4, actual.size());
 
         connector.dispose();
     }
@@ -117,11 +118,10 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         final ConnectorObject object =
                 facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
-        Assert.assertNotNull(object);
-        Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+        assertNotNull(object);
+        assertEquals(object.getName().getNameValue(), uid.getUidValue());
 
-        Assert.assertFalse((Boolean) object.getAttributeByName(
-                OperationalAttributes.ENABLE_NAME).getValue().get(0));
+        assertFalse((Boolean) object.getAttributeByName(OperationalAttributes.ENABLE_NAME).getValue().get(0));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 }, null);
 
         // attempt to see if they compare..
-        Assert.assertTrue(actual.containsAll(TestAccountsValue.TEST_ACCOUNTS));
+        assertTrue(actual.containsAll(TestAccountsValue.TEST_ACCOUNTS));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
 
         boolean found = false;
@@ -177,16 +177,16 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
             ConnectorObject object = delta.getObject();
             if ("____jpc4323435;jPenelope".equals(
                     object.getName().getNameValue())) {
-                Assert.assertFalse((Boolean) object.getAttributeByName(
+                assertFalse((Boolean) object.getAttributeByName(
                         OperationalAttributes.ENABLE_NAME).getValue().get(0));
                 found = true;
             } else {
-                Assert.assertTrue((Boolean) object.getAttributeByName(
+                assertTrue((Boolean) object.getAttributeByName(
                         OperationalAttributes.ENABLE_NAME).getValue().get(0));
             }
         }
 
-        Assert.assertTrue(found);
+        assertTrue(found);
 
         createFile("syncWithNewFile2", TestAccountsValue.TEST_ACCOUNTS2);
 
@@ -195,7 +195,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size()
                 + TestAccountsValue.TEST_ACCOUNTS2.size());
 
@@ -216,7 +216,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
 
         updateFile(toBeUpdated, TestAccountsValue.TEST_ACCOUNTS2);
@@ -227,7 +227,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size()
                 + TestAccountsValue.TEST_ACCOUNTS2.size());
 
@@ -247,7 +247,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(
+        assertEquals(
                 TestAccountsValue.TEST_ACCOUNTS.size(),
                 syncDeltaList.size());
 
@@ -264,7 +264,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 getSyncResultsHandler(syncDeltaList), null);
 
 
-        Assert.assertEquals(syncDeltaList.size(), 0);
+        assertEquals(syncDeltaList.size(), 0);
 
         connector.dispose();
     }
@@ -284,7 +284,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
 
         syncDeltaList.clear();
@@ -302,7 +302,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 connector.getLatestSyncToken(ObjectClass.ACCOUNT),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 +TestAccountsValue.TEST_ACCOUNTS2.size());
 
         connector.dispose();
@@ -324,7 +324,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
 
         syncDeltaList.clear();
@@ -341,7 +341,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 connector.getLatestSyncToken(ObjectClass.ACCOUNT),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size()
                 + TestAccountsValue.TEST_ACCOUNTS2.size());
 
@@ -362,7 +362,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size());
 
         syncDeltaList.clear();
@@ -379,7 +379,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 connector.getLatestSyncToken(ObjectClass.ACCOUNT),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size()
                 + TestAccountsValue.TEST_ACCOUNTS2.size());
 
@@ -397,7 +397,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 connector.getLatestSyncToken(ObjectClass.ACCOUNT),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(),
+        assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS3.size());
 
         syncDeltaList.clear();
@@ -411,12 +411,11 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
             actual.add(new TestAccount(obj));
         }
 
-        Set<TestAccount> accounts =
-                new HashSet(TestAccountsValue.TEST_ACCOUNTS);
+        Set<TestAccount> accounts = new HashSet<TestAccount>(TestAccountsValue.TEST_ACCOUNTS);
         accounts.addAll(TestAccountsValue.TEST_ACCOUNTS2);
         accounts.addAll(TestAccountsValue.TEST_ACCOUNTS3);
 
-        Assert.assertEquals(accounts, actual);
+        assertEquals(accounts, actual);
 
         connector.dispose();
     }
@@ -434,7 +433,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
                 getSyncResultsHandler(syncDeltaList), null);
 
-        Assert.assertEquals(syncDeltaList.size(), (int) (THOUSANDS * 1000));
+        assertEquals(syncDeltaList.size(), (int) (THOUSANDS * 1000));
 
         connector.dispose();
     }
@@ -468,7 +467,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                                         getSyncResultsHandler(syncDeltaList),
                                         null);
 
-                                Assert.assertEquals(syncDeltaList.size(), 10);
+                                assertEquals(syncDeltaList.size(), 10);
 
                             } catch (Throwable t) {
                                 exception.append(t.getMessage()).append("\n");
@@ -485,12 +484,12 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
             // ignore exception
         }
 
-        Assert.assertTrue(exception.toString(), exception.length() == 0);
+        assertTrue(exception.toString(), exception.length() == 0);
 
         connector.dispose();
     }
 
-    private SyncResultsHandler getSyncResultsHandler(final List list) {
+    private SyncResultsHandler getSyncResultsHandler(final List<SyncDelta> list) {
         return new SyncResultsHandler() {
 
             @Override

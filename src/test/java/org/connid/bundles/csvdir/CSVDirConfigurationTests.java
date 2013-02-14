@@ -23,15 +23,17 @@
  */
 package org.connid.bundles.csvdir;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.nio.charset.Charset;
-import junit.framework.Assert;
-import static junit.framework.Assert.*;
 import org.junit.Test;
 
 /**
- * Attempts to test that the configuration options can validate the input given
- * them. It also attempt to make sure the properties are correct.
+ * Attempts to test that the configuration options can validate the input given them. It also attempt to make sure the
+ * properties are correct.
  */
 public class CSVDirConfigurationTests extends AbstractTest {
 
@@ -56,7 +58,7 @@ public class CSVDirConfigurationTests extends AbstractTest {
         // try the validate..
         try {
             config.validate();
-            Assert.fail();
+            fail();
         } catch (RuntimeException e) {
             // expected because configuration is incomplete
         }
@@ -83,7 +85,7 @@ public class CSVDirConfigurationTests extends AbstractTest {
         config.setFieldDelimiter('"');
         try {
             config.validate();
-            Assert.fail();
+            fail();
         } catch (IllegalStateException ex) {
             // should go here..
         }
@@ -94,7 +96,7 @@ public class CSVDirConfigurationTests extends AbstractTest {
         try {
             config.setKeyColumnNames(new String[]{});
             config.validate();
-            Assert.fail();
+            fail();
         } catch (IllegalArgumentException ex) {
             // should throw..
         }
