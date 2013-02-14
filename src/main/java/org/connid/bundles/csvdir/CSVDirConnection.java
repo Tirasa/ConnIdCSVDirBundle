@@ -37,11 +37,11 @@ import org.connid.bundles.csvdir.database.FileSystem;
 import org.connid.bundles.csvdir.database.FileToDB;
 import org.connid.bundles.csvdir.database.QueryCreator;
 import org.connid.bundles.csvdir.utilities.Utilities;
+import org.connid.bundles.db.common.DatabaseConnection;
+import org.connid.bundles.db.common.SQLParam;
+import org.connid.bundles.db.common.SQLUtil;
 import org.hsqldb.jdbcDriver;
 import org.identityconnectors.common.logging.Log;
-import org.identityconnectors.dbcommon.DatabaseConnection;
-import org.identityconnectors.dbcommon.SQLParam;
-import org.identityconnectors.dbcommon.SQLUtil;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Uid;
 
