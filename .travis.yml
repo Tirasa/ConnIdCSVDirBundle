@@ -6,7 +6,7 @@ env:
     - secure: "hh/MIMNBld7O7RK1GIjDkbSpTU8i3Oa3JmGKiKHN1BmrF3piUkxOPASyDCp5\nMkKrnN9js4DeOAmjjxUItDa39MEeKJJTwGdU8mc7zRadX8f0HGMEt2i3glg/\nHF6lEhRAlUl5TkVyA651inJ+Ll9rjSj88LPvQejb4N5G689ecFo="
 
 after_success:
-  - python addServer.py
+  - python .travis.addServer.py
   - mvn clean deploy --settings ~/.m2/mySettings.xml
 
 notifications:
