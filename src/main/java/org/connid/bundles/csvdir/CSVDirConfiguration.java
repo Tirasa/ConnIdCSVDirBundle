@@ -41,7 +41,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     private String fileMask;
 
     /**
-     * Absolute path of a directory where are located CSV files to be processed
+     * Absolute path of a directory where the CSV files to be processed are located
      */
     private String sourcePath;
 
@@ -57,7 +57,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     private String encoding = Charset.defaultCharset().name();
 
     /**
-     * Delimiter to determine begin and end of text in value.
+     * Delimiter to determine beginning and end of text in value.
      */
     private char textQualifier = '"';
 
@@ -133,7 +133,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     }
 
     @ConfigurationProperty(displayMessageKey = "fieldDelimiter.display",
-    helpMessageKey = "fieldDelimiter.help", required = true, order = 4)
+    helpMessageKey = "fieldDelimiter.help", order = 4)
     public char getFieldDelimiter() {
         return fieldDelimiter;
     }
@@ -163,7 +163,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     }
 
     @ConfigurationProperty(displayMessageKey = "quotationRequired.display",
-    helpMessageKey = "quotationRequired.help", required = true, order = 9)
+    helpMessageKey = "quotationRequired.help", order = 9)
     public Boolean getQuotationRequired() {
         return quotationRequired;
     }
@@ -175,13 +175,13 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     }
 
     @ConfigurationProperty(displayMessageKey = "ignoreHeader.display",
-    helpMessageKey = "ignoreHeader.help", required = true, order = 11)
+    helpMessageKey = "ignoreHeader.help", order = 11)
     public Boolean getIgnoreHeader() {
         return ignoreHeader;
     }
 
     @ConfigurationProperty(displayMessageKey = "keyseparator.display",
-    helpMessageKey = "keyseparator.help", required = true, order = 12)
+    helpMessageKey = "keyseparator.help", order = 12)
     public String getKeyseparator() {
         return keyseparator;
     }
