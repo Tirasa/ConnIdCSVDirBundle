@@ -36,8 +36,7 @@ public class QueryCreator {
             final String[] keys,
             final String tableName) {
 
-        final QueryTemplate queryTemplate =
-                new QueryTemplate("UPDATE {0} SET {1} WHERE {2}");
+        final QueryTemplate queryTemplate = new QueryTemplate("UPDATE {0} SET {1} WHERE {2}");
 
         final StringBuilder set = new StringBuilder();
 
@@ -46,7 +45,7 @@ public class QueryCreator {
                 set.append(",");
             }
             set.append(value).append("=").
-                    append("'").append(valuesMap.get(value)).append("'");
+                    append(value == null ? "" : "'").append(valuesMap.get(value)).append(value == null ? "" : "'");
         }
 
         final String[] uidKeys = uid.getUidValue().split(keySeparator);
@@ -54,8 +53,7 @@ public class QueryCreator {
         final StringBuilder where = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i]).append("=").
-                    append("'").append(uidKeys[i]).append("'");
+            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
             if (i < keys.length - 1) {
                 where.append(" AND ");
             }
@@ -94,30 +92,26 @@ public class QueryCreator {
             final String deletedField,
             final String tableName) {
 
-        final QueryTemplate queryTemplate =
-                new QueryTemplate("INSERT INTO {0} VALUES({1})");
-
-        final StringBuilder columnName = new StringBuilder(tableName + "(");
-        for (int i = 0; i < fields.length; i++) {
-            columnName.append(fields[i]);
-            if (i < fields.length - 1) {
-                columnName.append(",");
-            }
-        }
-        columnName.append(")");
+        final QueryTemplate queryTemplate = new QueryTemplate("INSERT INTO {0}({1}) VALUES({2})");
 
         final StringBuilder values = new StringBuilder();
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].equals(deletedField)) {
-                values.append("'false'");
-            } else {
-                values.append("'").append(valuesMap.get(fields[i])).append("'");
-            }
+        final StringBuilder columnName = new StringBuilder();
 
-            if (i < fields.length - 1) {
-                values.append(",");
+        for (int i = 0; i < fields.length; i++) {
+
+            final String value = fields[i].equals(deletedField) ? "false" : valuesMap.get(fields[i]);
+
+            if (value != null) {
+                columnName.append(fields[i]);
+                values.append("'").append(valuesMap.get(fields[i])).append("'");
+
+                if (i < fields.length - 1) {
+                    columnName.append(",");
+                    values.append(",");
+                }
             }
         }
-        return queryTemplate.apply(columnName, values);
+
+        return queryTemplate.apply(tableName, columnName, values);
     }
 }
