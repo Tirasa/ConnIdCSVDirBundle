@@ -35,6 +35,8 @@ public class CSVDirConfiguration extends AbstractConfiguration {
 
     private String keyseparator = ",";
 
+    private String multivalueSeparator;
+
     /**
      * Regular expression describing files to be processed
      */
@@ -51,8 +53,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     private String deleteColumnName;
 
     /**
-     * Basic encoding of the file the default valid in the default character set
-     * of the OS.
+     * Basic encoding of the file the default valid in the default character set of the OS.
      */
     private String encoding = Charset.defaultCharset().name();
 
@@ -97,20 +98,17 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     private String statusColumn;
 
     /**
-     * Value for 'statusColumn' field to indicate disabled entries.
-     * Default 'true'.
+     * Value for 'statusColumn' field to indicate disabled entries. Default 'true'.
      */
     private String enabledStatusValue = "true";
 
     /**
-     * Value for 'statusColumn' field to indicate disabled entries.
-     * Default 'false'.
+     * Value for 'statusColumn' field to indicate disabled entries. Default 'false'.
      */
     private String disabledStatusValue = "false";
 
     /**
-     * Default value for 'statusColumn' field.
-     * Default 'true'.
+     * Default value for 'statusColumn' field. Default 'true'.
      */
     private String defaultStatusValue = "true";
 
@@ -186,32 +184,42 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         return keyseparator;
     }
 
+    @ConfigurationProperty(displayMessageKey = "multivalueSeparator.display",
+    helpMessageKey = "multivalueSeparator.help", order = 13)
+    public String getMultivalueSeparator() {
+        return multivalueSeparator;
+    }
+
     @ConfigurationProperty(displayMessageKey = "defaultStatusValue.display",
-    helpMessageKey = "defaultStatusValue.help", required = false, order = 13)
+    helpMessageKey = "defaultStatusValue.help", required = false, order = 14)
     public String getDefaultStatusValue() {
         return defaultStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "disabledStatusValue.display",
-    helpMessageKey = "disabledStatusValue.help", required = false, order = 14)
+    helpMessageKey = "disabledStatusValue.help", required = false, order = 15)
     public String getDisabledStatusValue() {
         return disabledStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "enabledStatusValue.display",
-    helpMessageKey = "enabledStatusValue.help", required = false, order = 15)
+    helpMessageKey = "enabledStatusValue.help", required = false, order = 16)
     public String getEnabledStatusValue() {
         return enabledStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "statusColumn.display",
-    helpMessageKey = "statusColumn.help", required = false, order = 16)
+    helpMessageKey = "statusColumn.help", required = false, order = 17)
     public String getStatusColumn() {
         return statusColumn;
     }
 
     public void setKeyseparator(String keyseparator) {
         this.keyseparator = keyseparator;
+    }
+
+    public void setMultivalueSeparator(String multivalueSeparator) {
+        this.multivalueSeparator = multivalueSeparator;
     }
 
     public void setIgnoreHeader(Boolean ignoreHeader) {
@@ -284,17 +292,12 @@ public class CSVDirConfiguration extends AbstractConfiguration {
 
     /**
      * Determine if all the values are valid.
-     * 
-     * @throws IllegalArgumentException
-     *             if encoding or fileMask or sourcePath or keyColumnName or
-     *             passwordColumnName or deleteColumnName or fields
-     *             is blank or null.
-     * @throws IllegalStateException
-     *             if the text qualifier and field delimiter are the same.
-     * @throws RuntimeException
-     *             if the file is not found.
-     * @throws IllegalCharsetNameException
-     *             if the character set name is invalid
+     *
+     * @throws IllegalArgumentException if encoding or fileMask or sourcePath or keyColumnName or passwordColumnName or
+     * deleteColumnName or fields is blank or null.
+     * @throws IllegalStateException if the text qualifier and field delimiter are the same.
+     * @throws RuntimeException if the file is not found.
+     * @throws IllegalCharsetNameException if the character set name is invalid
      * @see org.identityconnectors.framework.Configuration#validate()
      */
     @Override
