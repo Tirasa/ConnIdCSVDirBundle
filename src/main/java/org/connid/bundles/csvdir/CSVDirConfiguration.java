@@ -1,6 +1,6 @@
 /**
  * ====================
- *  DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  * Copyright 2011-2013 Tirasa. All rights reserved.
@@ -112,126 +112,126 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     private String defaultStatusValue = "true";
 
     @ConfigurationProperty(displayMessageKey = "sourcePath.display",
-    helpMessageKey = "sourcePath.help", required = true, order = 1)
+            helpMessageKey = "sourcePath.help", required = true, order = 1)
     public String getSourcePath() {
         return sourcePath;
     }
 
     @ConfigurationProperty(displayMessageKey = "fileMask.display",
-    helpMessageKey = "fileMask.help", required = true, order = 2)
+            helpMessageKey = "fileMask.help", required = true, order = 2)
     public final String getFileMask() {
         return fileMask;
     }
 
     @ConfigurationProperty(displayMessageKey = "encoding.display",
-    helpMessageKey = "encoding.help", order = 3)
+            helpMessageKey = "encoding.help", order = 3)
     public final String getEncoding() {
         return encoding;
     }
 
     @ConfigurationProperty(displayMessageKey = "fieldDelimiter.display",
-    helpMessageKey = "fieldDelimiter.help", order = 4)
+            helpMessageKey = "fieldDelimiter.help", order = 4)
     public char getFieldDelimiter() {
         return fieldDelimiter;
     }
 
     @ConfigurationProperty(displayMessageKey = "textQualifier.display",
-    helpMessageKey = "textQualifier.help", order = 5)
+            helpMessageKey = "textQualifier.help", order = 5)
     public char getTextQualifier() {
         return textQualifier;
     }
 
     @ConfigurationProperty(displayMessageKey = "keyColumnName.display",
-    helpMessageKey = "keyColumnName.help", required = true, order = 6)
+            helpMessageKey = "keyColumnName.help", required = true, order = 6)
     public String[] getKeyColumnNames() {
         return keyColumnNames;
     }
 
     @ConfigurationProperty(displayMessageKey = "passwordColumnName.display",
-    helpMessageKey = "passwordColumnName.help", order = 7)
+            helpMessageKey = "passwordColumnName.help", order = 7)
     public String getPasswordColumnName() {
         return passwordColumnName;
     }
 
     @ConfigurationProperty(displayMessageKey = "deleteColumnName.display",
-    helpMessageKey = "deleteColumnName.help", order = 8)
+            helpMessageKey = "deleteColumnName.help", order = 8)
     public String getDeleteColumnName() {
         return deleteColumnName;
     }
 
     @ConfigurationProperty(displayMessageKey = "quotationRequired.display",
-    helpMessageKey = "quotationRequired.help", order = 9)
+            helpMessageKey = "quotationRequired.help", order = 9)
     public Boolean getQuotationRequired() {
         return quotationRequired;
     }
 
     @ConfigurationProperty(displayMessageKey = "fields.display",
-    helpMessageKey = "fields.help", required = true, order = 10)
+            helpMessageKey = "fields.help", required = true, order = 10)
     public String[] getFields() {
-        return fields;
+        return fields.clone();
     }
 
     @ConfigurationProperty(displayMessageKey = "ignoreHeader.display",
-    helpMessageKey = "ignoreHeader.help", order = 11)
+            helpMessageKey = "ignoreHeader.help", order = 11)
     public Boolean getIgnoreHeader() {
         return ignoreHeader;
     }
 
     @ConfigurationProperty(displayMessageKey = "keyseparator.display",
-    helpMessageKey = "keyseparator.help", order = 12)
+            helpMessageKey = "keyseparator.help", order = 12)
     public String getKeyseparator() {
         return keyseparator;
     }
 
     @ConfigurationProperty(displayMessageKey = "multivalueSeparator.display",
-    helpMessageKey = "multivalueSeparator.help", order = 13)
+            helpMessageKey = "multivalueSeparator.help", order = 13)
     public String getMultivalueSeparator() {
         return multivalueSeparator;
     }
 
     @ConfigurationProperty(displayMessageKey = "defaultStatusValue.display",
-    helpMessageKey = "defaultStatusValue.help", required = false, order = 14)
+            helpMessageKey = "defaultStatusValue.help", required = false, order = 14)
     public String getDefaultStatusValue() {
         return defaultStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "disabledStatusValue.display",
-    helpMessageKey = "disabledStatusValue.help", required = false, order = 15)
+            helpMessageKey = "disabledStatusValue.help", required = false, order = 15)
     public String getDisabledStatusValue() {
         return disabledStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "enabledStatusValue.display",
-    helpMessageKey = "enabledStatusValue.help", required = false, order = 16)
+            helpMessageKey = "enabledStatusValue.help", required = false, order = 16)
     public String getEnabledStatusValue() {
         return enabledStatusValue;
     }
 
     @ConfigurationProperty(displayMessageKey = "statusColumn.display",
-    helpMessageKey = "statusColumn.help", required = false, order = 17)
+            helpMessageKey = "statusColumn.help", required = false, order = 17)
     public String getStatusColumn() {
         return statusColumn;
     }
 
-    public void setKeyseparator(String keyseparator) {
+    public void setKeyseparator(final String keyseparator) {
         this.keyseparator = keyseparator;
     }
 
-    public void setMultivalueSeparator(String multivalueSeparator) {
+    public void setMultivalueSeparator(final String multivalueSeparator) {
         this.multivalueSeparator = multivalueSeparator;
     }
 
-    public void setIgnoreHeader(Boolean ignoreHeader) {
+    public void setIgnoreHeader(final Boolean ignoreHeader) {
         if (ignoreHeader != null) {
             this.ignoreHeader = ignoreHeader;
         }
     }
 
-    public void setDeleteColumnName(String deleteColumnName) {
+    public void setDeleteColumnName(final String deleteColumnName) {
         this.deleteColumnName = deleteColumnName;
     }
 
-    public void setEncoding(String encoding) {
+    public void setEncoding(final String encoding) {
         if (encoding == null) {
             this.encoding = Charset.defaultCharset().name();
         } else {
@@ -239,53 +239,53 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         }
     }
 
-    public void setFieldDelimiter(char fieldDelimeter) {
+    public void setFieldDelimiter(final char fieldDelimeter) {
         this.fieldDelimiter = fieldDelimeter;
     }
 
-    public void setFileMask(String fileMask) {
+    public void setFileMask(final String fileMask) {
         this.fileMask = fileMask;
     }
 
-    public void setKeyColumnNames(String[] keyColumnNames) {
+    public void setKeyColumnNames(final String[] keyColumnNames) {
         this.keyColumnNames = keyColumnNames;
     }
 
-    public void setSourcePath(String sourcePath) {
+    public void setSourcePath(final String sourcePath) {
         this.sourcePath = sourcePath;
     }
 
-    public void setTextQualifier(char textQualifier) {
+    public void setTextQualifier(final char textQualifier) {
         this.textQualifier = textQualifier;
     }
 
-    public void setPasswordColumnName(String passwordColumnName) {
+    public void setPasswordColumnName(final String passwordColumnName) {
         this.passwordColumnName = passwordColumnName;
     }
 
-    public void setFields(String[] fields) {
+    public void setFields(final String[] fields) {
         this.fields = fields;
     }
 
-    public void setQuotationRequired(Boolean quotationRequired) {
+    public void setQuotationRequired(final Boolean quotationRequired) {
         if (quotationRequired != null) {
             this.quotationRequired = quotationRequired;
         }
     }
 
-    public void setDefaultStatusValue(String defaultStatusValue) {
+    public void setDefaultStatusValue(final String defaultStatusValue) {
         this.defaultStatusValue = defaultStatusValue;
     }
 
-    public void setDisabledStatusValue(String disabledStatusValue) {
+    public void setDisabledStatusValue(final String disabledStatusValue) {
         this.disabledStatusValue = disabledStatusValue;
     }
 
-    public void setEnabledStatusValue(String enabledStatusValue) {
+    public void setEnabledStatusValue(final String enabledStatusValue) {
         this.enabledStatusValue = enabledStatusValue;
     }
 
-    public void setStatusColumn(String statusColumn) {
+    public void setStatusColumn(final String statusColumn) {
         this.statusColumn = statusColumn;
     }
 
@@ -296,7 +296,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
      * deleteColumnName or fields is blank or null.
      * @throws IllegalStateException if the text qualifier and field delimiter are the same.
      * @throws RuntimeException if the file is not found.
-     * @throws IllegalCharsetNameException if the character set name is invalid
+     * @throws java.nio.charset.IllegalCharsetNameException if the character set name is invalid
      * @see org.identityconnectors.framework.Configuration#validate()
      */
     @Override
