@@ -20,6 +20,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
  */
+package org.connid.bundles.csvdir.methods;
+
 import java.sql.Types;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
 import org.connid.bundles.csvdir.CSVDirConnector;

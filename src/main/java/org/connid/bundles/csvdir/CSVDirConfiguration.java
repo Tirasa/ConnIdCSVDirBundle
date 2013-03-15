@@ -20,8 +20,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
  */
+package org.connid.bundles.csvdir;
+
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.spi.AbstractConfiguration;
 import org.identityconnectors.framework.spi.ConfigurationProperty;
