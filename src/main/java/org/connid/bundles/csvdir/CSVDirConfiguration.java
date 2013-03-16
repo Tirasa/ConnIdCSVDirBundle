@@ -168,7 +168,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     @ConfigurationProperty(displayMessageKey = "fields.display",
             helpMessageKey = "fields.help", required = true, order = 10)
     public String[] getFields() {
-        return fields.clone();
+        return fields == null ? null : fields.clone();
     }
 
     @ConfigurationProperty(displayMessageKey = "ignoreHeader.display",
