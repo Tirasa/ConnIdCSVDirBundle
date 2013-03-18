@@ -177,7 +177,7 @@ public class FileToDB {
                     append(";all_quoted=").
                     append(conf.getQuotationRequired()).
                     append(";fs=").
-                    append(conf.getFieldDelimiter()).
+                    append(conf.getEscapedFieldDelimiter()).
                     append(";lvs=").
                     append(conf.getTextQualifier() == '"'
                     ? "\\quote" : conf.getTextQualifier()).

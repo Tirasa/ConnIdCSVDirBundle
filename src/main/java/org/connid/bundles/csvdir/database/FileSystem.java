@@ -97,7 +97,8 @@ public class FileSystem {
     }
 
     private boolean isMatched(final File file) {
-        return !file.isDirectory() && (file.getName().matches(conf.getFileMask()) || file.getName().
-                matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
+        return !file.isDirectory()
+                && (file.getName().matches(conf.getFileMask())
+                || file.getName().matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
     }
 }

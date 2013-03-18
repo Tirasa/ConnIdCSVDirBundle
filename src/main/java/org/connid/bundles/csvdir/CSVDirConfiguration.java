@@ -135,6 +135,37 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         return fieldDelimiter;
     }
 
+    /**
+     * from http://hsqldb.org/doc/2.0/guide/texttables-chapt.html#ttc_configuration
+     *
+     * @return field delimiter expression to be used with HSQLDB
+     */
+    public String getEscapedFieldDelimiter() {
+        final String escaped;
+        switch (fieldDelimiter) {
+
+            case ';':
+                escaped = "\\semi";
+                break;
+
+            case '\'':
+                escaped = "\\quote";
+                break;
+
+            case ' ':
+                escaped = "\\space";
+                break;
+
+            case '`':
+                escaped = "\\apos";
+                break;
+
+            default:
+                escaped = String.valueOf(fieldDelimiter);
+        }
+        return escaped;
+    }
+
     @ConfigurationProperty(displayMessageKey = "textQualifier.display",
             helpMessageKey = "textQualifier.help", order = 5)
     public char getTextQualifier() {

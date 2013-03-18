@@ -30,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -143,20 +142,19 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         facade.search(ObjectClass.ACCOUNT, new NoFilter(),
                 new ResultsHandler() {
 
-                    @Override
-                    public boolean handle(final ConnectorObject obj) {
-                        actual.add(new TestAccount(obj));
-                        return true;
-                    }
-                }, null);
+            @Override
+            public boolean handle(final ConnectorObject obj) {
+                actual.add(new TestAccount(obj));
+                return true;
+            }
+        }, null);
 
         // attempt to see if they compare..
         assertTrue(actual.containsAll(TestAccountsValue.TEST_ACCOUNTS));
     }
 
     @Test
-    public final void syncWithNewFile()
-            throws IOException {
+    public final void syncWithNewFile() throws IOException {
         createFile("syncWithNewFile1", TestAccountsValue.TEST_ACCOUNTS);
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -164,11 +162,9 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
 
-        connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
-                getSyncResultsHandler(syncDeltaList), null);
+        connector.sync(ObjectClass.ACCOUNT, new SyncToken(0), getSyncResultsHandler(syncDeltaList), null);
 
-        assertEquals(syncDeltaList.size(),
-                TestAccountsValue.TEST_ACCOUNTS.size());
+        assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS.size());
 
         boolean found = false;
 
@@ -452,27 +448,27 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
             taskExecutor.execute(
                     new Runnable() {
 
-                        @Override
-                        public void run() {
+                @Override
+                public void run() {
 
-                            try {
+                    try {
 
-                                final List<SyncDelta> syncDeltaList =
-                                        new ArrayList<SyncDelta>();
+                        final List<SyncDelta> syncDeltaList =
+                                new ArrayList<SyncDelta>();
 
-                                connector.sync(
-                                        ObjectClass.ACCOUNT,
-                                        new SyncToken(0),
-                                        getSyncResultsHandler(syncDeltaList),
-                                        null);
+                        connector.sync(
+                                ObjectClass.ACCOUNT,
+                                new SyncToken(0),
+                                getSyncResultsHandler(syncDeltaList),
+                                null);
 
-                                assertEquals(syncDeltaList.size(), 10);
+                        assertEquals(syncDeltaList.size(), 10);
 
-                            } catch (Throwable t) {
-                                exception.append(t.getMessage()).append("\n");
-                            }
-                        }
-                    });
+                    } catch (Throwable t) {
+                        exception.append(t.getMessage()).append("\n");
+                    }
+                }
+            });
         }
 
         taskExecutor.shutdown();

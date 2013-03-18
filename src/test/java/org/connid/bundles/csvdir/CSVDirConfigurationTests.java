@@ -41,14 +41,14 @@ public class CSVDirConfigurationTests extends AbstractTest {
      */
     @Test
     public void testValidate() throws Exception {
-        CSVDirConfiguration config = new CSVDirConfiguration();
+        final CSVDirConfiguration config = new CSVDirConfiguration();
         // check defaults..
         assertNull(config.getFileMask());
         assertEquals(Charset.defaultCharset().name(), config.getEncoding());
         assertEquals('"', config.getTextQualifier());
         assertEquals(',', config.getFieldDelimiter());
         // set a unique attribute so there's not a runtime exception..
-        config.setKeyColumnNames(new String[]{"uid"});
+        config.setKeyColumnNames(new String[] {"uid"});
 
         // simple property test..
         config.setFileMask(".*\\.csv");
@@ -62,13 +62,12 @@ public class CSVDirConfigurationTests extends AbstractTest {
             // expected because configuration is incomplete
         }
 
-        config.setFileMask(".*\\.csv");
         config.setPasswordColumnName("password");
         config.setDeleteColumnName("deleted");
-        config.setFields(new String[]{"accountid", "password", "deleted"});
+        config.setFields(new String[] {"accountid", "password", "deleted"});
 
         // create a temp file
-        File csv = File.createTempFile("sample", ".csv", testSourceDir);
+        final File csv = File.createTempFile("sample", ".csv", testSourceDir);
         csv.deleteOnExit();
 
         config.setSourcePath(csv.getParent());
@@ -93,7 +92,7 @@ public class CSVDirConfigurationTests extends AbstractTest {
 
         // test blank unique attribute..
         try {
-            config.setKeyColumnNames(new String[]{});
+            config.setKeyColumnNames(new String[] {});
             config.validate();
             fail();
         } catch (IllegalArgumentException ex) {

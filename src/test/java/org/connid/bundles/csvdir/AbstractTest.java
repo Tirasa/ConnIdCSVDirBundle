@@ -62,23 +62,22 @@ public abstract class AbstractTest {
         // create the connector configuration..
         final CSVDirConfiguration config = new CSVDirConfiguration();
         config.setFileMask(mask);
-        config.setKeyColumnNames(new String[]{
-                    TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME});
+        config.setKeyColumnNames(new String[] {TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME});
         config.setDeleteColumnName(TestAccountsValue.DELETED);
         config.setPasswordColumnName(TestAccountsValue.PASSWORD);
         config.setSourcePath(testSourceDir.getPath());
         config.setQuotationRequired(Boolean.TRUE);
         config.setIgnoreHeader(IGNORE_HEADER);
         config.setKeyseparator(";");
-        config.setFields(new String[]{
-                    TestAccountsValue.ACCOUNTID,
-                    TestAccountsValue.FIRSTNAME,
-                    TestAccountsValue.LASTNAME,
-                    TestAccountsValue.EMAIL,
-                    TestAccountsValue.CHANGE_NUMBER,
-                    TestAccountsValue.PASSWORD,
-                    TestAccountsValue.DELETED,
-                    TestAccountsValue.STATUS});
+        config.setFields(new String[] {
+            TestAccountsValue.ACCOUNTID,
+            TestAccountsValue.FIRSTNAME,
+            TestAccountsValue.LASTNAME,
+            TestAccountsValue.EMAIL,
+            TestAccountsValue.CHANGE_NUMBER,
+            TestAccountsValue.PASSWORD,
+            TestAccountsValue.DELETED,
+            TestAccountsValue.STATUS});
         config.setStatusColumn("status");
         config.validate();
         return config;

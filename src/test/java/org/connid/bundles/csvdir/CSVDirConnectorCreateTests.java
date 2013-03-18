@@ -25,6 +25,7 @@ package org.connid.bundles.csvdir;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,50 +49,45 @@ import org.junit.Test;
 public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
-    public final void createTest()
+    public final void create()
             throws IOException {
 
         createFile("createAccountTest", Collections.<TestAccount>emptySet());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
-        Name name = new Name("___mperro123;pmassi");
+        final Name name = new Name("___mperro123;pmassi");
 
-        Uid newAccount = connector.create(
+        final Uid newAccount = connector.create(
                 ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
-
         assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
         // check creation result
         // --------------------------------
-        final ConnectorFacadeFactory factory =
-                ConnectorFacadeFactory.getInstance();
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
         final APIConfiguration impl = TestHelpers.createTestConfiguration(
                 CSVDirConnector.class,
                 createConfiguration("createAccountTest.*\\.csv"));
 
         final ConnectorFacade facade = factory.newInstance(impl);
-
         final ConnectorObject object =
                 facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
 
         assertNotNull(object);
 
-        final Attribute password = AttributeUtil.find(
-                OperationalAttributes.PASSWORD_NAME, object.getAttributes());
+        final Attribute password = AttributeUtil.find(OperationalAttributes.PASSWORD_NAME, object.getAttributes());
 
         assertNotNull(password.getValue().get(0));
 
-        ((GuardedString) password.getValue().get(0)).access(
-                new GuardedString.Accessor() {
+        ((GuardedString) password.getValue().get(0)).access(new GuardedString.Accessor() {
 
-                    @Override
-                    public void access(char[] clearChars) {
-                        assertEquals("password", new String(clearChars));
-                    }
-                });
+            @Override
+            public void access(final char[] clearChars) {
+                assertEquals("password", new String(clearChars));
+            }
+        });
         // --------------------------------
 
         final Uid uid = connector.authenticate(
@@ -106,72 +102,61 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
     }
 
     @Test(expected = ConnectorException.class)
-    public final void createExistingUserTest()
-            throws IOException {
+    public final void createExistingUserTest() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
 
-        Name name = new Name("____jpc4323435;jPenelope");
-        connector.create(
-                ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
+        final Name name = new Name("____jpc4323435;jPenelope");
+        connector.create(ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
         connector.dispose();
     }
 
     @Test
-    public final void connid_ISSUE51()
-            throws IOException {
-
+    public final void issue51() throws IOException {
         createFile("createAccountTest", Collections.<TestAccount>emptySet());
 
         final CSVDirConnector connector = new CSVDirConnector();
-        CSVDirConfiguration configuration = createConfiguration("createAccountTest.*\\.csv");
-        configuration.setKeyColumnNames(new String[]{TestAccountsValue.ACCOUNTID});
+        final CSVDirConfiguration configuration = createConfiguration("createAccountTest.*\\.csv");
+        configuration.setKeyColumnNames(new String[] {TestAccountsValue.ACCOUNTID});
         connector.init(configuration);
 
-        Name name = new Name("___mperro1234");
+        final Name name = new Name("___mperro1234");
 
-        Uid newAccount = connector.create(
-                ObjectClass.ACCOUNT, setAccountIdISSUE51(createSetOfAttributes(name)), null);
-
+        Set<Attribute> attributes = createSetOfAttributes(name);
+        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro1234"));
+        final Uid newAccount = connector.create(ObjectClass.ACCOUNT, attributes, null);
         assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
         // check creation result
         // --------------------------------
-        final ConnectorFacadeFactory factory =
-                ConnectorFacadeFactory.getInstance();
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
-        CSVDirConfiguration newConfiguration = createConfiguration("createAccountTest.*\\.csv");
-        newConfiguration.setKeyColumnNames(new String[]{TestAccountsValue.ACCOUNTID});
+        final CSVDirConfiguration newConfiguration = createConfiguration("createAccountTest.*\\.csv");
+        newConfiguration.setKeyColumnNames(new String[] {TestAccountsValue.ACCOUNTID});
 
         final APIConfiguration impl = TestHelpers.createTestConfiguration(
                 CSVDirConnector.class, newConfiguration);
 
         final ConnectorFacade facade = factory.newInstance(impl);
 
-        final ConnectorObject object =
-                facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
-
+        final ConnectorObject object = facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
         assertNotNull(object);
 
-        final Attribute password = AttributeUtil.find(
-                OperationalAttributes.PASSWORD_NAME, object.getAttributes());
-
+        final Attribute password = AttributeUtil.find(OperationalAttributes.PASSWORD_NAME, object.getAttributes());
         assertNotNull(password.getValue().get(0));
 
-        ((GuardedString) password.getValue().get(0)).access(
-                new GuardedString.Accessor() {
+        ((GuardedString) password.getValue().get(0)).access(new GuardedString.Accessor() {
 
-                    @Override
-                    public void access(char[] clearChars) {
-                        assertEquals("password", new String(clearChars));
-                    }
-                });
+            @Override
+            public void access(final char[] clearChars) {
+                assertEquals("password", new String(clearChars));
+            }
+        });
         // --------------------------------
 
         final Name accountid = AttributeUtil.getNameFromAttributes(object.getAttributes());
-
         assertEquals("___mperro1234", accountid.getNameValue());
 
         final Uid uid = connector.authenticate(
@@ -185,33 +170,41 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         connector.dispose();
     }
 
-    private Set<Attribute> createSetOfAttributes(Name name) {
-        Set<Attribute> attributes = new HashSet<Attribute>();
+    @Test
+    public void issueCSVDIR6() throws IOException {
+        final CSVDirConfiguration config = createConfiguration("issueCSVDIR6.*\\.csv");
+        config.setFieldDelimiter(';');
+        config.validate();
+
+        final File csv = File.createTempFile("issueCSVDIR6", ".csv", testSourceDir);
+        csv.deleteOnExit();
+
+        final CSVDirConnector connector = new CSVDirConnector();
+        connector.init(config);
+        final Name name = new Name("___csvdir6");
+
+        final Set<Attribute> attributes = createSetOfAttributes(name);
+        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, name.getNameValue()));
+        final Uid newAccount = connector.create(ObjectClass.ACCOUNT, attributes, null);
+        assertEquals(name.getNameValue(), newAccount.getUidValue());
+    }
+
+    private Set<Attribute> createSetOfAttributes(final Name name) {
+        final Set<Attribute> attributes = new HashSet<Attribute>();
 
         attributes.add(name);
-        attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME,
-                "pmassi"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.LASTNAME,
-                "mperrone"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL,
-                "massimiliano.perrone@test.it"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.CHANGE_NUMBER,
-                "0"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD,
-                "password"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME, "pmassi"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.LASTNAME, "mperrone"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "massimiliano.perrone@test.it"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.CHANGE_NUMBER, "0"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD, "password"));
         attributes.add(AttributeBuilder.build(TestAccountsValue.DELETED, "no"));
+
         return attributes;
     }
 
-    private Set<Attribute> setAccountId(Set<Attribute> attributes) {
-        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID,
-                "___mperro123"));
-        return attributes;
-    }
-
-    private Set<Attribute> setAccountIdISSUE51(Set<Attribute> attributes) {
-        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID,
-                "___mperro1234"));
+    private Set<Attribute> setAccountId(final Set<Attribute> attributes) {
+        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro123"));
         return attributes;
     }
 }
