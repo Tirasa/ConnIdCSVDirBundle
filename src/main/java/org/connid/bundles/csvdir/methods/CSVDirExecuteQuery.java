@@ -1,21 +1,20 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
@@ -31,9 +30,9 @@ import java.util.List;
 import java.util.Set;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
 import org.connid.bundles.csvdir.CSVDirConnection;
+import org.connid.bundles.db.common.FilterWhereBuilder;
+import org.connid.bundles.db.common.SQLParam;
 import org.identityconnectors.common.logging.Log;
-import org.identityconnectors.dbcommon.FilterWhereBuilder;
-import org.identityconnectors.dbcommon.SQLParam;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
 import org.identityconnectors.framework.common.objects.ObjectClass;
@@ -49,31 +48,31 @@ public class CSVDirExecuteQuery extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirExecuteQuery.class);
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConnection conn = null;
+    private final CSVDirConnection conn;
 
-    private ObjectClass oclass = null;
+    private final ObjectClass oclass;
 
-    private FilterWhereBuilder where = null;
+    private final FilterWhereBuilder where;
 
-    private ResultsHandler handler = null;
+    private final ResultsHandler handler;
 
-    private OperationOptions options = null;
+    private final OperationOptions options;
 
     public CSVDirExecuteQuery(final CSVDirConfiguration configuration,
             final ObjectClass oclass,
             final FilterWhereBuilder where,
             final ResultsHandler handler,
             final OperationOptions options)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+
         this.conf = configuration;
         this.oclass = oclass;
         this.where = where;
         this.handler = handler;
         this.options = options;
-        conn = CSVDirConnection.openConnection(configuration);
+        this.conn = CSVDirConnection.openConnection(configuration);
     }
 
     public void execute() {
@@ -109,26 +108,21 @@ public class CSVDirExecuteQuery extends CommonOperation {
         LOG.ok("The ObjectClass and result handler is ok");
 
         final Set<String> columnNamesToGet = resolveColumnNamesToGet();
-
         LOG.ok("Column Names {0} To Get", columnNamesToGet);
 
-        final String whereClause = where != null ? where.getWhereClause() : null;
-
+        final String whereClause = where == null ? null : where.getWhereClause();
         LOG.ok("Where Clause {0}", whereClause);
 
-        final List<SQLParam> params = where != null ? where.getParams() : null;
-
+        final List<SQLParam> params = where == null ? null : where.getParams();
         LOG.ok("Where Params {0}", params);
 
         ResultSet rs = null;
-
         try {
             rs = conn.allCsvFiles(whereClause, params);
 
             boolean handled = true;
 
             while (rs.next() && handled) {
-
                 // create the connector object..
                 handled = handler.handle(buildConnectorObject(conf, rs).build());
             }
@@ -148,16 +142,14 @@ public class CSVDirExecuteQuery extends CommonOperation {
     }
 
     private Set<String> resolveColumnNamesToGet() {
-
         final Set<String> attributesToGet = new HashSet<String>();
         attributesToGet.add(Uid.NAME);
 
         String[] attributes = null;
-
-        if (options != null && options.getAttributesToGet() != null) {
-            attributes = options.getAttributesToGet();
-        } else {
+        if (options == null || options.getAttributesToGet() == null) {
             attributes = conf.getFields();
+        } else {
+            attributes = options.getAttributesToGet();
         }
 
         attributesToGet.addAll(Arrays.asList(attributes));

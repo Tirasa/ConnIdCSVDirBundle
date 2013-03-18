@@ -1,21 +1,20 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
@@ -42,22 +41,22 @@ public class CSVDirUpdate extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirUpdate.class);
 
-    private CSVDirConnection connection = null;
+    private final CSVDirConnection conn;
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private Uid uid = null;
+    private final Uid uid;
 
     private Set<Attribute> attrs = null;
 
     public CSVDirUpdate(final CSVDirConfiguration conf,
             final Uid uid, final Set<Attribute> set)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+        
         this.conf = conf;
         this.uid = uid;
         this.attrs = set;
-        connection = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public Uid execute() {
@@ -68,8 +67,8 @@ public class CSVDirUpdate extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -85,11 +84,11 @@ public class CSVDirUpdate extends CommonOperation {
                     "No Name attribute provided in the attributes");
         }
 
-        if (!userExists(uid.getUidValue(), connection, conf)) {
+        if (!userExists(uid.getUidValue(), conn, conf)) {
             throw new ConnectorException("User doesn't exist");
         }
 
-        connection.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
+        conn.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
 
         LOG.ok("Creation commited");
         return uid;

@@ -1,41 +1,38 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
- */package org.connid.bundles.csvdir.database;
+ */
+package org.connid.bundles.csvdir.database;
 
 import java.io.File;
 import java.io.FileFilter;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
-import org.identityconnectors.common.logging.Log;
 
 public class FileSystem {
 
-    private static final Log log = Log.getLog(FileSystem.class);
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConfiguration conf;
+    private final File sourcePath;
 
-    private File sourcePath = null;
-
-    private FileFilter fileFilter = null;
+    private final FileFilter fileFilter;
 
     private long highestTimeStamp;
 
@@ -92,21 +89,16 @@ public class FileSystem {
     }
 
     private File[] returnNewArrayIfCsvFilesIsEmpty(final File[] csvFiles) {
-        if (csvFiles != null) {
-            return csvFiles;
-        } else {
-            return new File[]{};
-        }
+        return csvFiles == null ? new File[] {} : csvFiles;
     }
 
     public final long getHighestTimeStamp() {
         return highestTimeStamp;
     }
 
-    private boolean isMatched(File file) {
+    private boolean isMatched(final File file) {
         return !file.isDirectory()
                 && (file.getName().matches(conf.getFileMask())
-                || file.getName().matches(
-                FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
+                || file.getName().matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
     }
 }

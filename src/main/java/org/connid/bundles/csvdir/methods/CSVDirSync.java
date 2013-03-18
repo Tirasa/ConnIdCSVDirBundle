@@ -1,21 +1,20 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
@@ -49,31 +48,31 @@ public class CSVDirSync extends CommonOperation {
 
     private static long token = 0L;
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConnection connection = null;
+    private final CSVDirConnection connection;
 
-    private ObjectClass objectClass = null;
+    private final ObjectClass objectClass;
 
-    private SyncToken syncToken = null;
+    private SyncToken syncToken;
 
-    private SyncResultsHandler handler = null;
+    private final SyncResultsHandler handler;
 
-    private OperationOptions options = null;
+    private final OperationOptions options;
 
     public CSVDirSync(final CSVDirConfiguration conf,
             final ObjectClass objectClass,
-            SyncToken syncToken,
+            final SyncToken syncToken,
             final SyncResultsHandler handler,
             final OperationOptions options)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+
         this.conf = conf;
         this.objectClass = objectClass;
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
-        connection = CSVDirConnection.openConnection(conf);
+        this.connection = CSVDirConnection.openConnection(conf);
     }
 
     public long execute() {
@@ -112,7 +111,6 @@ public class CSVDirSync extends CommonOperation {
         }
 
         CSVDirConnection conn = null;
-
         try {
             conn = CSVDirConnection.openConnection(conf);
 
@@ -152,35 +150,31 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private void choseRightDeltaType(final ResultSet rs,
-            final SyncDeltaBuilder syncDeltaBuilder)
+    private void choseRightDeltaType(final ResultSet rs, final SyncDeltaBuilder syncDeltaBuilder)
             throws SQLException {
-        if (Boolean.valueOf(getValueFromColumnName(rs,
-                conf.getDeleteColumnName()))) {
+
+        if (Boolean.valueOf(getValueFromColumnName(rs, conf.getDeleteColumnName()))) {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.DELETE);
         } else {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.CREATE_OR_UPDATE);
         }
     }
 
-    private SyncDeltaBuilder createSyncDelta(
-            final ConnectorObjectBuilder connObjectBuilder) {
+    private SyncDeltaBuilder createSyncDelta(final ConnectorObjectBuilder connObjectBuilder) {
         final SyncDeltaBuilder syncDeltaBuilder = new SyncDeltaBuilder();
 
-        ConnectorObject object = connObjectBuilder.build();
+        final ConnectorObject object = connObjectBuilder.build();
         syncDeltaBuilder.setObject(object);
         syncDeltaBuilder.setUid(object.getUid());
-        syncDeltaBuilder.setToken(getLatestSyncToken(ObjectClass.ACCOUNT));
+        syncDeltaBuilder.setToken(getLatestSyncToken());
         return syncDeltaBuilder;
     }
 
-    private String getValueFromColumnName(final ResultSet rs,
-            final String columnName)
-            throws SQLException {
+    private String getValueFromColumnName(final ResultSet rs, final String columnName) throws SQLException {
         return rs.getString(rs.findColumn(columnName));
     }
 
-    private SyncToken getLatestSyncToken(final ObjectClass objectClass) {
+    private SyncToken getLatestSyncToken() {
         return new SyncToken(token);
     }
 }

@@ -1,33 +1,33 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
- */package org.connid.bundles.csvdir.methods;
+ */
+package org.connid.bundles.csvdir.methods;
 
 import java.sql.Types;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
 import org.connid.bundles.csvdir.CSVDirConnector;
+import org.connid.bundles.db.common.FilterWhereBuilder;
+import org.connid.bundles.db.common.SQLParam;
 import org.identityconnectors.common.StringUtil;
-import org.identityconnectors.dbcommon.FilterWhereBuilder;
-import org.identityconnectors.dbcommon.SQLParam;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.Name;
@@ -35,31 +35,29 @@ import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
-import org.identityconnectors.framework.common.objects
-         .filter.AbstractFilterTranslator;
+import org.identityconnectors.framework.common.objects.filter.AbstractFilterTranslator;
 import org.identityconnectors.framework.common.objects.filter.ContainsFilter;
 import org.identityconnectors.framework.common.objects.filter.EndsWithFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
-import org.identityconnectors.framework.common
-         .objects.filter.GreaterThanFilter;
-import org.identityconnectors.framework.common
-         .objects.filter.GreaterThanOrEqualFilter;
+import org.identityconnectors.framework.common.objects.filter.GreaterThanFilter;
+import org.identityconnectors.framework.common.objects.filter.GreaterThanOrEqualFilter;
 import org.identityconnectors.framework.common.objects.filter.LessThanFilter;
-import org.identityconnectors.framework.common
-         .objects.filter.LessThanOrEqualFilter;
+import org.identityconnectors.framework.common.objects.filter.LessThanOrEqualFilter;
 import org.identityconnectors.framework.common.objects.filter.StartsWithFilter;
 
-public class CSVDirFilterTranslator
-        extends AbstractFilterTranslator<FilterWhereBuilder> {
+public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhereBuilder> {
 
-    private CSVDirConnector connector;
-    private ObjectClass oclass;
-    private OperationOptions options;
+    private final CSVDirConnector connector;
+
+    private final ObjectClass oclass;
+
+    private final OperationOptions options;
 
     public CSVDirFilterTranslator(
             final CSVDirConnector connector,
             final ObjectClass oclass,
             final OperationOptions options) {
+
         this.connector = connector;
         this.oclass = oclass;
         this.options = options;
@@ -70,47 +68,43 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder
-            createAndExpression(FilterWhereBuilder leftExpression,
-            FilterWhereBuilder rightExpression) {
-        FilterWhereBuilder build = createBuilder();
+    protected FilterWhereBuilder createAndExpression(final FilterWhereBuilder leftExpression,
+            final FilterWhereBuilder rightExpression) {
+
+        final FilterWhereBuilder build = createBuilder();
         build.join("AND", leftExpression, rightExpression);
         return build;
     }
 
     @Override
-    protected FilterWhereBuilder
-            createOrExpression(FilterWhereBuilder leftExpression,
-            FilterWhereBuilder rightExpression) {
-        FilterWhereBuilder build = createBuilder();
+    protected FilterWhereBuilder createOrExpression(final FilterWhereBuilder leftExpression,
+            final FilterWhereBuilder rightExpression) {
+
+        final FilterWhereBuilder build = createBuilder();
         build.join("OR", leftExpression, rightExpression);
         return build;
     }
 
     @Override
-    protected FilterWhereBuilder
-            createEqualsExpression(EqualsFilter filter, boolean not) {
+    protected FilterWhereBuilder createEqualsExpression(final EqualsFilter filter, final boolean not) {
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
         }
 
-        SQLParam[] params = getSQLParam(attribute, oclass, options);
+        final SQLParam[] params = getSQLParam(attribute, oclass, options);
         if (params == null) {
             return null;
         }
 
         final FilterWhereBuilder ret = createBuilder();
-
         ret.getWhere().append("(");
-
         if (not) {
             ret.getWhere().append("NOT ");
         }
 
-        SQLParam param;
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
@@ -129,9 +123,7 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder createContainsExpression(
-            final ContainsFilter filter, final boolean not) {
-
+    protected FilterWhereBuilder createContainsExpression(final ContainsFilter filter, final boolean not) {
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -151,16 +143,13 @@ public class CSVDirFilterTranslator
             ret.getWhere().append("NOT ");
         }
 
-        String value;
-
-        SQLParam param;
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
             if (value != null && value instanceof String) {
@@ -184,8 +173,7 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder createEndsWithExpression(
-            final EndsWithFilter filter, final boolean not) {
+    protected FilterWhereBuilder createEndsWithExpression(final EndsWithFilter filter, final boolean not) {
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -205,20 +193,17 @@ public class CSVDirFilterTranslator
             ret.getWhere().append("NOT ");
         }
 
-        String value;
-
-        SQLParam param;
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
-            if (value != null && value instanceof String) {
-                //To be sure, this is not already quoted
+            if (value != null) {
+                // To be sure, this is not already quoted
                 if (!value.startsWith("%")) {
                     value = "%" + value;
                 }
@@ -234,8 +219,8 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder createStartsWithExpression(
-            final StartsWithFilter filter, final boolean not) {
+    protected FilterWhereBuilder createStartsWithExpression(final StartsWithFilter filter, final boolean not) {
+
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -255,19 +240,16 @@ public class CSVDirFilterTranslator
             ret.getWhere().append("NOT ");
         }
 
-        String value;
-
-        SQLParam param;
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
-            if (value != null && value instanceof String) {
+            if (value != null) {
                 //To be sure, this is not already quoted
                 if (!value.endsWith("%")) {
                     value = value + "%";
@@ -285,8 +267,8 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder createGreaterThanExpression(
-            final GreaterThanFilter filter, final boolean not) {
+    protected FilterWhereBuilder createGreaterThanExpression(final GreaterThanFilter filter, final boolean not) {
+
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -302,16 +284,13 @@ public class CSVDirFilterTranslator
 
         ret.getWhere().append("(");
 
-        String value;
-        SQLParam param;
-
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
             if (value != null) {
@@ -327,6 +306,7 @@ public class CSVDirFilterTranslator
     @Override
     protected FilterWhereBuilder createGreaterThanOrEqualExpression(
             final GreaterThanOrEqualFilter filter, final boolean not) {
+
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -342,16 +322,13 @@ public class CSVDirFilterTranslator
 
         ret.getWhere().append("(");
 
-        String value;
-        SQLParam param;
-
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
             if (value != null) {
@@ -366,8 +343,7 @@ public class CSVDirFilterTranslator
     }
 
     @Override
-    protected FilterWhereBuilder createLessThanExpression(
-            final LessThanFilter filter, final boolean not) {
+    protected FilterWhereBuilder createLessThanExpression(final LessThanFilter filter, final boolean not) {
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -383,16 +359,13 @@ public class CSVDirFilterTranslator
 
         ret.getWhere().append("(");
 
-        String value;
-        SQLParam param;
-
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
             if (value != null) {
@@ -409,6 +382,7 @@ public class CSVDirFilterTranslator
     @Override
     protected FilterWhereBuilder createLessThanOrEqualExpression(
             final LessThanOrEqualFilter filter, final boolean not) {
+
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -424,16 +398,13 @@ public class CSVDirFilterTranslator
 
         ret.getWhere().append("(");
 
-        String value;
-        SQLParam param;
-
         for (int i = 0; i < params.length; i++) {
-            param = params[i];
+            final SQLParam param = params[i];
             if (i > 0) {
                 ret.getWhere().append(" AND ");
             }
 
-            value = (String) param.getValue();
+            String value = (String) param.getValue();
 
             // ignore null values
             if (value != null) {
@@ -449,8 +420,7 @@ public class CSVDirFilterTranslator
 
     protected boolean validateSearchAttribute(final Attribute attribute) {
         //Ignore streamed ( byte[] objects ) from query
-        if (byte[].class.equals(AttributeUtil.getSingleValue(attribute).
-                getClass())) {
+        if (byte[].class.equals(AttributeUtil.getSingleValue(attribute).getClass())) {
             return false;
         }
         //Otherwise let the database process
@@ -484,34 +454,28 @@ public class CSVDirFilterTranslator
                         columnType);
             }
         } else {
-            params = new SQLParam[]{new SQLParam(
-                        columnNames[0],
-                        values != null && values.length == columnNames.length
-                        ? values[0] : null,
-                        columnType)};
+            params = new SQLParam[] {new SQLParam(
+                columnNames[0],
+                values != null && values.length == columnNames.length
+                ? values[0] : null,
+                columnType)};
         }
 
         return params;
     }
 
-    protected String[] getColumnName(String attributeName) {
+    protected String[] getColumnName(final String attributeName) {
         if (Name.NAME.equalsIgnoreCase(attributeName)) {
-            return ((CSVDirConfiguration)
-                    connector.getConfiguration()).getKeyColumnNames();
+            return ((CSVDirConfiguration) connector.getConfiguration()).getKeyColumnNames();
         }
         if (Uid.NAME.equalsIgnoreCase(attributeName)) {
-            return ((CSVDirConfiguration)
-                    connector.getConfiguration()).getKeyColumnNames();
+            return ((CSVDirConfiguration) connector.getConfiguration()).getKeyColumnNames();
         }
-        if (!StringUtil.isBlank(
-                ((CSVDirConfiguration)
-                connector.getConfiguration()).getPasswordColumnName())
-                && OperationalAttributes
-                .PASSWORD_NAME.equalsIgnoreCase(attributeName)) {
-            return new String[]{
-                        ((CSVDirConfiguration)
-                    connector.getConfiguration()).getPasswordColumnName()};
+        if (!StringUtil.isBlank(((CSVDirConfiguration) connector.getConfiguration()).getPasswordColumnName())
+                && OperationalAttributes.PASSWORD_NAME.equalsIgnoreCase(attributeName)) {
+
+            return new String[] {((CSVDirConfiguration) connector.getConfiguration()).getPasswordColumnName()};
         }
-        return new String[]{attributeName};
+        return new String[] {attributeName};
     }
 }

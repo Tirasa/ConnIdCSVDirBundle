@@ -1,26 +1,26 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  * ====================
- */package org.connid.bundles.csvdir.database;
+ */
+package org.connid.bundles.csvdir.database;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -34,13 +34,13 @@ import org.identityconnectors.framework.spi.Connector;
 
 public class FileToDB {
 
-    private CSVDirConfiguration conf = null;
+    public static final String DEFAULT_PREFIX = "DEFAULT";
 
-    private CSVDirConnection conn = null;
+    private final CSVDirConfiguration conf;
 
-    private FileSystem fileSystem = null;
+    private final CSVDirConnection conn;
 
-    public static String DEFAULT_PREFIX = "DEFAULT";
+    private final FileSystem fileSystem;
 
     public FileToDB(final CSVDirConnection conn) {
         this.conn = conn;
@@ -111,16 +111,7 @@ public class FileToDB {
             }
         }
 
-        if (view.length() != 0) {
-            try {
-                view.insert(0, "CREATE VIEW " + conn.getViewname() + " AS ");
-
-                LOG.ok("Execute: {0}", view.toString());
-                conn.getConn().createStatement().execute(view.toString());
-            } catch (SQLException e) {
-                LOG.error(e, "While creating view {0}", conn.getViewname());
-            }
-        } else {
+        if (view.length() == 0) {
             try {
                 LOG.ok("Execute: CREATE TEXT TABLE NOENTRIES");
 
@@ -146,18 +137,25 @@ public class FileToDB {
             } catch (SQLException e) {
                 LOG.error(e, "While creating table NOENTRIES");
             }
+        } else {
+            try {
+                view.insert(0, "CREATE VIEW " + conn.getViewname() + " AS ");
+
+                LOG.ok("Execute: {0}", view.toString());
+                conn.getConn().createStatement().execute(view.toString());
+            } catch (SQLException e) {
+                LOG.error(e, "While creating view {0}", conn.getViewname());
+            }
         }
 
         return tables;
     }
 
     private String bindFileTable(final File file) {
-
         LOG.ok("File to load {0}", file.getAbsolutePath());
 
+        final String tableName = "CSV_TABLE" + Utilities.randomNumber();
         try {
-            final String tableName = "CSV_TABLE" + Utilities.randomNumber();
-
             conn.getConn().createStatement().execute(
                     "DROP TABLE " + tableName + " IF EXISTS CASCADE");
 
@@ -179,7 +177,7 @@ public class FileToDB {
                     append(";all_quoted=").
                     append(conf.getQuotationRequired()).
                     append(";fs=").
-                    append(conf.getFieldDelimiter()).
+                    append(conf.getEscapedFieldDelimiter()).
                     append(";lvs=").
                     append(conf.getTextQualifier() == '"'
                     ? "\\quote" : conf.getTextQualifier()).

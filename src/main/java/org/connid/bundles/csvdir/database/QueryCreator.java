@@ -1,21 +1,20 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
@@ -27,7 +26,11 @@ import java.util.Map;
 import org.connid.bundles.csvdir.utilities.QueryTemplate;
 import org.identityconnectors.framework.common.objects.Uid;
 
-public class QueryCreator {
+public final class QueryCreator {
+
+    private QueryCreator() {
+        // empty private constructor for utility class
+    }
 
     public static String updateQuery(
             final Map<String, String> valuesMap,
@@ -40,12 +43,14 @@ public class QueryCreator {
 
         final StringBuilder set = new StringBuilder();
 
-        for (String value : valuesMap.keySet()) {
+        for (Map.Entry<String, String> entry : valuesMap.entrySet()) {
             if (set.length() > 0) {
                 set.append(",");
             }
-            set.append(value).append("=").
-                    append(value == null ? "" : "'").append(valuesMap.get(value)).append(value == null ? "" : "'");
+            set.append(entry.getKey()).append("=").
+                    append(entry.getKey() == null ? "" : "'").
+                    append(entry.getValue()).
+                    append(entry.getKey() == null ? "" : "'");
         }
 
         final String[] uidKeys = uid.getUidValue().split(keySeparator);
@@ -67,17 +72,14 @@ public class QueryCreator {
             final String[] keys,
             final String tableName) {
 
-        final QueryTemplate queryTemplate =
-                new QueryTemplate("DELETE FROM {0} WHERE {1}");
+        final QueryTemplate queryTemplate = new QueryTemplate("DELETE FROM {0} WHERE {1}");
 
-        final String[] uidKeys =
-                uid.getUidValue().split(keySeparator);
+        final String[] uidKeys = uid.getUidValue().split(keySeparator);
 
         final StringBuilder where = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i]).append("=").
-                    append("'").append(uidKeys[i]).append("'");
+            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
 
             if (i < keys.length - 1) {
                 where.append(" AND ");

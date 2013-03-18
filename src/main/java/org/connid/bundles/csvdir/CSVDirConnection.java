@@ -1,21 +1,20 @@
-/*
+/**
  * ====================
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Tirasa. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2011-2013 Tirasa. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common Development
- * and Distribution License("CDDL") (the "License").  You may not use this file
+ * and Distribution License("CDDL") (the "License"). You may not use this file
  * except in compliance with the License.
  *
- * You can obtain a copy of the License at
- * https://connid.googlecode.com/svn/base/trunk/legal/license.txt
- * See the License for the specific language governing
- * permissions and limitations under the License.
+ * You can obtain a copy of the License at https://oss.oracle.com/licenses/CDDL
+ * See the License for the specific language governing permissions and limitations
+ * under the License.
  *
- * When distributing the Covered Code, include this
- * CDDL Header Notice in each file
- * and include the License file at identityconnectors/legal/license.txt.
+ * When distributing the Covered Code, include this CDDL Header Notice in each file
+ * and include the License file at https://oss.oracle.com/licenses/CDDL.
  * If applicable, add the following below this CDDL Header, with the fields
  * enclosed by brackets [] replaced by your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
@@ -37,11 +36,11 @@ import org.connid.bundles.csvdir.database.FileSystem;
 import org.connid.bundles.csvdir.database.FileToDB;
 import org.connid.bundles.csvdir.database.QueryCreator;
 import org.connid.bundles.csvdir.utilities.Utilities;
+import org.connid.bundles.db.common.DatabaseConnection;
+import org.connid.bundles.db.common.SQLParam;
+import org.connid.bundles.db.common.SQLUtil;
 import org.hsqldb.jdbcDriver;
 import org.identityconnectors.common.logging.Log;
-import org.identityconnectors.dbcommon.DatabaseConnection;
-import org.identityconnectors.dbcommon.SQLParam;
-import org.identityconnectors.dbcommon.SQLUtil;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Uid;
 
@@ -56,21 +55,21 @@ public class CSVDirConnection {
 
     private static final String HSQLDB_DB_NAME = "csvdir_db";
 
-    private String viewname = null;
+    private final String viewname;
 
-    private String query = null;
+    private final String query;
 
-    private String jdbcUrl = "jdbc:hsqldb:file:";
+    private final String jdbcUrl;
 
-    private Set<String> tables = new HashSet<String>();
+    private final Set<String> tables = new HashSet<String>();
 
-    private Connection conn;
+    private final Connection conn;
 
     private final CSVDirConfiguration conf;
 
-    private FileSystem fileSystem;
+    private final FileSystem fileSystem;
 
-    private FileToDB fileToDB;
+    private final FileToDB fileToDB;
 
     private CSVDirConnection(final CSVDirConfiguration conf)
             throws ClassNotFoundException, SQLException {
@@ -98,6 +97,7 @@ public class CSVDirConnection {
 
     public void closeConnection()
             throws SQLException {
+
         if (conn != null) {
             LOG.ok("Closing connection ...");
             dropTableAndViewIfExists();
@@ -107,7 +107,6 @@ public class CSVDirConnection {
     }
 
     public int deleteAccount(final Uid uid) {
-
         File[] files = fileSystem.getAllCsvFiles();
 
         if (files.length == 0) {
