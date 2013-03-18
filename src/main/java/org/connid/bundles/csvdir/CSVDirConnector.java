@@ -69,7 +69,7 @@ import org.identityconnectors.framework.spi.operations.UpdateOp;
  * Only implements search since this connector is only used to do sync.
  */
 @ConnectorClass(configurationClass = CSVDirConfiguration.class,
-displayNameKey = "FlatFile")
+        displayNameKey = "FlatFile")
 public class CSVDirConnector implements
         Connector, SearchOp<FilterWhereBuilder>, SchemaOp, SyncOp, CreateOp,
         UpdateOp, DeleteOp, AuthenticateOp, TestOp {
@@ -109,6 +109,7 @@ public class CSVDirConnector implements
     @Override
     public final FilterTranslator<FilterWhereBuilder> createFilterTranslator(
             final ObjectClass oclass, final OperationOptions options) {
+
         if (oclass == null || (!oclass.equals(ObjectClass.ACCOUNT))) {
             throw new IllegalArgumentException("Invalid objectclass");
         }
@@ -121,15 +122,13 @@ public class CSVDirConnector implements
             final FilterWhereBuilder where,
             final ResultsHandler handler,
             final OperationOptions options) {
+
         try {
-            new CSVDirExecuteQuery(
-                    configuration, oclass, where, handler, options).execute();
-        } catch (ClassNotFoundException ex) {
-            LOG.error(ex, "error during execute query");
-            throw new ConnectorIOException(ex);
-        } catch (SQLException ex) {
-            LOG.error(ex, "error during execute query");
-            throw new ConnectorIOException(ex);
+            new CSVDirExecuteQuery(configuration, oclass, where, handler, options).execute();
+        } catch (ClassNotFoundException e) {
+            throw new ConnectorIOException(e);
+        } catch (SQLException e) {
+            throw new ConnectorIOException(e);
         }
     }
 
@@ -144,11 +143,9 @@ public class CSVDirConnector implements
             token = new CSVDirSync(
                     configuration, objectClass, syncToken, handler, options).
                     execute();
-        } catch (ClassNotFoundException ex) {
-            LOG.error(ex, "error during creation");
-            throw new ConnectorIOException(ex);
+        } catch (ClassNotFoundException e) {
+            throw new ConnectorIOException(e);
         } catch (SQLException ex) {
-            LOG.error(ex, "error during creation");
             throw new ConnectorIOException(ex);
         }
     }
@@ -164,44 +161,41 @@ public class CSVDirConnector implements
     }
 
     @Override
-    public final Uid create(final ObjectClass oc, final Set<Attribute> set,
-            final OperationOptions oo) {
+    public final Uid create(final ObjectClass objectClass, final Set<Attribute> set,
+            final OperationOptions options) {
+
         try {
             return new CSVDirCreate(configuration, set).execute();
-        } catch (ClassNotFoundException ex) {
-            LOG.error(ex, "error during creation");
-            throw new ConnectorIOException(ex);
-        } catch (SQLException ex) {
-            LOG.error(ex, "error during creation");
-            throw new ConnectorIOException(ex);
+        } catch (ClassNotFoundException e) {
+            throw new ConnectorIOException(e);
+        } catch (SQLException e) {
+            throw new ConnectorIOException(e);
         }
     }
 
     @Override
-    public final Uid update(final ObjectClass oc, final Uid uid,
-            final Set<Attribute> set, final OperationOptions oo) {
+    public final Uid update(final ObjectClass objectClass, final Uid uid,
+            final Set<Attribute> attrs, final OperationOptions options) {
+
         try {
-            return new CSVDirUpdate(configuration, uid, set).execute();
-        } catch (ClassNotFoundException ex) {
-            LOG.error(ex, "error during update operation");
-            throw new ConnectorIOException(ex);
-        } catch (SQLException ex) {
-            LOG.error(ex, "error during update operation");
-            throw new ConnectorIOException(ex);
+            return new CSVDirUpdate(configuration, uid, attrs).execute();
+        } catch (ClassNotFoundException e) {
+            throw new ConnectorIOException(e);
+        } catch (SQLException e) {
+            throw new ConnectorIOException(e);
         }
     }
 
     @Override
-    public final void delete(final ObjectClass oc, final Uid uid,
-            final OperationOptions oo) {
+    public final void delete(final ObjectClass objectClass, final Uid uid,
+            final OperationOptions options) {
+
         try {
             new CSVDirDelete(configuration, uid).execute();
-        } catch (ClassNotFoundException ex) {
-            LOG.error(ex, "error during delete operation");
-            throw new ConnectorIOException(ex);
-        } catch (SQLException ex) {
-            LOG.error(ex, "error delete operation");
-            throw new ConnectorIOException(ex);
+        } catch (ClassNotFoundException e) {
+            throw new ConnectorIOException(e);
+        } catch (SQLException e) {
+            throw new ConnectorIOException(e);
         }
     }
 
@@ -221,13 +215,10 @@ public class CSVDirConnector implements
 
             @Override
             public void access(final char[] clearChars) {
-                final Filter uid = FilterBuilder.equalTo(
-                        AttributeBuilder.build(Uid.NAME, username));
+                final Filter uid = FilterBuilder.equalTo(AttributeBuilder.build(Uid.NAME, username));
 
                 final Filter pwd = FilterBuilder.equalTo(
-                        AttributeBuilder.build(
-                        configuration.getPasswordColumnName(),
-                        new String(clearChars)));
+                        AttributeBuilder.build(configuration.getPasswordColumnName(), new String(clearChars)));
 
                 final Filter filter = FilterBuilder.and(uid, pwd);
 
@@ -236,7 +227,7 @@ public class CSVDirConnector implements
                 final ResultsHandler handler = new ResultsHandler() {
 
                     @Override
-                    public boolean handle(ConnectorObject obj) {
+                    public boolean handle(final ConnectorObject obj) {
                         if (obj != null && obj.getUid() != null) {
                             results.add(obj.getUid());
                             return true;
@@ -271,10 +262,8 @@ public class CSVDirConnector implements
         LOG.info("Connection test");
         try {
             new CSVDirTest(configuration).test();
-        } catch (ClassNotFoundException ex) {
-            LOG.error("Test failed", ex);
-        } catch (SQLException ex) {
-            LOG.error("Test failed", ex);
+        } catch (Exception e) {
+            LOG.error("Test failed", e);
         }
     }
 }

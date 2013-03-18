@@ -144,7 +144,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     @ConfigurationProperty(displayMessageKey = "keyColumnName.display",
             helpMessageKey = "keyColumnName.help", required = true, order = 6)
     public String[] getKeyColumnNames() {
-        return keyColumnNames;
+        return keyColumnNames == null ? null : keyColumnNames.clone();
     }
 
     @ConfigurationProperty(displayMessageKey = "passwordColumnName.display",
@@ -248,7 +248,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     }
 
     public void setKeyColumnNames(final String[] keyColumnNames) {
-        this.keyColumnNames = keyColumnNames;
+        this.keyColumnNames = keyColumnNames == null ? null : keyColumnNames.clone();
     }
 
     public void setSourcePath(final String sourcePath) {
@@ -264,7 +264,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     }
 
     public void setFields(final String[] fields) {
-        this.fields = fields;
+        this.fields = fields == null ? null : fields.clone();
     }
 
     public void setQuotationRequired(final Boolean quotationRequired) {
@@ -303,8 +303,7 @@ public class CSVDirConfiguration extends AbstractConfiguration {
     public void validate() {
         // make sure the encoding is set..
         if (this.encoding == null) {
-            final String msg = "File encoding must not be null!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("File encoding must not be null!");
         }
 
         //make sure it's a valid charset
@@ -312,37 +311,30 @@ public class CSVDirConfiguration extends AbstractConfiguration {
 
         // make sure the delimiter and the text qualifier are not the same..
         if (this.textQualifier == this.fieldDelimiter) {
-            final String msg =
-                    "Field delimiter and text qualifier can not be equal!";
-            throw new IllegalStateException(msg);
+            throw new IllegalStateException("Field delimiter and text qualifier can not be equal!");
         }
 
         // make sure file mask is set..
         if (StringUtil.isBlank(this.fileMask)) {
-            final String msg = "File mask must not be blank!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("File mask must not be blank!");
         }
 
         // make sure source path is set..
         if (StringUtil.isBlank(this.sourcePath)) {
-            final String msg = "Source path must not be blank!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("Source path must not be blank!");
         }
 
         // make sure keyColumnName is set..
         if (this.keyColumnNames == null || this.keyColumnNames.length == 0) {
-            final String msg = "key column name must not be blank!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("key column name must not be blank!");
         }
         // make sure fields is set..
         if (this.fields == null || this.fields.length == 0) {
-            final String msg = "Column names must not be blank!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("Column names must not be blank!");
         }
         // make sure key separator is set..
         if (StringUtil.isBlank(this.keyseparator)) {
-            final String msg = "File mask must not be blank!";
-            throw new IllegalArgumentException(msg);
+            throw new IllegalArgumentException("File mask must not be blank!");
         }
     }
 }

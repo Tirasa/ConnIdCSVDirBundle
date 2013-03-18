@@ -48,31 +48,31 @@ public class CSVDirExecuteQuery extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirExecuteQuery.class);
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConnection conn = null;
+    private final CSVDirConnection conn;
 
-    private ObjectClass oclass = null;
+    private final ObjectClass oclass;
 
-    private FilterWhereBuilder where = null;
+    private final FilterWhereBuilder where;
 
-    private ResultsHandler handler = null;
+    private final ResultsHandler handler;
 
-    private OperationOptions options = null;
+    private final OperationOptions options;
 
     public CSVDirExecuteQuery(final CSVDirConfiguration configuration,
             final ObjectClass oclass,
             final FilterWhereBuilder where,
             final ResultsHandler handler,
             final OperationOptions options)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+
         this.conf = configuration;
         this.oclass = oclass;
         this.where = where;
         this.handler = handler;
         this.options = options;
-        conn = CSVDirConnection.openConnection(configuration);
+        this.conn = CSVDirConnection.openConnection(configuration);
     }
 
     public void execute() {
@@ -108,26 +108,21 @@ public class CSVDirExecuteQuery extends CommonOperation {
         LOG.ok("The ObjectClass and result handler is ok");
 
         final Set<String> columnNamesToGet = resolveColumnNamesToGet();
-
         LOG.ok("Column Names {0} To Get", columnNamesToGet);
 
-        final String whereClause = where != null ? where.getWhereClause() : null;
-
+        final String whereClause = where == null ? null : where.getWhereClause();
         LOG.ok("Where Clause {0}", whereClause);
 
-        final List<SQLParam> params = where != null ? where.getParams() : null;
-
+        final List<SQLParam> params = where == null ? null : where.getParams();
         LOG.ok("Where Params {0}", params);
 
         ResultSet rs = null;
-
         try {
             rs = conn.allCsvFiles(whereClause, params);
 
             boolean handled = true;
 
             while (rs.next() && handled) {
-
                 // create the connector object..
                 handled = handler.handle(buildConnectorObject(conf, rs).build());
             }
@@ -147,16 +142,14 @@ public class CSVDirExecuteQuery extends CommonOperation {
     }
 
     private Set<String> resolveColumnNamesToGet() {
-
         final Set<String> attributesToGet = new HashSet<String>();
         attributesToGet.add(Uid.NAME);
 
         String[] attributes = null;
-
-        if (options != null && options.getAttributesToGet() != null) {
-            attributes = options.getAttributesToGet();
-        } else {
+        if (options == null || options.getAttributesToGet() == null) {
             attributes = conf.getFields();
+        } else {
+            attributes = options.getAttributesToGet();
         }
 
         attributesToGet.addAll(Arrays.asList(attributes));

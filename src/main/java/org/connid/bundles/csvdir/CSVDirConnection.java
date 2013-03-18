@@ -55,21 +55,21 @@ public class CSVDirConnection {
 
     private static final String HSQLDB_DB_NAME = "csvdir_db";
 
-    private String viewname = null;
+    private final String viewname;
 
-    private String query = null;
+    private final String query;
 
-    private String jdbcUrl = "jdbc:hsqldb:file:";
+    private final String jdbcUrl;
 
-    private Set<String> tables = new HashSet<String>();
+    private final Set<String> tables = new HashSet<String>();
 
-    private Connection conn;
+    private final Connection conn;
 
     private final CSVDirConfiguration conf;
 
-    private FileSystem fileSystem;
+    private final FileSystem fileSystem;
 
-    private FileToDB fileToDB;
+    private final FileToDB fileToDB;
 
     private CSVDirConnection(final CSVDirConfiguration conf)
             throws ClassNotFoundException, SQLException {
@@ -97,6 +97,7 @@ public class CSVDirConnection {
 
     public void closeConnection()
             throws SQLException {
+
         if (conn != null) {
             LOG.ok("Closing connection ...");
             dropTableAndViewIfExists();
@@ -106,7 +107,6 @@ public class CSVDirConnection {
     }
 
     public int deleteAccount(final Uid uid) {
-
         File[] files = fileSystem.getAllCsvFiles();
 
         if (files.length == 0) {

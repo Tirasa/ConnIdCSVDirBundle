@@ -28,26 +28,29 @@ import org.connid.bundles.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.spi.Connector;
 
-public class CSVDirDelete extends CommonOperation{
+public class CSVDirDelete extends CommonOperation {
 
     /**
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirDelete.class);
-    
-    private CSVDirConnection connection = null;
-    private CSVDirConfiguration configuration = null;
+
+    private final CSVDirConnection connection;
+
+    private final CSVDirConfiguration configuration;
+
     private Uid uid = null;
 
-    public CSVDirDelete(final CSVDirConfiguration configuration,
-            final Uid uid) throws
-            ClassNotFoundException, SQLException {
+    public CSVDirDelete(final CSVDirConfiguration configuration, final Uid uid)
+            throws ClassNotFoundException, SQLException {
+
         this.configuration = configuration;
         this.uid = uid;
-        connection = CSVDirConnection.openConnection(configuration);
+        this.connection = CSVDirConnection.openConnection(configuration);
     }
-    
+
     public void execute() {
         try {
             executeImpl();
@@ -65,7 +68,7 @@ public class CSVDirDelete extends CommonOperation{
         }
     }
 
-    private void executeImpl() throws SQLException {    
+    private void executeImpl() throws SQLException {
         if (!userExists(uid.getUidValue(), connection, configuration)) {
             throw new ConnectorException("User does not exist");
         }

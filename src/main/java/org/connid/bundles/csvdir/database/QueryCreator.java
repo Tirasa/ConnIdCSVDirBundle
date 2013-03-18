@@ -26,7 +26,11 @@ import java.util.Map;
 import org.connid.bundles.csvdir.utilities.QueryTemplate;
 import org.identityconnectors.framework.common.objects.Uid;
 
-public class QueryCreator {
+public final class QueryCreator {
+
+    private QueryCreator() {
+        // empty private constructor for utility class
+    }
 
     public static String updateQuery(
             final Map<String, String> valuesMap,
@@ -39,12 +43,14 @@ public class QueryCreator {
 
         final StringBuilder set = new StringBuilder();
 
-        for (String value : valuesMap.keySet()) {
+        for (Map.Entry<String, String> entry : valuesMap.entrySet()) {
             if (set.length() > 0) {
                 set.append(",");
             }
-            set.append(value).append("=").
-                    append(value == null ? "" : "'").append(valuesMap.get(value)).append(value == null ? "" : "'");
+            set.append(entry.getKey()).append("=").
+                    append(entry.getKey() == null ? "" : "'").
+                    append(entry.getValue()).
+                    append(entry.getKey() == null ? "" : "'");
         }
 
         final String[] uidKeys = uid.getUidValue().split(keySeparator);
@@ -66,17 +72,14 @@ public class QueryCreator {
             final String[] keys,
             final String tableName) {
 
-        final QueryTemplate queryTemplate =
-                new QueryTemplate("DELETE FROM {0} WHERE {1}");
+        final QueryTemplate queryTemplate = new QueryTemplate("DELETE FROM {0} WHERE {1}");
 
-        final String[] uidKeys =
-                uid.getUidValue().split(keySeparator);
+        final String[] uidKeys = uid.getUidValue().split(keySeparator);
 
         final StringBuilder where = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i]).append("=").
-                    append("'").append(uidKeys[i]).append("'");
+            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
 
             if (i < keys.length - 1) {
                 where.append(" AND ");

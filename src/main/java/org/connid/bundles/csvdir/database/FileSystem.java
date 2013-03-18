@@ -25,17 +25,14 @@ package org.connid.bundles.csvdir.database;
 import java.io.File;
 import java.io.FileFilter;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
-import org.identityconnectors.common.logging.Log;
 
 public class FileSystem {
 
-    private static final Log log = Log.getLog(FileSystem.class);
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConfiguration conf;
+    private final File sourcePath;
 
-    private File sourcePath = null;
-
-    private FileFilter fileFilter = null;
+    private final FileFilter fileFilter;
 
     private long highestTimeStamp;
 
@@ -92,21 +89,15 @@ public class FileSystem {
     }
 
     private File[] returnNewArrayIfCsvFilesIsEmpty(final File[] csvFiles) {
-        if (csvFiles != null) {
-            return csvFiles;
-        } else {
-            return new File[]{};
-        }
+        return csvFiles == null ? new File[] {} : csvFiles;
     }
 
     public final long getHighestTimeStamp() {
         return highestTimeStamp;
     }
 
-    private boolean isMatched(File file) {
-        return !file.isDirectory()
-                && (file.getName().matches(conf.getFileMask())
-                || file.getName().matches(
-                FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
+    private boolean isMatched(final File file) {
+        return !file.isDirectory() && (file.getName().matches(conf.getFileMask()) || file.getName().
+                matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
     }
 }

@@ -41,22 +41,22 @@ public class CSVDirUpdate extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirUpdate.class);
 
-    private CSVDirConnection connection = null;
+    private final CSVDirConnection conn;
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private Uid uid = null;
+    private final Uid uid;
 
     private Set<Attribute> attrs = null;
 
     public CSVDirUpdate(final CSVDirConfiguration conf,
             final Uid uid, final Set<Attribute> set)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+        
         this.conf = conf;
         this.uid = uid;
         this.attrs = set;
-        connection = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public Uid execute() {
@@ -67,8 +67,8 @@ public class CSVDirUpdate extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -84,11 +84,11 @@ public class CSVDirUpdate extends CommonOperation {
                     "No Name attribute provided in the attributes");
         }
 
-        if (!userExists(uid.getUidValue(), connection, conf)) {
+        if (!userExists(uid.getUidValue(), conn, conf)) {
             throw new ConnectorException("User doesn't exist");
         }
 
-        connection.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
+        conn.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
 
         LOG.ok("Creation commited");
         return uid;

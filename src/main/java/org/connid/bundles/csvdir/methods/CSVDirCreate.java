@@ -33,6 +33,7 @@ import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.Uid;
+import org.identityconnectors.framework.spi.Connector;
 
 public class CSVDirCreate extends CommonOperation {
 
@@ -41,18 +42,19 @@ public class CSVDirCreate extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirCreate.class);
 
-    private CSVDirConnection conn = null;
+    private final CSVDirConnection conn;
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private Set<Attribute> attrs = null;
+    private final Set<Attribute> attrs;
 
     public CSVDirCreate(
             final CSVDirConfiguration conf,
-            final Set<Attribute> set)
+            final Set<Attribute> attrs)
             throws SQLException, ClassNotFoundException {
+
         this.conf = conf;
-        this.attrs = set;
+        this.attrs = attrs;
         conn = CSVDirConnection.openConnection(conf);
     }
 

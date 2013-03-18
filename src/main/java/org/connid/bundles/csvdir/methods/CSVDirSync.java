@@ -48,31 +48,31 @@ public class CSVDirSync extends CommonOperation {
 
     private static long token = 0L;
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private CSVDirConnection connection = null;
+    private final CSVDirConnection connection;
 
-    private ObjectClass objectClass = null;
+    private final ObjectClass objectClass;
 
-    private SyncToken syncToken = null;
+    private SyncToken syncToken;
 
-    private SyncResultsHandler handler = null;
+    private final SyncResultsHandler handler;
 
-    private OperationOptions options = null;
+    private final OperationOptions options;
 
     public CSVDirSync(final CSVDirConfiguration conf,
             final ObjectClass objectClass,
-            SyncToken syncToken,
+            final SyncToken syncToken,
             final SyncResultsHandler handler,
             final OperationOptions options)
-            throws
-            ClassNotFoundException, SQLException {
+            throws ClassNotFoundException, SQLException {
+
         this.conf = conf;
         this.objectClass = objectClass;
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
-        connection = CSVDirConnection.openConnection(conf);
+        this.connection = CSVDirConnection.openConnection(conf);
     }
 
     public long execute() {
@@ -111,7 +111,6 @@ public class CSVDirSync extends CommonOperation {
         }
 
         CSVDirConnection conn = null;
-
         try {
             conn = CSVDirConnection.openConnection(conf);
 
@@ -151,35 +150,31 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private void choseRightDeltaType(final ResultSet rs,
-            final SyncDeltaBuilder syncDeltaBuilder)
+    private void choseRightDeltaType(final ResultSet rs, final SyncDeltaBuilder syncDeltaBuilder)
             throws SQLException {
-        if (Boolean.valueOf(getValueFromColumnName(rs,
-                conf.getDeleteColumnName()))) {
+
+        if (Boolean.valueOf(getValueFromColumnName(rs, conf.getDeleteColumnName()))) {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.DELETE);
         } else {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.CREATE_OR_UPDATE);
         }
     }
 
-    private SyncDeltaBuilder createSyncDelta(
-            final ConnectorObjectBuilder connObjectBuilder) {
+    private SyncDeltaBuilder createSyncDelta(final ConnectorObjectBuilder connObjectBuilder) {
         final SyncDeltaBuilder syncDeltaBuilder = new SyncDeltaBuilder();
 
-        ConnectorObject object = connObjectBuilder.build();
+        final ConnectorObject object = connObjectBuilder.build();
         syncDeltaBuilder.setObject(object);
         syncDeltaBuilder.setUid(object.getUid());
-        syncDeltaBuilder.setToken(getLatestSyncToken(ObjectClass.ACCOUNT));
+        syncDeltaBuilder.setToken(getLatestSyncToken());
         return syncDeltaBuilder;
     }
 
-    private String getValueFromColumnName(final ResultSet rs,
-            final String columnName)
-            throws SQLException {
+    private String getValueFromColumnName(final ResultSet rs, final String columnName) throws SQLException {
         return rs.getString(rs.findColumn(columnName));
     }
 
-    private SyncToken getLatestSyncToken(final ObjectClass objectClass) {
+    private SyncToken getLatestSyncToken() {
         return new SyncToken(token);
     }
 }

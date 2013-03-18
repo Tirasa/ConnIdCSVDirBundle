@@ -22,10 +22,15 @@
  */
 package org.connid.bundles.csvdir.utilities;
 
-public class Utilities {
-    
-    public static int randomNumber() {
-        return (int) (Math.random() * 100000);
+import java.util.Random;
+
+public final class Utilities {
+
+    private Utilities() {
+        // empty method for static utility class
     }
-    
+
+    public static int randomNumber() {
+        return new Random().nextInt(100000);
+    }
 }

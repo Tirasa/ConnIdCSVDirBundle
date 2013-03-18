@@ -25,15 +25,14 @@ package org.connid.bundles.csvdir.utilities;
 import java.text.MessageFormat;
 
 public class QueryTemplate {
-    
+
     private String template;
 
-    public QueryTemplate(String template) {
+    public QueryTemplate(final String template) {
         this.template = template;
     }
 
-    public String apply(Object... parameters) {
+    public String apply(final Object... parameters) {
         return MessageFormat.format(template, parameters);
     }
-    
 }

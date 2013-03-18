@@ -43,9 +43,9 @@ public class CSVDirSchema {
      */
     private static final Log LOG = Log.getLog(CSVDirSchema.class);
 
-    private CSVDirConfiguration conf = null;
+    private final CSVDirConfiguration conf;
 
-    private Class<? extends Connector> connectorClass = null;
+    private final Class<? extends Connector> connectorClass;
 
     public CSVDirSchema(final Class<? extends Connector> connectorClass, final CSVDirConfiguration conf) {
         this.connectorClass = connectorClass;

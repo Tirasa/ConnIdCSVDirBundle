@@ -31,13 +31,11 @@ import org.identityconnectors.framework.common.exceptions.ConnectorException;
 public class CSVDirTest {
 
     private static final Log LOG = Log.getLog(CSVDirTest.class);
-    private CSVDirConnection conn = null;
-    private CSVDirConfiguration configuration = null;
 
-    public CSVDirTest(final CSVDirConfiguration conf)
-            throws ClassNotFoundException, SQLException {
-        configuration = conf;
-        conn = CSVDirConnection.openConnection(conf);
+    private final CSVDirConnection conn;
+
+    public CSVDirTest(final CSVDirConfiguration conf) throws ClassNotFoundException, SQLException {
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public void test() {

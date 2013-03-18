@@ -34,13 +34,13 @@ import org.identityconnectors.framework.spi.Connector;
 
 public class FileToDB {
 
-    private CSVDirConfiguration conf = null;
+    public static final String DEFAULT_PREFIX = "DEFAULT";
 
-    private CSVDirConnection conn = null;
+    private final CSVDirConfiguration conf;
 
-    private FileSystem fileSystem = null;
+    private final CSVDirConnection conn;
 
-    public static String DEFAULT_PREFIX = "DEFAULT";
+    private final FileSystem fileSystem;
 
     public FileToDB(final CSVDirConnection conn) {
         this.conn = conn;
@@ -111,16 +111,7 @@ public class FileToDB {
             }
         }
 
-        if (view.length() != 0) {
-            try {
-                view.insert(0, "CREATE VIEW " + conn.getViewname() + " AS ");
-
-                LOG.ok("Execute: {0}", view.toString());
-                conn.getConn().createStatement().execute(view.toString());
-            } catch (SQLException e) {
-                LOG.error(e, "While creating view {0}", conn.getViewname());
-            }
-        } else {
+        if (view.length() == 0) {
             try {
                 LOG.ok("Execute: CREATE TEXT TABLE NOENTRIES");
 
@@ -146,18 +137,25 @@ public class FileToDB {
             } catch (SQLException e) {
                 LOG.error(e, "While creating table NOENTRIES");
             }
+        } else {
+            try {
+                view.insert(0, "CREATE VIEW " + conn.getViewname() + " AS ");
+
+                LOG.ok("Execute: {0}", view.toString());
+                conn.getConn().createStatement().execute(view.toString());
+            } catch (SQLException e) {
+                LOG.error(e, "While creating view {0}", conn.getViewname());
+            }
         }
 
         return tables;
     }
 
     private String bindFileTable(final File file) {
-
         LOG.ok("File to load {0}", file.getAbsolutePath());
 
+        final String tableName = "CSV_TABLE" + Utilities.randomNumber();
         try {
-            final String tableName = "CSV_TABLE" + Utilities.randomNumber();
-
             conn.getConn().createStatement().execute(
                     "DROP TABLE " + tableName + " IF EXISTS CASCADE");
 
