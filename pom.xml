@@ -35,7 +35,7 @@
 
   <groupId>org.connid.bundles</groupId>
   <artifactId>org.connid.bundles.csvdir</artifactId>
-  <version>0.6.1-SNAPSHOT</version>
+  <version>0.6.1</version>
 
   <name>ConnId Bundles: CSV Directory</name>
 
