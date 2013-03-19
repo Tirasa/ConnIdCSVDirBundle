@@ -79,7 +79,8 @@ public class CSVDirConnection {
         this.fileSystem = new FileSystem(conf);
 
         Class.forName(jdbcDriver.class.getName());
-        this.jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator + HSQLDB_DB_NAME;
+        this.jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator
+                + HSQLDB_DB_NAME + ";shutdown=false";
         this.conn = DriverManager.getConnection(jdbcUrl, "sa", "");
         this.conn.setAutoCommit(true);
 
@@ -103,7 +104,6 @@ public class CSVDirConnection {
             LOG.ok("Closing connection ...");
 
             dropTableAndViewIfExists();
-            shutdown();
             this.conn.close();
 
             tables.clear();
@@ -275,22 +275,6 @@ public class CSVDirConnection {
                 if (stmt != null) {
                     stmt.close();
                 }
-            }
-        }
-    }
-
-    private void shutdown()
-            throws SQLException {
-
-        LOG.ok("Shutting down...");
-
-        Statement stmt = null;
-        try {
-            stmt = conn.createStatement();
-            stmt.execute("SHUTDOWN COMPACT");
-        } finally {
-            if (stmt != null) {
-                stmt.close();
             }
         }
     }
