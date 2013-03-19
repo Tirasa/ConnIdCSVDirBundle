@@ -22,9 +22,12 @@
  */
 package org.connid.bundles.csvdir.utilities;
 
+import java.util.Collection;
 import java.util.Random;
 
 public final class Utilities {
+
+    public static final String EMPTY = "";
 
     private Utilities() {
         // empty method for static utility class
@@ -32,5 +35,43 @@ public final class Utilities {
 
     public static int randomNumber() {
         return new Random().nextInt(100000);
+    }
+
+    public static String join(final Collection<String> collection, final char separator) {
+        if (collection == null) {
+            return null;
+        }
+
+        return join(collection.toArray(new String[collection.size()]), separator, 0, collection.size());
+    }
+
+    public static String join(final Object[] array, final char separator) {
+        if (array == null) {
+            return null;
+        }
+
+        return join(array, separator, 0, array.length);
+    }
+
+    public static String join(final Object[] array, final char separator, final int startIndex, final int endIndex) {
+        if (array == null) {
+            return null;
+        }
+        final int noOfItems = endIndex - startIndex;
+        if (noOfItems <= 0) {
+            return EMPTY;
+        }
+
+        final StringBuilder buf = new StringBuilder(noOfItems * 16);
+
+        for (int i = startIndex; i < endIndex; i++) {
+            if (i > startIndex) {
+                buf.append(separator);
+            }
+            if (array[i] != null) {
+                buf.append(array[i]);
+            }
+        }
+        return buf.toString();
     }
 }

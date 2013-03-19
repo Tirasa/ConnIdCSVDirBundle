@@ -22,14 +22,54 @@
  */
 package org.connid.bundles.csvdir.database;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.connid.bundles.csvdir.utilities.QueryTemplate;
+import org.connid.bundles.csvdir.utilities.Utilities;
 import org.identityconnectors.framework.common.objects.Uid;
 
 public final class QueryCreator {
 
     private QueryCreator() {
         // empty private constructor for utility class
+    }
+
+    private static String getWhereClause(final Uid uid, final String keySeparator, final String[] keys) {
+        final StringBuilder where = new StringBuilder();
+
+        final String[] uidKeys = uid.getUidValue().split(keySeparator);
+        for (int i = 0; i < keys.length; i++) {
+            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
+            if (i < keys.length - 1) {
+                where.append(" AND ");
+            }
+        }
+
+        return where.toString();
+    }
+
+    private static Map<String, String> getKeyValueMap(final Map<String, String> valuesMap) {
+        final Map<String, String> keyValueMap = new LinkedHashMap<String, String>();
+        for (Map.Entry<String, String> entry : valuesMap.entrySet()) {
+            if (entry.getValue() == null) {
+                keyValueMap.put(entry.getKey(), "NULL");
+            } else {
+                keyValueMap.put(entry.getKey(), "'" + entry.getValue() + "'");
+            }
+        }
+
+        return keyValueMap;
+    }
+
+    public static String insertQuery(final Map<String, String> valuesMap, final String tableName) {
+        final Map<String, String> keyValueMap = getKeyValueMap(valuesMap);
+
+        final QueryTemplate queryTemplate = new QueryTemplate("INSERT INTO {0}({1}) VALUES({2})");
+        return queryTemplate.apply(tableName,
+                Utilities.join(keyValueMap.keySet(), ','),
+                Utilities.join(keyValueMap.values(), ','));
     }
 
     public static String updateQuery(
@@ -39,31 +79,16 @@ public final class QueryCreator {
             final String[] keys,
             final String tableName) {
 
+        final Map<String, String> keyValueMap = getKeyValueMap(valuesMap);
+        final List<String> set = new ArrayList<String>(keyValueMap.size());
+        for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
+            set.add(entry.getKey() + "=" + entry.getValue());
+        }
+
         final QueryTemplate queryTemplate = new QueryTemplate("UPDATE {0} SET {1} WHERE {2}");
-
-        final StringBuilder set = new StringBuilder();
-
-        for (Map.Entry<String, String> entry : valuesMap.entrySet()) {
-            if (set.length() > 0) {
-                set.append(",");
-            }
-            set.append(entry.getKey()).append("=").
-                    append(entry.getKey() == null ? "" : "'").
-                    append(entry.getValue()).
-                    append(entry.getKey() == null ? "" : "'");
-        }
-
-        final String[] uidKeys = uid.getUidValue().split(keySeparator);
-
-        final StringBuilder where = new StringBuilder();
-
-        for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
-            if (i < keys.length - 1) {
-                where.append(" AND ");
-            }
-        }
-        return queryTemplate.apply(tableName, set.toString(), where.toString());
+        return queryTemplate.apply(tableName,
+                Utilities.join(set, ','),
+                getWhereClause(uid, keySeparator, keys));
     }
 
     public static String deleteQuery(
@@ -73,47 +98,7 @@ public final class QueryCreator {
             final String tableName) {
 
         final QueryTemplate queryTemplate = new QueryTemplate("DELETE FROM {0} WHERE {1}");
-
-        final String[] uidKeys = uid.getUidValue().split(keySeparator);
-
-        final StringBuilder where = new StringBuilder();
-
-        for (int i = 0; i < keys.length; i++) {
-            where.append(keys[i]).append("=").append("'").append(uidKeys[i]).append("'");
-
-            if (i < keys.length - 1) {
-                where.append(" AND ");
-            }
-        }
-        return queryTemplate.apply(tableName, where.toString());
-    }
-
-    public static String insertQuery(
-            final Map<String, String> valuesMap,
-            final String[] fields,
-            final String deletedField,
-            final String tableName) {
-
-        final QueryTemplate queryTemplate = new QueryTemplate("INSERT INTO {0}({1}) VALUES({2})");
-
-        final StringBuilder values = new StringBuilder();
-        final StringBuilder columnName = new StringBuilder();
-
-        for (int i = 0; i < fields.length; i++) {
-
-            final String value = fields[i].equals(deletedField) ? "false" : valuesMap.get(fields[i]);
-
-            if (value != null) {
-                columnName.append(fields[i]);
-                values.append("'").append(valuesMap.get(fields[i])).append("'");
-
-                if (i < fields.length - 1) {
-                    columnName.append(",");
-                    values.append(",");
-                }
-            }
-        }
-
-        return queryTemplate.apply(tableName, columnName, values);
+        return queryTemplate.apply(tableName,
+                getWhereClause(uid, keySeparator, keys));
     }
 }

@@ -106,34 +106,16 @@ public class CSVDirConnection {
         }
     }
 
-    public int deleteAccount(final Uid uid) {
-        File[] files = fileSystem.getAllCsvFiles();
+    public int insertAccount(final Map<String, String> attributes) {
+        final String tableName = fileToDB.createDbForCreate();
 
-        if (files.length == 0) {
-            throw new ConnectorException("Empty table");
-        }
+        tables.add(tableName);
 
-        int returnValue = 0;
-
-        for (File file : files) {
-            final String tableName = fileToDB.createDbForUpdate(file);
-
-            tables.add(tableName);
-
-            returnValue += execute(QueryCreator.deleteQuery(
-                    uid,
-                    conf.getKeyseparator(),
-                    conf.getKeyColumnNames(),
-                    tableName));
-
-        }
-        return returnValue;
+        return execute(QueryCreator.insertQuery(attributes, tableName));
     }
 
-    public int updateAccount(
-            final Map<String, String> attrToBeReplaced, final Uid uid) {
-
-        File[] files = fileSystem.getAllCsvFiles();
+    public int updateAccount(final Map<String, String> attrToBeReplaced, final Uid uid) {
+        final File[] files = fileSystem.getAllCsvFiles();
         if (files.length == 0) {
             throw new ConnectorException("Empty table");
         }
@@ -155,24 +137,35 @@ public class CSVDirConnection {
         return returnValue;
     }
 
-    public int insertAccount(final Map<String, String> attributes) {
-        final String tableName = fileToDB.createDbForCreate();
+    public int deleteAccount(final Uid uid) {
+        final File[] files = fileSystem.getAllCsvFiles();
+        if (files.length == 0) {
+            throw new ConnectorException("Empty table");
+        }
 
-        tables.add(tableName);
+        int returnValue = 0;
 
-        return execute(QueryCreator.insertQuery(
-                attributes,
-                conf.getFields(),
-                conf.getDeleteColumnName(),
-                tableName));
+        for (File file : files) {
+            final String tableName = fileToDB.createDbForUpdate(file);
+
+            tables.add(tableName);
+
+            returnValue += execute(QueryCreator.deleteQuery(
+                    uid,
+                    conf.getKeyseparator(),
+                    conf.getKeyColumnNames(),
+                    tableName));
+
+        }
+        return returnValue;
     }
 
     private int execute(final String query) {
         PreparedStatement stm = null;
 
+        LOG.ok("About to execute {0}", query);
         try {
             stm = conn.prepareStatement(query);
-            LOG.ok("Execute update {0}", stm.toString());
             return stm.executeUpdate();
         } catch (SQLException e) {
             LOG.error(e, "Error during sql query");
