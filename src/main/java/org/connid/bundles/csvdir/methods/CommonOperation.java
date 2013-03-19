@@ -122,7 +122,7 @@ public class CommonOperation {
                     }
                 } else {
                     key.add(attr.getName());
-                    value.add(objValue == null ? "" : objValue.toString());
+                    value.add(objValue == null ? null : objValue.toString());
                 }
 
                 attributes.put(key.iterator().next(), value.iterator().next());
