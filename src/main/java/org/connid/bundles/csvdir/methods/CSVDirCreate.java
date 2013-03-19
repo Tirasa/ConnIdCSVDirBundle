@@ -55,7 +55,7 @@ public class CSVDirCreate extends CommonOperation {
 
         this.conf = conf;
         this.attrs = attrs;
-        conn = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public Uid execute() {

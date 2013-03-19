@@ -22,6 +22,7 @@
  */
 package org.connid.bundles.csvdir.methods;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
 import org.connid.bundles.csvdir.CSVDirConnection;
@@ -48,9 +49,16 @@ public class CSVDirTest {
     }
 
     private void execute() throws SQLException {
-        if (conn.allCsvFiles() == null || conn.allCsvFiles().wasNull()) {
-            LOG.error("Test failed");
-            throw new ConnectorException("Test failed");
+        ResultSet resultSet = conn.allCsvFiles();
+        try {
+            if (resultSet == null || resultSet.wasNull()) {
+                LOG.error("Test failed");
+                throw new ConnectorException("Test failed");
+            }
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
         }
     }
 }

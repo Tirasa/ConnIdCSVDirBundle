@@ -22,6 +22,10 @@
  */
 package org.connid.bundles.csvdir;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.IOException;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -31,17 +35,15 @@ import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Assert;
 import org.junit.Test;
 
 public class CSVDirConnectorDeleteTests extends AbstractTest {
 
     @Test
-    public final void deleteTest() throws IOException {
+    public void delete() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
-        final ConnectorFacadeFactory factory =
-                ConnectorFacadeFactory.getInstance();
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
         // **test only**
         final APIConfiguration impl = TestHelpers.createTestConfiguration(
@@ -49,29 +51,25 @@ public class CSVDirConnectorDeleteTests extends AbstractTest {
 
         final ConnectorFacade facade = factory.newInstance(impl);
 
-        Uid uid = new Uid("____jpc4323435;jPenelope");
+        final Uid uid = new Uid("____jpc4323435;jPenelope");
 
-        ConnectorObject object = facade.getObject(
-                ObjectClass.ACCOUNT, uid, null);
-
-        Assert.assertNotNull(object);
-        Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+        final ConnectorObject object = facade.getObject(ObjectClass.ACCOUNT, uid, null);
+        assertNotNull(object);
+        assertEquals(object.getName().getNameValue(), uid.getUidValue());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
         connector.delete(ObjectClass.ACCOUNT, uid, null);
 
-        ConnectorObject deleteObject = facade.getObject(
-                ObjectClass.ACCOUNT, uid, null);
-
-        Assert.assertNull(deleteObject);
+        final ConnectorObject deleteObject = facade.getObject(ObjectClass.ACCOUNT, uid, null);
+        assertNull(deleteObject);
         connector.dispose();
     }
 
     @Test(expected = ConnectorException.class)
-    public final void deleteTestOfNotExistsUser() throws IOException {
+    public void deleteTestOfNotExistsUser() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
-        Uid uid = new Uid("____jpc4323435,jPenelo");
+        final Uid uid = new Uid("____jpc4323435,jPenelo");
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));

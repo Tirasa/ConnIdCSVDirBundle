@@ -30,7 +30,6 @@ import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
-import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.SyncDeltaBuilder;
@@ -50,7 +49,7 @@ public class CSVDirSync extends CommonOperation {
 
     private final CSVDirConfiguration conf;
 
-    private final CSVDirConnection connection;
+    private final CSVDirConnection conn;
 
     private final ObjectClass objectClass;
 
@@ -72,7 +71,7 @@ public class CSVDirSync extends CommonOperation {
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
-        this.connection = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public long execute() {
@@ -83,8 +82,8 @@ public class CSVDirSync extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -110,43 +109,37 @@ public class CSVDirSync extends CommonOperation {
             syncToken = new SyncToken(0);
         }
 
-        CSVDirConnection conn = null;
         try {
-            conn = CSVDirConnection.openConnection(conf);
-
-            buildSyncDelta(conn.modifiedCsvFiles(
-                    Long.valueOf(syncToken.getValue().toString())), handler);
+            buildSyncDelta(conn.modifiedCsvFiles(Long.valueOf(syncToken.getValue().toString())), handler);
 
             token = conn.getFileSystem().getHighestTimeStamp();
         } catch (Exception e) {
             LOG.error(e, "error during syncronization");
             throw new ConnectorIOException(e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.closeConnection();
-                }
-            } catch (SQLException e) {
-                LOG.error(e, "Error closing connections");
-            }
         }
 
         return token;
     }
 
     private void buildSyncDelta(
-            final ResultSet rs,
+            final ResultSet resultSet,
             final SyncResultsHandler handler)
             throws SQLException {
 
         boolean handled = true;
 
-        while (rs.next() && handled) {
-            final ConnectorObjectBuilder bld = buildConnectorObject(conf, rs);
+        try {
+            while (resultSet.next() && handled) {
+                final ConnectorObject connObject = buildConnectorObject(conf, resultSet);
 
-            final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(bld);
-            choseRightDeltaType(rs, syncDeltaBuilder);
-            handled = handler.handle(syncDeltaBuilder.build());
+                final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(connObject);
+                choseRightDeltaType(resultSet, syncDeltaBuilder);
+                handled = handler.handle(syncDeltaBuilder.build());
+            }
+        } finally {
+            if (resultSet != null) {
+                resultSet.close();
+            }
         }
     }
 
@@ -160,12 +153,11 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private SyncDeltaBuilder createSyncDelta(final ConnectorObjectBuilder connObjectBuilder) {
+    private SyncDeltaBuilder createSyncDelta(final ConnectorObject connObject) {
         final SyncDeltaBuilder syncDeltaBuilder = new SyncDeltaBuilder();
 
-        final ConnectorObject object = connObjectBuilder.build();
-        syncDeltaBuilder.setObject(object);
-        syncDeltaBuilder.setUid(object.getUid());
+        syncDeltaBuilder.setObject(connObject);
+        syncDeltaBuilder.setUid(connObject.getUid());
         syncDeltaBuilder.setToken(getLatestSyncToken());
         return syncDeltaBuilder;
     }

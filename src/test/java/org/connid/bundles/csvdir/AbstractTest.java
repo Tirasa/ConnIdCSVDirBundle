@@ -34,8 +34,12 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.Name;
 import org.junit.Before;
 
 public abstract class AbstractTest {
@@ -155,8 +159,7 @@ public abstract class AbstractTest {
         return Charset.forName("UTF-8");
     }
 
-    protected File updateFile(
-            final File file, final Set<TestAccount> testAccounts)
+    protected File updateFile(final File file, final Set<TestAccount> testAccounts)
             throws IOException {
 
         final BufferedWriter bufferedWriter = new BufferedWriter(
@@ -169,5 +172,19 @@ public abstract class AbstractTest {
         bufferedWriter.flush();
         bufferedWriter.close();
         return file;
+    }
+
+    protected Set<Attribute> buildTestAttributes(final Name name) {
+        final Set<Attribute> attributes = new HashSet<Attribute>();
+
+        attributes.add(name);
+        attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME, "pmassi"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.LASTNAME, "mperrone"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "massimiliano.perrone@test.it"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.CHANGE_NUMBER, "0"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD, "password"));
+        attributes.add(AttributeBuilder.build(TestAccountsValue.DELETED, "no"));
+
+        return attributes;
     }
 }

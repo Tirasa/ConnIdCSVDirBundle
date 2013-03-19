@@ -28,7 +28,6 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -59,7 +58,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final Name name = new Name("___mperro123;pmassi");
 
         final Uid newAccount = connector.create(
-                ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
+                ObjectClass.ACCOUNT, setAccountId(buildTestAttributes(name)), null);
         assertEquals(name.getNameValue(), newAccount.getUidValue());
 
         // --------------------------------
@@ -108,7 +107,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         connector.init(createConfiguration("sample.*\\.csv"));
 
         final Name name = new Name("____jpc4323435;jPenelope");
-        connector.create(ObjectClass.ACCOUNT, setAccountId(createSetOfAttributes(name)), null);
+        connector.create(ObjectClass.ACCOUNT, setAccountId(buildTestAttributes(name)), null);
         connector.dispose();
     }
 
@@ -123,7 +122,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
 
         final Name name = new Name("___mperro1234");
 
-        Set<Attribute> attributes = createSetOfAttributes(name);
+        Set<Attribute> attributes = buildTestAttributes(name);
         attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro1234"));
         final Uid newAccount = connector.create(ObjectClass.ACCOUNT, attributes, null);
         assertEquals(name.getNameValue(), newAccount.getUidValue());
@@ -183,24 +182,10 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         connector.init(config);
         final Name name = new Name("___csvdir6");
 
-        final Set<Attribute> attributes = createSetOfAttributes(name);
+        final Set<Attribute> attributes = buildTestAttributes(name);
         attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, name.getNameValue()));
         final Uid newAccount = connector.create(ObjectClass.ACCOUNT, attributes, null);
         assertEquals(name.getNameValue(), newAccount.getUidValue());
-    }
-
-    private Set<Attribute> createSetOfAttributes(final Name name) {
-        final Set<Attribute> attributes = new HashSet<Attribute>();
-
-        attributes.add(name);
-        attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME, "pmassi"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.LASTNAME, "mperrone"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "massimiliano.perrone@test.it"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.CHANGE_NUMBER, "0"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD, "password"));
-        attributes.add(AttributeBuilder.build(TestAccountsValue.DELETED, "no"));
-
-        return attributes;
     }
 
     private Set<Attribute> setAccountId(final Set<Attribute> attributes) {
