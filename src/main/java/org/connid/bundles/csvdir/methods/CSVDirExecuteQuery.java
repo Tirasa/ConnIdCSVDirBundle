@@ -116,26 +116,26 @@ public class CSVDirExecuteQuery extends CommonOperation {
         final List<SQLParam> params = where == null ? null : where.getParams();
         LOG.ok("Where Params {0}", params);
 
-        ResultSet rs = null;
+        ResultSet resultSet = null;
         try {
-            rs = conn.allCsvFiles(whereClause, params);
+            resultSet = conn.allCsvFiles(whereClause, params);
 
             boolean handled = true;
 
-            while (rs.next() && handled) {
+            while (resultSet.next() && handled) {
                 // create the connector object..
-                handled = handler.handle(buildConnectorObject(conf, rs).build());
+                handled = handler.handle(buildConnectorObject(conf, resultSet));
             }
         } catch (Exception e) {
             LOG.error(e, "Search query failed");
             throw new ConnectorIOException(e);
         } finally {
             try {
-                if (rs != null) {
-                    rs.close();
+                if (resultSet != null) {
+                    resultSet.close();
                 }
             } catch (SQLException e) {
-                LOG.error(e, "Error closing connections");
+                LOG.error(e, "Error closing result set");
             }
         }
         LOG.ok("Query Account commited");

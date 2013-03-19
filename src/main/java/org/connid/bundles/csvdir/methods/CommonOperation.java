@@ -37,6 +37,7 @@ import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.common.security.GuardedString.Accessor;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
@@ -45,26 +46,31 @@ import org.identityconnectors.framework.common.objects.Uid;
 public class CommonOperation {
 
     protected static Boolean userExists(final String uidString,
-            final CSVDirConnection connection,
-            final CSVDirConfiguration configuration)
+            final CSVDirConnection conn, final CSVDirConfiguration conf)
             throws SQLException {
 
-        final ResultSet rs = connection.allCsvFiles();
-        Boolean found = Boolean.FALSE;
-        Boolean toBeContinued;
-        final String[] keys = configuration.getKeyColumnNames();
-        final String[] uidKeys = uidString.split(configuration.getKeyseparator());
-        while (rs.next() && !found) {
-            toBeContinued = Boolean.TRUE;
-            for (int i = 0; i < keys.length && toBeContinued; i++) {
-                final String value = rs.getString(keys[i]);
-                if (!value.equalsIgnoreCase(uidKeys[i])) {
-                    toBeContinued = Boolean.FALSE;
+        final ResultSet resultSet = conn.allCsvFiles();
+
+        final String[] keys = conf.getKeyColumnNames();
+        final String[] uidKeys = uidString.split(conf.getKeyseparator());
+        try {
+            boolean found = false;
+            boolean toBeContinued = true;
+            while (resultSet.next() && !found) {
+                toBeContinued = true;
+                for (int i = 0; i < keys.length && toBeContinued; i++) {
+                    final String value = resultSet.getString(keys[i]);
+                    if (!value.equalsIgnoreCase(uidKeys[i])) {
+                        toBeContinued = false;
+                    }
                 }
+                found = toBeContinued;
             }
-            found = toBeContinued;
+
+            return found;
+        } finally {
+            resultSet.close();
         }
-        return found;
     }
 
     protected static String createUid(final String[] keys, final ResultSet rs, final String keySeparator)
@@ -139,14 +145,14 @@ public class CommonOperation {
         return attributes;
     }
 
-    protected ConnectorObjectBuilder buildConnectorObject(final CSVDirConfiguration conf, final ResultSet rs)
+    protected ConnectorObject buildConnectorObject(final CSVDirConfiguration conf, final ResultSet resultSet)
             throws SQLException {
 
         final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
 
-        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-            final String name = rs.getMetaData().getColumnName(i);
-            final String value = rs.getString(name);
+        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+            final String name = resultSet.getMetaData().getColumnName(i);
+            final String value = resultSet.getString(name);
 
             final String[] allValues = value == null
                     ? new String[] {}
@@ -165,11 +171,11 @@ public class CommonOperation {
             }
         }
 
-        final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), rs, conf.getKeyseparator()));
+        final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), resultSet, conf.getKeyseparator()));
 
         bld.setUid(uid);
         bld.setName(uid.getUidValue());
 
-        return bld;
+        return bld.build();
     }
 }

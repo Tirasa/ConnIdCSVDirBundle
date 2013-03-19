@@ -37,18 +37,18 @@ public class CSVDirDelete extends CommonOperation {
      */
     private static final Log LOG = Log.getLog(CSVDirDelete.class);
 
-    private final CSVDirConnection connection;
+    private final CSVDirConnection conn;
 
-    private final CSVDirConfiguration configuration;
+    private final CSVDirConfiguration conf;
 
     private Uid uid = null;
 
-    public CSVDirDelete(final CSVDirConfiguration configuration, final Uid uid)
+    public CSVDirDelete(final CSVDirConfiguration conf, final Uid uid)
             throws ClassNotFoundException, SQLException {
 
-        this.configuration = configuration;
+        this.conf = conf;
         this.uid = uid;
-        this.connection = CSVDirConnection.openConnection(configuration);
+        this.conn = CSVDirConnection.openConnection(conf);
     }
 
     public void execute() {
@@ -59,8 +59,8 @@ public class CSVDirDelete extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (connection != null) {
-                    connection.closeConnection();
+                if (conn != null) {
+                    conn.closeConnection();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
@@ -69,10 +69,10 @@ public class CSVDirDelete extends CommonOperation {
     }
 
     private void executeImpl() throws SQLException {
-        if (!userExists(uid.getUidValue(), connection, configuration)) {
+        if (!userExists(uid.getUidValue(), conn, conf)) {
             throw new ConnectorException("User does not exist");
         }
-        connection.deleteAccount(uid);
+        conn.deleteAccount(uid);
         LOG.ok("Delete completed");
     }
 }

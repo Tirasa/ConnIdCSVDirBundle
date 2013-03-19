@@ -28,6 +28,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,17 +76,17 @@ public class CSVDirConnection {
             throws ClassNotFoundException, SQLException {
 
         this.conf = conf;
-        jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator + HSQLDB_DB_NAME + ";shutdown=false";
-        fileSystem = new FileSystem(conf);
+        this.fileSystem = new FileSystem(conf);
 
         Class.forName(jdbcDriver.class.getName());
-        conn = DriverManager.getConnection(jdbcUrl, "sa", "");
-        conn.setAutoCommit(true);
+        this.jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator + HSQLDB_DB_NAME;
+        this.conn = DriverManager.getConnection(jdbcUrl, "sa", "");
+        this.conn.setAutoCommit(true);
 
-        viewname = "USER_EX" + Utilities.randomNumber();
-        query = "SELECT * FROM " + viewname;
+        this.viewname = "USER_EX" + Utilities.randomNumber();
+        this.query = "SELECT * FROM " + viewname;
 
-        fileToDB = new FileToDB(this);
+        this.fileToDB = new FileToDB(this);
     }
 
     public static CSVDirConnection openConnection(
@@ -98,11 +99,14 @@ public class CSVDirConnection {
     public void closeConnection()
             throws SQLException {
 
-        if (conn != null) {
+        if (this.conn != null) {
             LOG.ok("Closing connection ...");
+
             dropTableAndViewIfExists();
+            shutdown();
+            this.conn.close();
+
             tables.clear();
-            conn.close();
         }
     }
 
@@ -181,56 +185,57 @@ public class CSVDirConnection {
         }
     }
 
-    public final ResultSet modifiedCsvFiles(final long syncToken) {
+    public final ResultSet modifiedCsvFiles(final long syncToken) throws SQLException {
         final List<String> tableNames = fileToDB.createDbForSync(
                 fileSystem.getModifiedCsvFiles(syncToken));
 
         tables.addAll(tableNames);
 
-        try {
-            return doQuery(conn.prepareStatement(query));
-        } catch (SQLException ex) {
-            LOG.error(ex, "Error during sql query");
-            throw new IllegalStateException(ex);
-        }
+        return doQuery(conn.prepareStatement(query));
     }
 
     public ResultSet allCsvFiles() {
-        final List<String> tableNames =
-                fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
-
+        final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
         tables.addAll(tableNames);
 
+        PreparedStatement stmt = null;
         try {
-            return doQuery(conn.prepareStatement(query));
+            stmt = conn.prepareStatement(query);
+            return doQuery(stmt);
         } catch (SQLException ex) {
             LOG.error(ex, "Error during sql query");
             throw new IllegalStateException(ex);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                    LOG.error(ex, "While closing sql statement");
+                }
+            }
         }
     }
 
-    public ResultSet allCsvFiles(String where, final List<SQLParam> params) {
-        final List<String> tableNames =
-                fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
-
+    public ResultSet allCsvFiles(final String where, final List<SQLParam> params) {
+        final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
         tables.addAll(tableNames);
 
-        PreparedStatement stm = null;
+        PreparedStatement stmt = null;
         try {
-            stm = conn.prepareStatement(
+            stmt = conn.prepareStatement(
                     query + (where != null && !where.isEmpty()
                     ? " WHERE " + where : ""));
 
-            SQLUtil.setParams(stm, params);
+            SQLUtil.setParams(stmt, params);
 
-            return doQuery(stm);
+            return doQuery(stmt);
         } catch (SQLException e) {
             LOG.error(e, "Error during sql query");
             throw new IllegalStateException(e);
         } finally {
             try {
-                if (stm != null) {
-                    stm.close();
+                if (stmt != null) {
+                    stmt.close();
                 }
             } catch (SQLException ex) {
                 LOG.error(ex, "While closing sql statement");
@@ -240,20 +245,53 @@ public class CSVDirConnection {
 
     private ResultSet doQuery(final PreparedStatement stm)
             throws SQLException {
+
         LOG.ok("Execute query {0}", stm.toString());
         return stm.executeQuery();
     }
 
     private void dropTableAndViewIfExists()
             throws SQLException {
+
         LOG.ok("Drop view {0}", viewname);
 
-        conn.createStatement().execute("DROP VIEW " + viewname + " IF EXISTS CASCADE");
+        Statement stmt = null;
+        try {
+            stmt = conn.createStatement();
+            stmt.execute("DROP VIEW " + viewname + " IF EXISTS CASCADE");
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
 
         for (String table : tables) {
             LOG.ok("Drop table {0}", table);
 
-            conn.createStatement().execute("DROP TABLE " + table + " IF EXISTS CASCADE");
+            try {
+                stmt = conn.createStatement();
+                stmt.execute("DROP TABLE " + table + " IF EXISTS CASCADE");
+            } finally {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            }
+        }
+    }
+
+    private void shutdown()
+            throws SQLException {
+
+        LOG.ok("Shutting down...");
+
+        Statement stmt = null;
+        try {
+            stmt = conn.createStatement();
+            stmt.execute("SHUTDOWN COMPACT");
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
         }
     }
 
