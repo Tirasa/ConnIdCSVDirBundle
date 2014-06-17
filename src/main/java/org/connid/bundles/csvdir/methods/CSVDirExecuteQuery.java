@@ -123,8 +123,10 @@ public class CSVDirExecuteQuery extends CommonOperation {
             boolean handled = true;
 
             while (resultSet.next() && handled) {
-                // create the connector object..
-                handled = handler.handle(buildConnectorObject(conf, resultSet));
+                if (!Boolean.valueOf(resultSet.getString(resultSet.findColumn(conf.getDeleteColumnName())))) {
+                    // create the connector object..
+                    handled = handler.handle(buildConnectorObject(conf, resultSet));
+                }
             }
         } catch (Exception e) {
             LOG.error(e, "Search query failed");

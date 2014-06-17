@@ -35,6 +35,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.identityconnectors.framework.common.objects.Attribute;
@@ -87,7 +88,7 @@ public abstract class AbstractTest {
         return config;
     }
 
-    protected File createFile(final String name, final Set<TestAccount> testAccounts)
+    protected File createFile(final String name, final List<TestAccount> testAccounts)
             throws IOException {
 
         final File file = File.createTempFile(name, ".csv", testSourceDir);
@@ -102,7 +103,7 @@ public abstract class AbstractTest {
 
     private void writeOutEachUser(
             final PrintWriter wrt,
-            final Set<TestAccount> testAccounts) {
+            final List<TestAccount> testAccounts) {
 
         if (IGNORE_HEADER) {
             wrt.println(TestAccountsValue.HEADER.toLine(
@@ -159,7 +160,7 @@ public abstract class AbstractTest {
         return Charset.forName("UTF-8");
     }
 
-    protected File updateFile(final File file, final Set<TestAccount> testAccounts)
+    protected File updateFile(final File file, final List<TestAccount> testAccounts)
             throws IOException {
 
         final BufferedWriter bufferedWriter = new BufferedWriter(

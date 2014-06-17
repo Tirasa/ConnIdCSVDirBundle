@@ -51,7 +51,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
     public final void create()
             throws IOException {
 
-        createFile("createAccountTest", Collections.<TestAccount>emptySet());
+        createFile("createAccountTest", Collections.<TestAccount>emptyList());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
@@ -113,7 +113,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
     public final void issue51() throws IOException {
-        createFile("createAccountTest", Collections.<TestAccount>emptySet());
+        createFile("createAccountTest", Collections.<TestAccount>emptyList());
 
         final CSVDirConnector connector = new CSVDirConnector();
         final CSVDirConfiguration configuration = createConfiguration("createAccountTest.*\\.csv");

@@ -22,8 +22,8 @@
  */
 package org.connid.bundles.csvdir;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestAccountsValue {
 
@@ -49,94 +49,92 @@ public class TestAccountsValue {
 
     public static final TestAccount HEADER =
             new TestAccount(ACCOUNTID, FIRSTNAME,
-            LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
+                    LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
 
-    public static final Set<TestAccount> TEST_ACCOUNTS =
-            new HashSet<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS = new ArrayList<TestAccount>();
 
-    public static final Set<TestAccount> TEST_ACCOUNTS2 =
-            new HashSet<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS2 = new ArrayList<TestAccount>();
 
-    public static final Set<TestAccount> TEST_ACCOUNTS3 =
-            new HashSet<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS3 = new ArrayList<TestAccount>();
 
-    public static final Set<TestAccount> TEST_ACCOUNTS4 =
-            new HashSet<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS4 = new ArrayList<TestAccount>();
 
     static {
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323435", "jPenelope",
-                "jCruz", "jxPenelope.Cruz@mail.com", "0", "password", "no", "false"));
+                "jCruz", "jxPenelope.Cruz@mail.com", "0", "password", "false", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jkb3234416", "jKevin", "jBacon",
-                "jxKevin.Bacon@mail.com", "1", "password", "no"));
+                "jxKevin.Bacon@mail.com", "1", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323436", "jPenelope",
-                "jCruz2", "jyPenelope.Cruz@mail.com", "2", "password", "no"));
+                "jCruz2", "jyPenelope.Cruz@mail.com", "2", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jkb3234417", "jKevin",
-                "jBacon,II", "jyKevin.Bacon@mail.com", "3", "password", "no"));
+                "jBacon,II", "jyKevin.Bacon@mail.com", "3", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323437", "jPenelope",
-                "jCruz3", "jzPenelope.Cruz@mail.com", "4", "password", "no"));
+                "jCruz3", "jzPenelope.Cruz@mail.com", "4", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____jkb3234419", "jKevin",
-                "jBacon,III", "jzKevin.Bacon@mail.com", "5", "password", "no"));
+                "jBacon,III", "jzKevin.Bacon@mail.com", "5", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____billy@bob.com", "jBilly", "jBob",
-                "jaBilly.Bob@mail.com", "6", "password", "no"));
+                "jaBilly.Bob@mail.com", "6", "password", "false"));
         TEST_ACCOUNTS.add(new TestAccount("____bil@bob@bob.com", "jBillyBob",
-                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "no"));
+                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "false"));
+        TEST_ACCOUNTS.add(new TestAccount("____deletedUser@bob.com", "deletedUser",
+                "deletedUser", "deletedUser@mail.com", "8", "password", "true"));
     }
 
     static {
         TEST_ACCOUNTS2.add(new TestAccount("___jpc4323435", "jAl", "jPacino",
-                "jxPenelope.Cruz@mail.com", "0", "password", "no"));
+                "jxPenelope.Cruz@mail.com", "0", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___jkb3234416", "jAl", "jCapone",
-                "jxKevin.Bacon@mail.com", "1", "password", "no"));
+                "jxKevin.Bacon@mail.com", "1", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___jpc4323436", "jPenelope",
-                "jPacino2", "jyPenelope.Cruz@mail.com", "2", "password", "no"));
+                "jPacino2", "jyPenelope.Cruz@mail.com", "2", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___jkb3234417", "jKevin",
-                "jCapone,II", "jyKevin.Bacon@mail.com", "3", "password", "no"));
+                "jCapone,II", "jyKevin.Bacon@mail.com", "3", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___jpc4323437", "jPenelope",
-                "jPacino3", "jzPenelope.Cruz@mail.com", "4", "password", "no"));
+                "jPacino3", "jzPenelope.Cruz@mail.com", "4", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___jkb3234419", "jKevin",
                 "jCapone,III", "jzKevin.Bacon@mail.com",
-                "5", "password", "no"));
+                "5", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___billy@bob.com", "jBilly",
-                "jBobASDASD", "jaBilly.Bob@mail.com", "6", "password", "no"));
+                "jBobASDASD", "jaBilly.Bob@mail.com", "6", "password", "false"));
         TEST_ACCOUNTS2.add(new TestAccount("___bil@bob@bob.com", "jBillyBoaab",
-                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "no"));
+                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "false"));
     }
 
     static {
         TEST_ACCOUNTS3.add(new TestAccount("__jpc4323435", "jAl", "jBano",
-                "jxPenelope.Cruz@mail.com", "0", "password", "no"));
+                "jxPenelope.Cruz@mail.com", "0", "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__jkb3234416", "jAl", "jJazeera",
-                "jxKevin.Bacon@mail.com", "1", "password", "no"));
+                "jxKevin.Bacon@mail.com", "1", "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__jpc4323436", "jPenelope",
-                "jBano2", "jyPenelope.Cruz@mail.com", "2", "password", "no"));
+                "jBano2", "jyPenelope.Cruz@mail.com", "2", "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__jkb3234417", "jKevin",
                 "jJazeera,II", "jyKevin.Bacon@mail.com", "3",
-                "password", "no"));
+                "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__jpc4323437", "jPenelope", "jBano3",
-                "jzPenelope.Cruz@mail.com", "4", "password", "no"));
+                "jzPenelope.Cruz@mail.com", "4", "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__jkb3234419", "jKevin",
                 "jJazzera,III", "jzKevin.Bacon@mail.com", "5",
-                "password", "no"));
+                "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__billy@bob.com", "jBilly",
-                "jBobMax", "jaBilly.Bob@mail.com", "6", "password", "no"));
+                "jBobMax", "jaBilly.Bob@mail.com", "6", "password", "false"));
         TEST_ACCOUNTS3.add(new TestAccount("__bil@bob@bob.com", "jBillyBobMin",
-                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "no"));
+                "jBobby", "jaBillyBob.Bobby@mail.com", "7", "password", "false"));
     }
 
     static {
         TEST_ACCOUNTS4.add(new TestAccount("_jpc4323435", "jAl", "jMarco",
-                "jxPenelope.Cruz@mail.com", "0", "password", "no"));
+                "jxPenelope.Cruz@mail.com", "0", "password", "false"));
         TEST_ACCOUNTS4.add(new TestAccount("_jkb3234416", "jAl", "jFrancesco",
-                "jxKevin.Bacon@mail.com", "1", "password", "no"));
+                "jxKevin.Bacon@mail.com", "1", "password", "false"));
         TEST_ACCOUNTS4.add(new TestAccount("_jpc4323436", "jPenelope",
-                "jMarco2", "jyPenelope.Cruz@mail.com", "2", "password", "no"));
+                "jMarco2", "jyPenelope.Cruz@mail.com", "2", "password", "false"));
         TEST_ACCOUNTS4.add(new TestAccount("_jkb3234417", "jKevin",
                 "jFrancesco,II", "jyKevin.Bacon@mail.com", "3",
-                "password", "no"));
+                "password", "false"));
         TEST_ACCOUNTS4.add(new TestAccount("_jpc4323437", "jPenelope",
-                "jFabio3", "jzPenelope.Cruz@mail.com", "4", "password", "no"));
+                "jFabio3", "jzPenelope.Cruz@mail.com", "4", "password", "false"));
         TEST_ACCOUNTS4.add(new TestAccount("_jkb3234419", "jKevin",
                 "jCinzia,III", "jzKevin.Bacon@mail.com", "5",
-                "password", "no"));
+                "password", "false"));
     }
 }

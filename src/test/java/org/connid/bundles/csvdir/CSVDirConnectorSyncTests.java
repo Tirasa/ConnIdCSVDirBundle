@@ -45,6 +45,7 @@ import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncDelta;
+import org.identityconnectors.framework.common.objects.SyncDeltaType;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
@@ -146,7 +147,8 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         }, null);
 
         // attempt to see if they compare..
-        assertTrue(actual.containsAll(TestAccountsValue.TEST_ACCOUNTS));
+        assertTrue(actual.containsAll(
+                TestAccountsValue.TEST_ACCOUNTS.subList(0, TestAccountsValue.TEST_ACCOUNTS.size() - 1)));
     }
 
     @Test
@@ -362,7 +364,8 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
             actual.add(new TestAccount(obj));
         }
 
-        Set<TestAccount> accounts = new HashSet<TestAccount>(TestAccountsValue.TEST_ACCOUNTS);
+        final Set<TestAccount> accounts = new HashSet<TestAccount>(
+                TestAccountsValue.TEST_ACCOUNTS.subList(0, TestAccountsValue.TEST_ACCOUNTS.size() - 1));
         accounts.addAll(TestAccountsValue.TEST_ACCOUNTS2);
         accounts.addAll(TestAccountsValue.TEST_ACCOUNTS3);
 
@@ -446,5 +449,44 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
                 return true;
             }
         };
+    }
+
+    @Test
+    public void issueCSVDIR8() throws IOException {
+        createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
+
+        final CSVDirConnector connector = new CSVDirConnector();
+        connector.init(createConfiguration("sample.*\\.csv"));
+
+        final List<ConnectorObject> results = TestHelpers.searchToList(connector, ObjectClass.ACCOUNT, null);
+
+        assertEquals(8, results.size());
+        connector.dispose();
+    }
+
+    @Test
+    public final void incrementalSync()
+            throws IOException {
+
+        createFile("deleted", TestAccountsValue.TEST_ACCOUNTS);
+
+        final CSVDirConnector connector = new CSVDirConnector();
+        connector.init(createConfiguration("deleted.*\\.csv"));
+
+        final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
+        connector.sync(ObjectClass.ACCOUNT, new SyncToken(0), getSyncResultsHandler(syncDeltaList), null);
+        assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS.size());
+
+        boolean found = false;
+
+        for (SyncDelta delta : syncDeltaList) {
+            ConnectorObject object = delta.getObject();
+            if ("____deletedUser@bob.com;deletedUser".equals(object.getName().getNameValue())) {
+                assertEquals(SyncDeltaType.DELETE, delta.getDeltaType());
+                found = true;
+            }
+        }
+        assertTrue(found);  
+        connector.dispose();
     }
 }

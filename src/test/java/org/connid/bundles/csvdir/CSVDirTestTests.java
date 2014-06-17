@@ -30,7 +30,7 @@ public class CSVDirTestTests extends AbstractTest {
 
     @Test
     public final void test() throws IOException {
-        createFile("createAccountTest", Collections.<TestAccount>emptySet());
+        createFile("createAccountTest", Collections.<TestAccount>emptyList());
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
         connector.test();

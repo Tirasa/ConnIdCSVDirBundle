@@ -150,31 +150,31 @@ public class CommonOperation {
 
         final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
 
-        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-            final String name = resultSet.getMetaData().getColumnName(i);
-            final String value = resultSet.getString(name);
+            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                final String name = resultSet.getMetaData().getColumnName(i);
+                final String value = resultSet.getString(name);
 
-            final String[] allValues = value == null
-                    ? new String[] {}
+                final String[] allValues = value == null
+                        ? new String[] {}
                     : StringUtil.isBlank(conf.getMultivalueSeparator()) ? new String[] {value}
-                    : value.split(Pattern.quote(conf.getMultivalueSeparator()), -1);
+                        : value.split(Pattern.quote(conf.getMultivalueSeparator()), -1);
 
-            if (name.equalsIgnoreCase(conf.getPasswordColumnName())) {
-                bld.addAttribute(AttributeBuilder.buildPassword(value.toCharArray()));
-            } else if (name.equalsIgnoreCase(conf.getStatusColumn())) {
-                final boolean status = (StringUtil.isBlank(value)
-                        ? conf.getDefaultStatusValue() : value).equals(conf.getEnabledStatusValue());
+                if (name.equalsIgnoreCase(conf.getPasswordColumnName())) {
+                    bld.addAttribute(AttributeBuilder.buildPassword(value.toCharArray()));
+                } else if (name.equalsIgnoreCase(conf.getStatusColumn())) {
+                    final boolean status = (StringUtil.isBlank(value)
+                            ? conf.getDefaultStatusValue() : value).equals(conf.getEnabledStatusValue());
 
-                bld.addAttribute(AttributeBuilder.buildEnabled(status));
-            } else {
-                bld.addAttribute(name, Arrays.asList(allValues));
+                    bld.addAttribute(AttributeBuilder.buildEnabled(status));
+                } else {
+                    bld.addAttribute(name, Arrays.asList(allValues));
+                }
             }
-        }
 
-        final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), resultSet, conf.getKeyseparator()));
+            final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), resultSet, conf.getKeyseparator()));
 
-        bld.setUid(uid);
-        bld.setName(uid.getUidValue());
+            bld.setUid(uid);
+            bld.setName(uid.getUidValue());
 
         return bld.build();
     }
