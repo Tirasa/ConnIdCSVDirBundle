@@ -186,8 +186,7 @@ public class CSVDirConnection {
     }
 
     public final ResultSet modifiedCsvFiles(final long syncToken) throws SQLException {
-        final List<String> tableNames = fileToDB.createDbForSync(
-                fileSystem.getModifiedCsvFiles(syncToken));
+        final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getModifiedCsvFiles(syncToken));
 
         tables.addAll(tableNames);
 
