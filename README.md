@@ -9,13 +9,13 @@ The CSV Directory bundle is part of the [ConnId](http://connid.tirasa.net) proje
 
 ```XML
 <dependency>
-  <groupId>org.connid.bundles</groupId>
-  <artifactId>org.connid.bundles.csvdir</artifactId>
+  <groupId>net.tirasa.connid.bundles</groupId>
+  <artifactId>net.tirasa.connid.bundles.csvdir</artifactId>
   <version>${connid.csvdir.version}</version>
 </dependency>
 ```
 
-where `connid.csvdir.version` is one of [available](http://repo1.maven.org/maven2/org/connid/bundles/org.connid.bundles.csvdir/).
+where `connid.csvdir.version` is one of [available](http://repo1.maven.org/maven2/net/tirasa/connid/bundles/net.tirasa.connid.bundles.csvdir/).
 
 ### Downloads
 
