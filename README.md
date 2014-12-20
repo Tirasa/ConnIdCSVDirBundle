@@ -25,4 +25,4 @@ Available from [releases](https://github.com/Tirasa/ConnIdCSVDirBundle/releases)
 
  * [wiki](https://connid.atlassian.net/wiki/display/BASE/CSV+Directory)
  * [issues](https://connid.atlassian.net/browse/CSVDIR)
- * <a href="https://travis-ci.org/Tirasa/ConnIdDBBundle"><img src="https://api.travis-ci.org/Tirasa/ConnIdDBBundle.png"/></a>
+ * <a href="https://travis-ci.org/Tirasa/ConnIdCSVDirBundle"><img src="https://api.travis-ci.org/Tirasa/ConnIdCSVDirBundle.png"/></a>
