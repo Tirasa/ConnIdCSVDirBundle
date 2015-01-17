@@ -55,7 +55,7 @@ public class CommonOperation {
         final String[] uidKeys = uidString.split(conf.getKeyseparator());
         try {
             boolean found = false;
-            boolean toBeContinued = true;
+            boolean toBeContinued;
             while (resultSet.next() && !found) {
                 toBeContinued = true;
                 for (int i = 0; i < keys.length && toBeContinued; i++) {

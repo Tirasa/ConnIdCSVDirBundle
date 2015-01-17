@@ -147,7 +147,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
         final Set<String> attributesToGet = new HashSet<String>();
         attributesToGet.add(Uid.NAME);
 
-        String[] attributes = null;
+        String[] attributes;
         if (options == null || options.getAttributesToGet() == null) {
             attributes = conf.getFields();
         } else {

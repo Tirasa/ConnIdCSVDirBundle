@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
@@ -113,7 +114,10 @@ public class CSVDirSync extends CommonOperation {
             buildSyncDelta(conn.modifiedCsvFiles(Long.valueOf(syncToken.getValue().toString())), handler);
 
             token = conn.getFileSystem().getHighestTimeStamp();
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            LOG.error(e, "error during syncronization");
+            throw new ConnectorIOException(e);
+        } catch (SQLException e) {
             LOG.error(e, "error during syncronization");
             throw new ConnectorIOException(e);
         }
@@ -146,7 +150,8 @@ public class CSVDirSync extends CommonOperation {
     private void choseRightDeltaType(final ResultSet rs, final SyncDeltaBuilder syncDeltaBuilder)
             throws SQLException {
 
-        if (Boolean.valueOf(getValueFromColumnName(rs, conf.getDeleteColumnName()))) {
+        if (StringUtil.isNotBlank(conf.getDeleteColumnName())
+                && Boolean.valueOf(getValueFromColumnName(rs, conf.getDeleteColumnName()))) {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.DELETE);
         } else {
             syncDeltaBuilder.setDeltaType(SyncDeltaType.CREATE_OR_UPDATE);

@@ -419,12 +419,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
     }
 
     protected boolean validateSearchAttribute(final Attribute attribute) {
-        //Ignore streamed ( byte[] objects ) from query
-        if (byte[].class.equals(AttributeUtil.getSingleValue(attribute).getClass())) {
-            return false;
-        }
-        //Otherwise let the database process
-        return true;
+        return !byte[].class.equals(AttributeUtil.getSingleValue(attribute).getClass());
     }
 
     protected SQLParam[] getSQLParam(
