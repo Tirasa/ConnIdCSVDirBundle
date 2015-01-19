@@ -67,7 +67,7 @@ public class CSVDirSchema {
 
         final Set<AttributeInfo> attrInfos = new HashSet<AttributeInfo>();
 
-        for (String fieldName : conf.getFields()) {
+        for (final String fieldName : conf.getFields()) {
 
             if (!fieldName.equals(conf.getDeleteColumnName())) {
                 final AttributeInfoBuilder abld = new AttributeInfoBuilder();

@@ -32,6 +32,7 @@ import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
 import net.tirasa.connid.bundles.db.common.FilterWhereBuilder;
 import net.tirasa.connid.bundles.db.common.SQLParam;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
@@ -123,12 +124,13 @@ public class CSVDirExecuteQuery extends CommonOperation {
             boolean handled = true;
 
             while (resultSet.next() && handled) {
-                if (!Boolean.valueOf(resultSet.getString(resultSet.findColumn(conf.getDeleteColumnName())))) {
+                if (StringUtil.isBlank(conf.getDeleteColumnName())
+                        || !Boolean.valueOf(resultSet.getString(resultSet.findColumn(conf.getDeleteColumnName())))) {
                     // create the connector object..
                     handled = handler.handle(buildConnectorObject(conf, resultSet));
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e, "Search query failed");
             throw new ConnectorIOException(e);
         } finally {
