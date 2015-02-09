@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) ${project.inceptionYear} ConnId (connid-dev@googlegroups.com)
+    Copyright (C) 2011 ConnId (connid-dev@googlegroups.com)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@
   <packaging>jar</packaging>
 
   <url>http://connid.tirasa.net</url>
+  <inceptionYear>2011</inceptionYear>
 
   <licenses>
     <license>
