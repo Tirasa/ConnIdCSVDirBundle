@@ -22,8 +22,11 @@
  */
 package org.connid.bundles.csvdir;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -33,6 +36,7 @@ import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.test.common.TestHelpers;
 import org.junit.Assert;
@@ -47,8 +51,7 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
             throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
 
-        final ConnectorFacadeFactory factory =
-                ConnectorFacadeFactory.getInstance();
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
         // **test only**
         final APIConfiguration impl = TestHelpers.createTestConfiguration(
@@ -71,12 +74,11 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
 
         Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
 
-        ConnectorObject objectUpdated =
-                facade.getObject(ObjectClass.ACCOUNT, uid, null);
+        ConnectorObject objectUpdated = facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
         Assert.assertNotNull(object);
-        Assert.assertEquals(objectUpdated.getAttributeByName(
-                TestAccountsValue.EMAIL).getValue().get(0), NEWMAIL);
+        Assert.assertEquals(NEWMAIL,
+                objectUpdated.getAttributeByName(TestAccountsValue.EMAIL).getValue().get(0));
 
         connector.dispose();
     }
@@ -100,5 +102,40 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
         Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
 
         connector.dispose();
+    }
+
+    @Test
+    public void issueCSVDIR12() throws IOException {
+        final CSVDirConfiguration config = createConfiguration("issueCSVDIR12.*\\.csv");
+        config.setMultivalueSeparator("|");
+        config.validate();
+
+        createFile("issueCSVDIR12", TestAccountsValue.TEST_ACCOUNTS);
+
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
+        final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, config);
+        final ConnectorFacade connector = factory.newInstance(impl);
+
+        Uid uid = new Uid("____jpc4323435;jPenelope");
+
+        final ConnectorObject object = connector.getObject(ObjectClass.ACCOUNT, uid, null);
+
+        Assert.assertNotNull(object);
+        Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+
+        final Set<Attribute> attributes = new HashSet<Attribute>();
+        attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "mrossi1@tirasa.net", "mrossi2@tirasa.net"));
+
+        final Uid updatedAccount = connector.update(ObjectClass.ACCOUNT, uid, attributes, null);
+        Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
+
+        final OperationOptionsBuilder oob = new OperationOptionsBuilder();
+        oob.setAttributesToGet(TestAccountsValue.EMAIL);
+
+        final ConnectorObject obj = connector.getObject(ObjectClass.ACCOUNT, uid, oob.build());
+        final List<Object> value = obj.getAttributeByName(TestAccountsValue.EMAIL).getValue();
+        assertEquals(2, value.size(), 0);
+        assertEquals("mrossi1@tirasa.net", value.get(0).toString());
+        assertEquals("mrossi2@tirasa.net", value.get(1).toString());
     }
 }

@@ -24,17 +24,13 @@ package org.connid.bundles.csvdir.methods;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.connid.bundles.csvdir.CSVDirConfiguration;
 import org.connid.bundles.csvdir.CSVDirConnection;
+import org.connid.bundles.csvdir.utilities.AttributeValue;
 import org.identityconnectors.common.StringUtil;
-import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.common.security.GuardedString.Accessor;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
@@ -90,16 +86,14 @@ public class CommonOperation {
         return uid.toString();
     }
 
-    protected Map<String, String> getAttributeMap(final CSVDirConfiguration conf, final Set<Attribute> attrs,
-            final Name name) {
+    protected Map<String, String> getAttributeMap(
+            final CSVDirConfiguration conf, final Set<Attribute> attrs, final Name name) {
 
         final Map<String, String> attributes = new HashMap<String, String>();
 
         Boolean status = null;
         for (Attribute attr : attrs) {
-            final Object objValue =
-                    attr.getValue() != null && !attr.getValue().isEmpty()
-                    ? attr.getValue().get(0) : null;
+            final AttributeValue attrValue = new AttributeValue(attr.getValue());
 
             if (attr.is(Name.NAME)) {
                 final String[] keys = conf.getKeyColumnNames();
@@ -107,39 +101,21 @@ public class CommonOperation {
                     attributes.put(keys[0], name.getNameValue());
                 }
             } else if (attr.is(OperationalAttributes.ENABLE_NAME)) {
-                status = objValue == null ? null : (Boolean) objValue;
+                status = attrValue.toBoolean();
             } else {
-                final Set<String> key = new HashSet<String>();
-                final Set<String> value = new HashSet<String>();
-
                 if (attr.is(OperationalAttributes.PASSWORD_NAME)) {
-                    key.add(conf.getPasswordColumnName());
-
-                    if (objValue != null) {
-                        ((GuardedString) objValue).access(new Accessor() {
-
-                            @Override
-                            public void access(final char[] clearChars) {
-                                value.add(new String(clearChars));
-                            }
-                        });
-                    } else {
-                        value.add("");
-                    }
+                    attributes.put(conf.getPasswordColumnName(), attrValue.toSecureString());
                 } else {
-                    key.add(attr.getName());
-                    value.add(objValue == null ? null : objValue.toString());
+                    attributes.put(attr.getName(), attrValue.toString(conf.getMultivalueSeparator()));
                 }
-
-                attributes.put(key.iterator().next(), value.iterator().next());
             }
         }
 
         if (StringUtil.isNotBlank(conf.getStatusColumn())) {
             attributes.put(conf.getStatusColumn(),
                     status == null ? conf.getDefaultStatusValue() : status
-                    ? conf.getEnabledStatusValue()
-                    : conf.getDisabledStatusValue());
+                                    ? conf.getEnabledStatusValue()
+                                    : conf.getDisabledStatusValue());
         }
 
         return attributes;
@@ -150,31 +126,26 @@ public class CommonOperation {
 
         final ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
 
-            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                final String name = resultSet.getMetaData().getColumnName(i);
-                final String value = resultSet.getString(name);
+        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+            final String name = resultSet.getMetaData().getColumnName(i);
+            final String value = resultSet.getString(name);
 
-                final String[] allValues = value == null
-                        ? new String[] {}
-                    : StringUtil.isBlank(conf.getMultivalueSeparator()) ? new String[] {value}
-                        : value.split(Pattern.quote(conf.getMultivalueSeparator()), -1);
+            if (name.equalsIgnoreCase(conf.getPasswordColumnName()) && StringUtil.isNotBlank(value)) {
+                bld.addAttribute(AttributeBuilder.buildPassword(value.toCharArray()));
+            } else if (name.equalsIgnoreCase(conf.getStatusColumn())) {
+                final boolean status = (StringUtil.isBlank(value)
+                        ? conf.getDefaultStatusValue() : value).equals(conf.getEnabledStatusValue());
 
-                if (name.equalsIgnoreCase(conf.getPasswordColumnName())) {
-                    bld.addAttribute(AttributeBuilder.buildPassword(value.toCharArray()));
-                } else if (name.equalsIgnoreCase(conf.getStatusColumn())) {
-                    final boolean status = (StringUtil.isBlank(value)
-                            ? conf.getDefaultStatusValue() : value).equals(conf.getEnabledStatusValue());
-
-                    bld.addAttribute(AttributeBuilder.buildEnabled(status));
-                } else {
-                    bld.addAttribute(name, Arrays.asList(allValues));
-                }
+                bld.addAttribute(AttributeBuilder.buildEnabled(status));
+            } else {
+                bld.addAttribute(name, new AttributeValue(value, conf.getMultivalueSeparator()).get());
             }
+        }
 
-            final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), resultSet, conf.getKeyseparator()));
+        final Uid uid = new Uid(createUid(conf.getKeyColumnNames(), resultSet, conf.getKeyseparator()));
 
-            bld.setUid(uid);
-            bld.setName(uid.getUidValue());
+        bld.setUid(uid);
+        bld.setName(uid.getUidValue());
 
         return bld.build();
     }

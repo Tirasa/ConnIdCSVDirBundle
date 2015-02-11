@@ -45,7 +45,7 @@ import org.junit.Before;
 
 public abstract class AbstractTest {
 
-    private static boolean IGNORE_HEADER = false;
+    private static final boolean IGNORE_HEADER = false;
 
     protected File testSourceDir;
 
