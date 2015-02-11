@@ -73,8 +73,7 @@ public class CSVDirUpdate extends CommonOperation {
             throws SQLException {
 
         if (uid == null || StringUtil.isBlank(uid.getUidValue())) {
-            throw new IllegalArgumentException(
-                    "No Name attribute provided in the attributes");
+            throw new IllegalArgumentException("No Name attribute provided in the attributes");
         }
 
         if (!userExists(uid.getUidValue(), conn, conf)) {
