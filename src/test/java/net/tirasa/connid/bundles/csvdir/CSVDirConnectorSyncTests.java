@@ -251,6 +251,8 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS.size());
 
+        final SyncToken lastToken = syncDeltaList.get(syncDeltaList.size() - 1).getToken();
+
         syncDeltaList.clear();
 
         try {
@@ -262,7 +264,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         createFile("syncWithNewFileAndRealToken2", TestAccountsValue.TEST_ACCOUNTS2);
 
         connector.sync(ObjectClass.ACCOUNT,
-                connector.getLatestSyncToken(ObjectClass.ACCOUNT),
+                lastToken,
                 getSyncResultsHandler(syncDeltaList), null);
 
         assertEquals(syncDeltaList.size(), +TestAccountsValue.TEST_ACCOUNTS2.size());
@@ -284,6 +286,8 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS.size());
 
+        final SyncToken lastToken = syncDeltaList.get(syncDeltaList.size() - 1).getToken();
+
         syncDeltaList.clear();
 
         try {
@@ -294,9 +298,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         updateFile(toBeUpdated, TestAccountsValue.TEST_ACCOUNTS2);
 
-        connector.sync(ObjectClass.ACCOUNT,
-                connector.getLatestSyncToken(ObjectClass.ACCOUNT),
-                getSyncResultsHandler(syncDeltaList), null);
+        connector.sync(ObjectClass.ACCOUNT, lastToken, getSyncResultsHandler(syncDeltaList), null);
 
         assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size() + TestAccountsValue.TEST_ACCOUNTS2.size());
@@ -314,10 +316,11 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
 
-        connector.sync(ObjectClass.ACCOUNT, new SyncToken(0),
-                getSyncResultsHandler(syncDeltaList), null);
+        connector.sync(ObjectClass.ACCOUNT, new SyncToken(0), getSyncResultsHandler(syncDeltaList), null);
 
         assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS.size());
+
+        SyncToken lastToken = syncDeltaList.get(syncDeltaList.size() - 1).getToken();
 
         syncDeltaList.clear();
 
@@ -329,12 +332,12 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         updateFile(toBeUpdated, TestAccountsValue.TEST_ACCOUNTS2);
 
-        connector.sync(ObjectClass.ACCOUNT,
-                connector.getLatestSyncToken(ObjectClass.ACCOUNT),
-                getSyncResultsHandler(syncDeltaList), null);
+        connector.sync(ObjectClass.ACCOUNT, lastToken, getSyncResultsHandler(syncDeltaList), null);
 
         assertEquals(syncDeltaList.size(),
                 TestAccountsValue.TEST_ACCOUNTS.size() + TestAccountsValue.TEST_ACCOUNTS2.size());
+
+        lastToken = syncDeltaList.get(syncDeltaList.size() - 1).getToken();
 
         syncDeltaList.clear();
 
@@ -346,9 +349,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         createFile("mixedOperations2", TestAccountsValue.TEST_ACCOUNTS3);
 
-        connector.sync(ObjectClass.ACCOUNT,
-                connector.getLatestSyncToken(ObjectClass.ACCOUNT),
-                getSyncResultsHandler(syncDeltaList), null);
+        connector.sync(ObjectClass.ACCOUNT, lastToken, getSyncResultsHandler(syncDeltaList), null);
 
         assertEquals(syncDeltaList.size(), TestAccountsValue.TEST_ACCOUNTS3.size());
 

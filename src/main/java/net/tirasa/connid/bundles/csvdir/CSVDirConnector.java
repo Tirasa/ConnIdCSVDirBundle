@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import net.tirasa.connid.bundles.csvdir.database.FileSystem;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirCreate;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirDelete;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirExecuteQuery;
@@ -85,8 +86,6 @@ public class CSVDirConnector implements
      */
     private CSVDirConfiguration configuration;
 
-    private long token = 0L;
-
     @Override
     public final Configuration getConfiguration() {
         return configuration;
@@ -144,7 +143,7 @@ public class CSVDirConnector implements
             final OperationOptions options) {
 
         try {
-            token = new CSVDirSync(configuration, objectClass, syncToken, handler, options).execute();
+            new CSVDirSync(configuration, objectClass, syncToken, handler, options).execute();
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException ex) {
@@ -153,9 +152,8 @@ public class CSVDirConnector implements
     }
 
     @Override
-
     public final SyncToken getLatestSyncToken(final ObjectClass objectClass) {
-        return new SyncToken(token);
+        return new SyncToken(new FileSystem(configuration).getHighestTimeStamp(0L));
     }
 
     @Override
@@ -212,8 +210,7 @@ public class CSVDirConnector implements
 
         final List<Uid> res = new ArrayList<Uid>();
 
-        final CSVDirFilterTranslator translator =
-                new CSVDirFilterTranslator(this, objectClass, options);
+        final CSVDirFilterTranslator translator = new CSVDirFilterTranslator(this, objectClass, options);
 
         password.access(new GuardedString.Accessor() {
 

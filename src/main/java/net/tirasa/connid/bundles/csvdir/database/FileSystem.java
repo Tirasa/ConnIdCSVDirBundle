@@ -27,8 +27,6 @@ public class FileSystem {
 
     private final FileFilter fileFilter;
 
-    private long highestTimeStamp;
-
     public FileSystem(final CSVDirConfiguration conf) {
         this.conf = conf;
         this.sourcePath = new File(conf.getSourcePath());
@@ -63,30 +61,48 @@ public class FileSystem {
         return lastModifiedFile;
     }
 
-    public final File[] getModifiedCsvFiles(final long timeStamp) {
-        final File[] csvFiles = sourcePath.listFiles(new FileFilter() {
+    public File[] getLastestChangedFiles(final long startFrom) {
+        return returnNewArrayIfCsvFilesIsEmpty(sourcePath.listFiles(new FileFilter() {
 
             @Override
             public boolean accept(final File file) {
-                return isMatched(file) && file.lastModified() > timeStamp;
+                return isMatched(file) && file.lastModified() > startFrom;
             }
-        });
+        }));
+    }
 
-        for (File file : csvFiles) {
-            if (file.lastModified() > highestTimeStamp) {
-                highestTimeStamp = file.lastModified();
+    public long getHighestTimeStamp(final long startFrom) {
+        long res = 0L;
+
+        for (File file : returnNewArrayIfCsvFilesIsEmpty(sourcePath.listFiles(new FileFilter() {
+
+            @Override
+            public boolean accept(final File file) {
+                return isMatched(file) && file.lastModified() > startFrom;
+            }
+        }))) {
+            if (file.lastModified() > res) {
+                res = file.lastModified();
             }
         }
 
-        return returnNewArrayIfCsvFilesIsEmpty(csvFiles);
+        return res;
+    }
+
+    public long getHighestTimeStamp(final File[] csvFiles) {
+        long res = 0L;
+
+        for (File file : csvFiles) {
+            if (file.lastModified() > res) {
+                res = file.lastModified();
+            }
+        }
+
+        return res;
     }
 
     private File[] returnNewArrayIfCsvFilesIsEmpty(final File[] csvFiles) {
         return csvFiles == null ? new File[] {} : csvFiles;
-    }
-
-    public final long getHighestTimeStamp() {
-        return highestTimeStamp;
     }
 
     private boolean isMatched(final File file) {

@@ -34,6 +34,7 @@ import net.tirasa.connid.bundles.db.common.DatabaseConnection;
 import net.tirasa.connid.bundles.db.common.SQLParam;
 import net.tirasa.connid.bundles.db.common.SQLUtil;
 import org.hsqldb.jdbcDriver;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Uid;
@@ -178,12 +179,14 @@ public class CSVDirConnection {
         }
     }
 
-    public final ResultSet modifiedCsvFiles(final long syncToken) throws SQLException {
-        final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getModifiedCsvFiles(syncToken));
+    public final Pair<Long, ResultSet> modifiedCsvFiles(final long syncToken) throws SQLException {
+        final File[] csvFiles = fileSystem.getLastestChangedFiles(syncToken);
+        final Long highestTimeStamp = fileSystem.getHighestTimeStamp(csvFiles);
 
+        final List<String> tableNames = fileToDB.createDbForSync(csvFiles);
         tables.addAll(tableNames);
 
-        return doQuery(conn.prepareStatement(query));
+        return Pair.of(highestTimeStamp, doQuery(conn.prepareStatement(query)));
     }
 
     public ResultSet allCsvFiles() {
@@ -216,7 +219,7 @@ public class CSVDirConnection {
         try {
             stmt = conn.prepareStatement(
                     query + (where != null && !where.isEmpty()
-                    ? " WHERE " + where : ""));
+                            ? " WHERE " + where : ""));
 
             SQLUtil.setParams(stmt, params);
 

@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
+import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
@@ -38,8 +39,6 @@ public class CSVDirSync extends CommonOperation {
      * Setup {@link Connector} based logging.
      */
     private static final Log LOG = Log.getLog(CSVDirExecuteQuery.class);
-
-    private static long token = 0L;
 
     private final CSVDirConfiguration conf;
 
@@ -68,9 +67,9 @@ public class CSVDirSync extends CommonOperation {
         this.conn = CSVDirConnection.openConnection(conf);
     }
 
-    public long execute() {
+    public void execute() {
         try {
-            return executeImpl();
+            executeImpl();
         } catch (Exception e) {
             LOG.error(e, "error during updating");
             throw new ConnectorException(e);
@@ -85,7 +84,7 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private long executeImpl()
+    private void executeImpl()
             throws SQLException {
 
         // check objectclass
@@ -104,9 +103,8 @@ public class CSVDirSync extends CommonOperation {
         }
 
         try {
-            buildSyncDelta(conn.modifiedCsvFiles(Long.valueOf(syncToken.getValue().toString())), handler);
-
-            token = conn.getFileSystem().getHighestTimeStamp();
+            final Pair<Long, ResultSet> modified = conn.modifiedCsvFiles(Long.valueOf(syncToken.getValue().toString()));
+            buildSyncDelta(modified.getValue(), modified.getKey(), handler);
         } catch (NumberFormatException e) {
             LOG.error(e, "error during syncronization");
             throw new ConnectorIOException(e);
@@ -114,12 +112,11 @@ public class CSVDirSync extends CommonOperation {
             LOG.error(e, "error during syncronization");
             throw new ConnectorIOException(e);
         }
-
-        return token;
     }
 
     private void buildSyncDelta(
             final ResultSet resultSet,
+            final Long token,
             final SyncResultsHandler handler)
             throws SQLException {
 
@@ -129,7 +126,7 @@ public class CSVDirSync extends CommonOperation {
             while (resultSet.next() && handled) {
                 final ConnectorObject connObject = buildConnectorObject(conf, resultSet);
 
-                final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(connObject);
+                final SyncDeltaBuilder syncDeltaBuilder = createSyncDelta(connObject, token);
                 choseRightDeltaType(resultSet, syncDeltaBuilder);
                 handled = handler.handle(syncDeltaBuilder.build());
             }
@@ -151,20 +148,16 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private SyncDeltaBuilder createSyncDelta(final ConnectorObject connObject) {
+    private SyncDeltaBuilder createSyncDelta(final ConnectorObject connObject, final Long token) {
         final SyncDeltaBuilder syncDeltaBuilder = new SyncDeltaBuilder();
 
         syncDeltaBuilder.setObject(connObject);
         syncDeltaBuilder.setUid(connObject.getUid());
-        syncDeltaBuilder.setToken(getLatestSyncToken());
+        syncDeltaBuilder.setToken(new SyncToken(token));
         return syncDeltaBuilder;
     }
 
     private String getValueFromColumnName(final ResultSet rs, final String columnName) throws SQLException {
         return rs.getString(rs.findColumn(columnName));
-    }
-
-    private SyncToken getLatestSyncToken() {
-        return new SyncToken(token);
     }
 }
