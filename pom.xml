@@ -23,7 +23,7 @@
   <parent>
     <groupId>net.tirasa.connid</groupId>
     <artifactId>connid</artifactId>
-    <version>1.4.0.0</version>
+    <version>1.4.1.0</version>
   </parent>
 
   <groupId>net.tirasa.connid.bundles</groupId>
@@ -75,9 +75,8 @@
   </mailingLists>
 
   <properties>
-    <connid.version>1.4.0.0</connid.version>
+    <connid.version>1.4.1.0</connid.version>
     
-    <db.version>2.2.0</db.version>
     <hsqldb.version>2.2.9</hsqldb.version>
     <test.source.path>${project.build.directory}/test-source-path</test.source.path>    
     
@@ -86,23 +85,11 @@
 
   <dependencies>
     <dependency>
-      <groupId>net.tirasa.connid</groupId>
-      <artifactId>connector-framework</artifactId>
-      <version>${connid.version}</version>
+      <groupId>net.tirasa.connid.commons</groupId>
+      <artifactId>commons-db</artifactId>
+      <version>1.4.1.0-SNAPSHOT</version>
     </dependency>
-
-    <dependency>
-      <groupId>net.tirasa.connid</groupId>
-      <artifactId>connector-framework-internal</artifactId>
-      <version>${connid.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.tirasa.connid.bundles.db</groupId>
-      <artifactId>common</artifactId>
-      <version>${db.version}</version>
-    </dependency>
-
+    
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>

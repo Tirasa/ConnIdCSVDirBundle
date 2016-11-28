@@ -30,9 +30,9 @@ import net.tirasa.connid.bundles.csvdir.database.FileSystem;
 import net.tirasa.connid.bundles.csvdir.database.FileToDB;
 import net.tirasa.connid.bundles.csvdir.database.QueryCreator;
 import net.tirasa.connid.bundles.csvdir.utilities.Utilities;
-import net.tirasa.connid.bundles.db.common.DatabaseConnection;
-import net.tirasa.connid.bundles.db.common.SQLParam;
-import net.tirasa.connid.bundles.db.common.SQLUtil;
+import net.tirasa.connid.commons.db.DatabaseConnection;
+import net.tirasa.connid.commons.db.SQLParam;
+import net.tirasa.connid.commons.db.SQLUtil;
 import org.hsqldb.jdbcDriver;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.logging.Log;
@@ -219,7 +219,7 @@ public class CSVDirConnection {
         try {
             stmt = conn.prepareStatement(
                     query + (where != null && !where.isEmpty()
-                            ? " WHERE " + where : ""));
+                    ? " WHERE " + where : ""));
 
             SQLUtil.setParams(stmt, params);
 

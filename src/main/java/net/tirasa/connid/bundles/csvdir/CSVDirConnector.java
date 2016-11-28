@@ -28,7 +28,7 @@ import net.tirasa.connid.bundles.csvdir.methods.CSVDirSchema;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirSync;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirTest;
 import net.tirasa.connid.bundles.csvdir.methods.CSVDirUpdate;
-import net.tirasa.connid.bundles.db.common.FilterWhereBuilder;
+import net.tirasa.connid.commons.db.FilterWhereBuilder;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
