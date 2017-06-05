@@ -15,19 +15,21 @@
  */
 package net.tirasa.connid.bundles.csvdir.utilities;
 
+import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.Random;
 
 public final class Utilities {
 
     public static final String EMPTY = "";
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private Utilities() {
         // empty method for static utility class
     }
 
     public static int randomNumber() {
-        return new Random().nextInt(100000);
+        return RANDOM.nextInt(100000);
     }
 
     public static String join(final Collection<String> collection, final char separator) {
