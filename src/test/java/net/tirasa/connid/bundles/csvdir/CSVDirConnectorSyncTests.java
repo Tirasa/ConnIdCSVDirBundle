@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
@@ -48,6 +50,8 @@ import org.junit.Test;
 
 public class CSVDirConnectorSyncTests extends AbstractTest {
 
+    private static final Log LOG = Log.getLog(CSVDirConnectorSyncTests.class);
+
     private static final double THOUSANDS = 0.1;
 
     private static class NoFilter implements Filter {
@@ -58,7 +62,6 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         }
 
         @Override
-
         public <R, P> R accept(final FilterVisitor<R, P> v, final P p) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
@@ -402,16 +405,12 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
         final ExecutorService taskExecutor = Executors.newFixedThreadPool(10);
 
-        final StringBuilder exception = new StringBuilder();
-
         for (int i = 0; i < 10; i++) {
             taskExecutor.execute(new Runnable() {
 
                 @Override
                 public void run() {
-
                     try {
-
                         final List<SyncDelta> syncDeltaList = new ArrayList<SyncDelta>();
 
                         connector.sync(
@@ -422,7 +421,8 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
 
                         assertEquals(syncDeltaList.size(), 10);
                     } catch (Throwable t) {
-                        exception.append(t.getMessage()).append("\n");
+                        LOG.error(t, "While doing concurrent sync");
+                        fail("While doing concurrent sync");
                     }
                 }
             });
@@ -434,8 +434,6 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
         } catch (InterruptedException ignore) {
             // ignore exception
         }
-
-        assertTrue(exception.toString(), exception.length() == 0);
 
         connector.dispose();
     }

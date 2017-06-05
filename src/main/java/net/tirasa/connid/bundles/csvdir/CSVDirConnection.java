@@ -50,6 +50,15 @@ public class CSVDirConnection {
 
     private static final String HSQLDB_DB_NAME = "csvdir_db";
 
+    static {
+        try {
+            Class.forName(jdbcDriver.class.getName());
+            System.setProperty("textdb.allow_full_path", "true");
+        } catch (ClassNotFoundException e) {
+            LOG.error(e, "Could not load " + jdbcDriver.class.getName());
+        }
+    }
+
     private final String viewname;
 
     private final String query;
@@ -72,7 +81,6 @@ public class CSVDirConnection {
         this.conf = conf;
         this.fileSystem = new FileSystem(conf);
 
-        Class.forName(jdbcDriver.class.getName());
         this.jdbcUrl = HSQLDB_JDBC_URL_PREFIX + conf.getSourcePath() + File.separator
                 + HSQLDB_DB_NAME + ";shutdown=false";
         this.conn = DriverManager.getConnection(jdbcUrl, "sa", "");

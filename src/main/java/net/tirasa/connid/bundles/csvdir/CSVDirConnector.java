@@ -59,16 +59,9 @@ import org.identityconnectors.framework.spi.operations.SyncOp;
 import org.identityconnectors.framework.spi.operations.TestOp;
 import org.identityconnectors.framework.spi.operations.UpdateOp;
 
-/**
- *
- * Only implements search since this connector is only used to do sync.
- *
- */
-@ConnectorClass(configurationClass = CSVDirConfiguration.class,
-        displayNameKey = "FlatFile")
-public class CSVDirConnector implements
-        Connector, SearchOp<FilterWhereBuilder>, SchemaOp, SyncOp, CreateOp,
-        UpdateOp, DeleteOp, AuthenticateOp, TestOp {
+@ConnectorClass(configurationClass = CSVDirConfiguration.class, displayNameKey = "CSVDir")
+public class CSVDirConnector implements Connector,
+        SearchOp<FilterWhereBuilder>, SchemaOp, SyncOp, CreateOp, UpdateOp, DeleteOp, AuthenticateOp, TestOp {
 
     /**
      *

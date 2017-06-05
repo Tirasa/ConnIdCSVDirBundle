@@ -19,7 +19,7 @@ import java.text.MessageFormat;
 
 public class QueryTemplate {
 
-    private String template;
+    private final String template;
 
     public QueryTemplate(final String template) {
         this.template = template;

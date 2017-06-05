@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.connid.bundles.csvdir.utilities;
+package net.tirasa.connid.bundles.csvdir.utilities;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.identityconnectors.common.StringUtil;
@@ -36,10 +37,7 @@ public class AttributeValue {
             value = new ArrayList<Object>();
             value.add(strValue);
         } else {
-            value = new ArrayList<Object>();
-            for (String str : strValue.split(Pattern.quote(multivaluDelimiter), -1)) {
-                value.add(str);
-            }
+            value = new ArrayList<Object>(Arrays.asList(strValue.split(Pattern.quote(multivaluDelimiter), -1)));
         }
     }
 

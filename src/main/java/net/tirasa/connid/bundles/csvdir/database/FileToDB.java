@@ -164,7 +164,7 @@ public class FileToDB {
             linkTable.append("SET TABLE ").append(tableName).
                     append(" SOURCE ").
                     append("\"").
-                    append(File.separator).append(file.getName()).
+                    append(file.getName()).
                     append(";ignore_first=").
                     append(conf.getIgnoreHeader()).
                     append(";all_quoted=").

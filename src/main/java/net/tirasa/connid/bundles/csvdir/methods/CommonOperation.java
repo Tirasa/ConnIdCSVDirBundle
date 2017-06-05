@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
-import org.connid.bundles.csvdir.utilities.AttributeValue;
+import net.tirasa.connid.bundles.csvdir.utilities.AttributeValue;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
