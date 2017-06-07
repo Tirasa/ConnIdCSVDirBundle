@@ -28,7 +28,7 @@
 
   <groupId>net.tirasa.connid.bundles</groupId>
   <artifactId>net.tirasa.connid.bundles.csvdir</artifactId>
-  <version>0.8.6-SNAPSHOT</version>
+  <version>0.8.6</version>
 
   <name>ConnId Bundles: CSV Directory</name>
 
@@ -49,6 +49,7 @@
     <connection>scm:git:git@github.com:Tirasa/ConnIdCSVDirBundle.git</connection>
     <url>scm:git:git@github.com:Tirasa/ConnIdCSVDirBundle.git</url>
     <developerConnection>scm:git:git@github.com:Tirasa/ConnIdCSVDirBundle.git</developerConnection>
+    <tag>net.tirasa.connid.bundles.csvdir-0.8.6</tag>
   </scm>
 
   <issueManagement>
