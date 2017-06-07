@@ -85,11 +85,7 @@ public class CSVDirConnector implements Connector,
     }
 
     /**
-     *
      * @param cfg Saves the configuration for use in later calls.
-     *
-     * @see org.identityconnectors.framework.Connector#init( org.identityconnectors.framework.Configuration)
-     *
      */
     @Override
     public final void init(final Configuration cfg) {
