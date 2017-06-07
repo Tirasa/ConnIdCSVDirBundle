@@ -324,7 +324,6 @@ public class CSVDirConfiguration extends AbstractConfiguration {
      * @throws IllegalStateException if the text qualifier and field delimiter are the same.
      * @throws RuntimeException if the file is not found.
      * @throws java.nio.charset.IllegalCharsetNameException if the character set name is invalid
-     * @see org.identityconnectors.framework.Configuration#validate()
      */
     @Override
     public void validate() {
