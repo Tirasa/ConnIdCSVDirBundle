@@ -253,9 +253,9 @@ public class CSVDirConnector implements Connector,
         LOG.info("Connection test");
 
         try {
-            new CSVDirTest(configuration).test();
+            new CSVDirTest(configuration).execute();
         } catch (Exception e) {
-            LOG.error("Test failed", e);
+            LOG.error(e, "Test failed");
         }
     }
 }

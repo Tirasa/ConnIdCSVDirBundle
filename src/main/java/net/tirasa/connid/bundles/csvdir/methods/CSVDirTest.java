@@ -26,31 +26,39 @@ public class CSVDirTest {
 
     private static final Log LOG = Log.getLog(CSVDirTest.class);
 
-    private final CSVDirConnection conn;
+    private final CSVDirConfiguration conf;
 
     public CSVDirTest(final CSVDirConfiguration conf) throws ClassNotFoundException, SQLException {
-        this.conn = CSVDirConnection.openConnection(conf);
+        this.conf = conf;
     }
 
-    public void test() {
+    public void execute() {
+        CSVDirConnection conn = null;
+        ResultSet resultSet = null;
         try {
-            execute();
+            conn = CSVDirConnection.open(conf);
+            resultSet = conn.allCsvFiles();
+
+            if (resultSet == null || resultSet.wasNull()) {
+                throw new ConnectorException("Test failed");
+            }
         } catch (Exception e) {
             LOG.error(e, "error during test connection");
             throw new ConnectorException(e);
-        }
-    }
-
-    private void execute() throws SQLException {
-        ResultSet resultSet = conn.allCsvFiles();
-        try {
-            if (resultSet == null || resultSet.wasNull()) {
-                LOG.error("Test failed");
-                throw new ConnectorException("Test failed");
-            }
         } finally {
             if (resultSet != null) {
-                resultSet.close();
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
             }
         }
     }

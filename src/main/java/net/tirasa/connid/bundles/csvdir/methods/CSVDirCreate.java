@@ -48,7 +48,7 @@ public class CSVDirCreate extends CommonOperation {
 
         this.conf = conf;
         this.attrs = attrs;
-        this.conn = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.open(conf);
     }
 
     public Uid execute() {
@@ -59,20 +59,15 @@ public class CSVDirCreate extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (conn != null) {
-                    conn.closeConnection();
-                }
+                conn.close();
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
             }
         }
     }
 
-    private Uid executeImpl()
-            throws SQLException {
-
+    private Uid executeImpl() throws SQLException {
         final Name name = AttributeUtil.getNameFromAttributes(attrs);
-
         if (name == null || StringUtil.isBlank(name.getNameValue())) {
             throw new IllegalArgumentException(
                     "No Name attribute provided in the attributes");

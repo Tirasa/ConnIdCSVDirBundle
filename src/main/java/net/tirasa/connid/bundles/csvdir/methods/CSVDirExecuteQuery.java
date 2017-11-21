@@ -66,7 +66,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
         this.where = where;
         this.handler = handler;
         this.options = options;
-        this.conn = CSVDirConnection.openConnection(configuration);
+        this.conn = CSVDirConnection.open(configuration);
     }
 
     public void execute() {
@@ -77,9 +77,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (conn != null) {
-                    conn.closeConnection();
-                }
+                conn.close();
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
             }
@@ -123,7 +121,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
                     handled = handler.handle(buildConnectorObject(conf, resultSet));
                 }
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             LOG.error(e, "Search query failed");
             throw new ConnectorIOException(e);
         } finally {

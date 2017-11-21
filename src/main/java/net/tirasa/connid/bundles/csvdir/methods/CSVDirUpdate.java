@@ -45,11 +45,11 @@ public class CSVDirUpdate extends CommonOperation {
     public CSVDirUpdate(final CSVDirConfiguration conf,
             final Uid uid, final Set<Attribute> set)
             throws ClassNotFoundException, SQLException {
-        
+
         this.conf = conf;
         this.uid = uid;
         this.attrs = set;
-        this.conn = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.open(conf);
     }
 
     public Uid execute() {
@@ -60,18 +60,14 @@ public class CSVDirUpdate extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (conn != null) {
-                    conn.closeConnection();
-                }
+                conn.close();
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
             }
         }
     }
 
-    private Uid executeImpl()
-            throws SQLException {
-
+    private Uid executeImpl() throws SQLException {
         if (uid == null || StringUtil.isBlank(uid.getUidValue())) {
             throw new IllegalArgumentException("No Name attribute provided in the attributes");
         }
@@ -82,7 +78,7 @@ public class CSVDirUpdate extends CommonOperation {
 
         conn.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
 
-        LOG.ok("Creation commited");
+        LOG.ok("Update commited");
         return uid;
     }
 }

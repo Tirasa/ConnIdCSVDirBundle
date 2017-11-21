@@ -41,7 +41,7 @@ public class CSVDirDelete extends CommonOperation {
 
         this.conf = conf;
         this.uid = uid;
-        this.conn = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.open(conf);
     }
 
     public void execute() {
@@ -53,7 +53,7 @@ public class CSVDirDelete extends CommonOperation {
         } finally {
             try {
                 if (conn != null) {
-                    conn.closeConnection();
+                    conn.close();
                 }
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");

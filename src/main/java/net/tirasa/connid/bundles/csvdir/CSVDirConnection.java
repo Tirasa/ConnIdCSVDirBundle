@@ -92,21 +92,17 @@ public class CSVDirConnection {
         this.fileToDB = new FileToDB(this);
     }
 
-    public static CSVDirConnection openConnection(
-            final CSVDirConfiguration configuration)
-            throws ClassNotFoundException, SQLException {
-
-        return new CSVDirConnection(configuration);
+    public static CSVDirConnection open(final CSVDirConfiguration conf) throws ClassNotFoundException, SQLException {
+        return new CSVDirConnection(conf);
     }
 
-    public void closeConnection()
-            throws SQLException {
-
+    public void close() throws SQLException {
         if (this.conn != null) {
             LOG.ok("Closing connection ...");
 
             dropTableAndViewIfExists();
-            this.conn.close();
+
+            SQLUtil.closeQuietly(conn);
 
             tables.clear();
         }
@@ -167,23 +163,17 @@ public class CSVDirConnection {
     }
 
     private int execute(final String query) {
-        PreparedStatement stm = null;
+        PreparedStatement stmt = null;
 
         LOG.ok("About to execute {0}", query);
         try {
-            stm = conn.prepareStatement(query);
-            return stm.executeUpdate();
+            stmt = conn.prepareStatement(query);
+            return stmt.executeUpdate();
         } catch (SQLException e) {
             LOG.error(e, "Error during sql query");
             throw new IllegalStateException(e);
         } finally {
-            try {
-                if (stm != null) {
-                    stm.close();
-                }
-            } catch (SQLException e) {
-                LOG.error(e, "While closing sql statement");
-            }
+            SQLUtil.closeQuietly(stmt);
         }
     }
 
@@ -209,13 +199,7 @@ public class CSVDirConnection {
             LOG.error(ex, "Error during sql query");
             throw new IllegalStateException(ex);
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException ex) {
-                    LOG.error(ex, "While closing sql statement");
-                }
-            }
+            SQLUtil.closeQuietly(stmt);
         }
     }
 
@@ -236,26 +220,16 @@ public class CSVDirConnection {
             LOG.error(e, "Error during sql query");
             throw new IllegalStateException(e);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (SQLException ex) {
-                LOG.error(ex, "While closing sql statement");
-            }
+            SQLUtil.closeQuietly(stmt);
         }
     }
 
-    private ResultSet doQuery(final PreparedStatement stm)
-            throws SQLException {
-
+    private ResultSet doQuery(final PreparedStatement stm) throws SQLException {
         LOG.ok("Execute query {0}", stm.toString());
         return stm.executeQuery();
     }
 
-    private void dropTableAndViewIfExists()
-            throws SQLException {
-
+    private void dropTableAndViewIfExists() throws SQLException {
         LOG.ok("Drop view {0}", viewname);
 
         Statement stmt = null;
@@ -263,9 +237,7 @@ public class CSVDirConnection {
             stmt = conn.createStatement();
             stmt.execute("DROP VIEW " + viewname + " IF EXISTS CASCADE");
         } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
+            SQLUtil.closeQuietly(stmt);
         }
 
         for (String table : tables) {
@@ -275,9 +247,7 @@ public class CSVDirConnection {
                 stmt = conn.createStatement();
                 stmt.execute("DROP TABLE " + table + " IF EXISTS CASCADE");
             } finally {
-                if (stmt != null) {
-                    stmt.close();
-                }
+                SQLUtil.closeQuietly(stmt);
             }
         }
     }

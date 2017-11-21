@@ -64,7 +64,7 @@ public class CSVDirSync extends CommonOperation {
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
-        this.conn = CSVDirConnection.openConnection(conf);
+        this.conn = CSVDirConnection.open(conf);
     }
 
     public void execute() {
@@ -75,18 +75,14 @@ public class CSVDirSync extends CommonOperation {
             throw new ConnectorException(e);
         } finally {
             try {
-                if (conn != null) {
-                    conn.closeConnection();
-                }
+                conn.close();
             } catch (SQLException e) {
                 LOG.error(e, "Error closing connections");
             }
         }
     }
 
-    private void executeImpl()
-            throws SQLException {
-
+    private void executeImpl() throws SQLException {
         // check objectclass
         if (objectClass == null || (!objectClass.equals(ObjectClass.ACCOUNT))) {
             throw new IllegalArgumentException("Invalid objectclass");
