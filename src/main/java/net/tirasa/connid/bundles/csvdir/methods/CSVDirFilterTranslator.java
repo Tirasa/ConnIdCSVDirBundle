@@ -32,6 +32,7 @@ import org.identityconnectors.framework.common.objects.filter.AbstractFilterTran
 import org.identityconnectors.framework.common.objects.filter.ContainsFilter;
 import org.identityconnectors.framework.common.objects.filter.EndsWithFilter;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
+import org.identityconnectors.framework.common.objects.filter.EqualsIgnoreCaseFilter;
 import org.identityconnectors.framework.common.objects.filter.GreaterThanFilter;
 import org.identityconnectors.framework.common.objects.filter.GreaterThanOrEqualFilter;
 import org.identityconnectors.framework.common.objects.filter.LessThanFilter;
@@ -106,7 +107,46 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
                 // Normalize NULLs
                 ret.addNull(param.getName());
             } else {
-                ret.addBind(param, "=");
+                ret.addBind(param, "=", false);
+            }
+        }
+
+        ret.getWhere().append(")");
+
+        return ret;
+    }
+
+    @Override
+    protected FilterWhereBuilder createEqualsIgnoreCaseExpression(
+            final EqualsIgnoreCaseFilter filter, final boolean not) {
+
+        final Attribute attribute = filter.getAttribute();
+        if (!validateSearchAttribute(attribute)) {
+            return null;
+        }
+
+        final SQLParam[] params = getSQLParam(attribute, oclass, options);
+        if (params == null) {
+            return null;
+        }
+
+        final FilterWhereBuilder ret = createBuilder();
+        ret.getWhere().append("(");
+        if (not) {
+            ret.getWhere().append("NOT ");
+        }
+
+        for (int i = 0; i < params.length; i++) {
+            final SQLParam param = params[i];
+            if (i > 0) {
+                ret.getWhere().append(" AND ");
+            }
+
+            if (param.getValue() == null) {
+                // Normalize NULLs
+                ret.addNull(param.getName());
+            } else {
+                ret.addBind(param, "=", true);
             }
         }
 
@@ -156,8 +196,8 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
                 }
                 ret.addBind(
                         new SQLParam(param.getName(),
-                        value,
-                        param.getSqlType()), "LIKE");
+                                value,
+                                param.getSqlType()), "LIKE", false);
             }
         }
         ret.getWhere().append(")");
@@ -202,8 +242,8 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
                 }
                 ret.addBind(
                         new SQLParam(param.getName(),
-                        value,
-                        param.getSqlType()), "LIKE");
+                                value,
+                                param.getSqlType()), "LIKE", false);
             }
         }
         ret.getWhere().append(")");
@@ -213,7 +253,6 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
 
     @Override
     protected FilterWhereBuilder createStartsWithExpression(final StartsWithFilter filter, final boolean not) {
-
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -249,8 +288,8 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
                 }
                 ret.addBind(
                         new SQLParam(param.getName(),
-                        value,
-                        param.getSqlType()), "LIKE");
+                                value,
+                                param.getSqlType()), "LIKE", false);
             }
         }
 
@@ -261,7 +300,6 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
 
     @Override
     protected FilterWhereBuilder createGreaterThanExpression(final GreaterThanFilter filter, final boolean not) {
-
         final Attribute attribute = filter.getAttribute();
         if (!validateSearchAttribute(attribute)) {
             return null;
@@ -288,7 +326,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
             // ignore null values
             if (value != null) {
                 final String op = not ? "<=" : ">";
-                ret.addBind(param, op);
+                ret.addBind(param, op, false);
             }
         }
         ret.getWhere().append(")");
@@ -326,7 +364,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
             // ignore null values
             if (value != null) {
                 final String op = not ? "<" : ">=";
-                ret.addBind(param, op);
+                ret.addBind(param, op, false);
             }
         }
 
@@ -363,7 +401,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
             // ignore null values
             if (value != null) {
                 final String op = not ? ">=" : "<";
-                ret.addBind(param, op);
+                ret.addBind(param, op, false);
             }
         }
 
@@ -402,7 +440,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
             // ignore null values
             if (value != null) {
                 final String op = not ? ">" : "<=";
-                ret.addBind(param, op);
+                ret.addBind(param, op, false);
             }
         }
 
@@ -426,7 +464,7 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
         final String[] values =
                 AttributeUtil.getSingleValue(attribute) != null
                 ? AttributeUtil.getSingleValue(attribute).toString().split(
-                ((CSVDirConfiguration) connector.getConfiguration()).getKeyseparator())
+                        ((CSVDirConfiguration) connector.getConfiguration()).getKeyseparator())
                 : null;
 
         final SQLParam[] params;
@@ -438,15 +476,15 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
                 params[i] = new SQLParam(
                         columnNames[i],
                         values != null && values.length == columnNames.length
-                        ? values[i] : null,
+                                ? values[i] : null,
                         columnType);
             }
         } else {
-            params = new SQLParam[] {new SQLParam(
+            params = new SQLParam[] { new SQLParam(
                 columnNames[0],
                 values != null && values.length == columnNames.length
                 ? values[0] : null,
-                columnType)};
+                columnType) };
         }
 
         return params;
@@ -462,8 +500,8 @@ public class CSVDirFilterTranslator extends AbstractFilterTranslator<FilterWhere
         if (!StringUtil.isBlank(((CSVDirConfiguration) connector.getConfiguration()).getPasswordColumnName())
                 && OperationalAttributes.PASSWORD_NAME.equalsIgnoreCase(attributeName)) {
 
-            return new String[] {((CSVDirConfiguration) connector.getConfiguration()).getPasswordColumnName()};
+            return new String[] { ((CSVDirConfiguration) connector.getConfiguration()).getPasswordColumnName() };
         }
-        return new String[] {attributeName};
+        return new String[] { attributeName };
     }
 }
