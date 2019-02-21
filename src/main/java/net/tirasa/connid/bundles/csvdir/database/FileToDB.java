@@ -48,10 +48,8 @@ public class FileToDB {
     private static final Log LOG = Log.getLog(FileToDB.class);
 
     public String createDbForCreate() {
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA db to create");
         File file = fileSystem.getLastModifiedCsvFile();
         if (file == null) {
-            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRRGGGGGGGGGGG");
             file = new File(DEFAULT_PREFIX + Utilities.randomNumber() + ".csv");
         }
         return bindFileTable(file);
