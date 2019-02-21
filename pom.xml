@@ -23,7 +23,7 @@
   <parent>
     <groupId>net.tirasa.connid</groupId>
     <artifactId>connid</artifactId>
-    <version>1.4.5.1</version>
+    <version>1.4.5.0</version>
   </parent>
 
   <groupId>net.tirasa.connid.bundles</groupId>
@@ -76,7 +76,7 @@
   </mailingLists>
 
   <properties>
-    <connid.version>1.4.5.1</connid.version>
+    <connid.version>1.4.5.0</connid.version>
     
     <hsqldb.version>2.3.5</hsqldb.version>
     <test.source.path>${project.build.directory}/test-source-path</test.source.path>    

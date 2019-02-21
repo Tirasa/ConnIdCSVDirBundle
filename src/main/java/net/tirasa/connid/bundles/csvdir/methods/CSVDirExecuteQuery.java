@@ -46,32 +46,29 @@ public class CSVDirExecuteQuery extends CommonOperation {
 
     private final CSVDirConnection conn;
 
-    private final ObjectClass oclass;
-
     private final FilterWhereBuilder where;
 
     private final ResultsHandler handler;
 
     private final OperationOptions options;
 
-    public CSVDirExecuteQuery(final CSVDirConfiguration configuration,
-            final ObjectClass oclass,
+    public CSVDirExecuteQuery(
+            final CSVDirConfiguration configuration,
             final FilterWhereBuilder where,
             final ResultsHandler handler,
             final OperationOptions options)
             throws ClassNotFoundException, SQLException {
 
         this.conf = configuration;
-        this.oclass = oclass;
         this.where = where;
         this.handler = handler;
         this.options = options;
         this.conn = CSVDirConnection.open(configuration);
     }
 
-    public void execute() {
+    public void execute(final ObjectClass oc) {
         try {
-            executeImpl();
+            executeImpl(oc);
         } catch (Exception e) {
             LOG.error(e, "error during updating");
             throw new ConnectorException(e);
@@ -84,14 +81,9 @@ public class CSVDirExecuteQuery extends CommonOperation {
         }
     }
 
-    private void executeImpl()
+    private void executeImpl(final ObjectClass oc)
             throws SQLException {
         LOG.info("check the ObjectClass and result handler");
-
-        // Contract tests
-        if (oclass == null || (!oclass.equals(ObjectClass.ACCOUNT))) {
-            throw new IllegalArgumentException("Object class required");
-        }
 
         if (handler == null) {
             throw new IllegalArgumentException("Result handler required");
@@ -110,7 +102,7 @@ public class CSVDirExecuteQuery extends CommonOperation {
 
         ResultSet resultSet = null;
         try {
-            resultSet = conn.allCsvFiles(whereClause, params);
+            resultSet = conn.allCsvFiles(oc, whereClause, params);
 
             boolean handled = true;
 

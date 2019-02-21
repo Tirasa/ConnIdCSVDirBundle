@@ -22,6 +22,7 @@ import java.util.List;
 import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
 import net.tirasa.connid.bundles.csvdir.utilities.Utilities;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -47,8 +48,10 @@ public class FileToDB {
     private static final Log LOG = Log.getLog(FileToDB.class);
 
     public String createDbForCreate() {
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA db to create");
         File file = fileSystem.getLastModifiedCsvFile();
         if (file == null) {
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRRGGGGGGGGGGG");
             file = new File(DEFAULT_PREFIX + Utilities.randomNumber() + ".csv");
         }
         return bindFileTable(file);
@@ -72,6 +75,10 @@ public class FileToDB {
                 append(tableName).append("_SYS_PK_").
                 append(Utilities.randomNumber()).
                 append(" PRIMARY KEY (");
+
+        if (!StringUtil.isBlank(conf.getObjectClassColumn())) {
+            tableHeader.append(conf.getObjectClassColumn()).append(",");
+        }
 
         final String[] keys = conf.getKeyColumnNames();
         for (int i = 0; i < keys.length; i++) {
@@ -173,7 +180,7 @@ public class FileToDB {
                     append(conf.getEscapedFieldDelimiter()).
                     append(";lvs=").
                     append(conf.getTextQualifier() == '"'
-                    ? "\\quote" : conf.getTextQualifier()).
+                            ? "\\quote" : conf.getTextQualifier()).
                     append(";encoding=").
                     append(conf.getEncoding()).
                     append("\"");

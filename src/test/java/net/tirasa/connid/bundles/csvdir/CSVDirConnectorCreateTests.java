@@ -123,8 +123,8 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, newCfg);
         // TODO: remove the line below when using ConnId >= 1.4.0.1
         ((APIConfigurationImpl) impl).
-                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(newCfg));        
-        
+                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(newCfg));
+
         final ConnectorFacade facade = factory.newInstance(impl);
 
         final ConnectorObject object = facade.getObject(ObjectClass.ACCOUNT, newAccount, null);
@@ -198,11 +198,6 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         // -----------------------------------------
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, config);
-        
-        // TODO: remove the line below when using ConnId >= 1.4.0.1
-        ((APIConfigurationImpl) impl).
-                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(config));  
-        
         final ConnectorFacade connector = factory.newInstance(impl);
 
         final Uid uid = connector.create(ObjectClass.ACCOUNT, attributes, null);
@@ -217,10 +212,5 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         assertEquals(2, value.size(), 0);
         assertEquals("mrossi1@tirasa.net", value.get(0).toString());
         assertEquals("mrossi2@tirasa.net", value.get(1).toString());
-    }
-
-    private Set<Attribute> setAccountId(final Set<Attribute> attributes) {
-        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro123"));
-        return attributes;
     }
 }

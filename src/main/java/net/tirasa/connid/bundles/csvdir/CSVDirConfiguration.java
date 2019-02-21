@@ -17,6 +17,7 @@ package net.tirasa.connid.bundles.csvdir;
 
 import java.nio.charset.Charset;
 import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.spi.AbstractConfiguration;
 import org.identityconnectors.framework.spi.ConfigurationProperty;
 
@@ -105,6 +106,16 @@ public class CSVDirConfiguration extends AbstractConfiguration {
      * Default value for 'statusColumn' field. Default 'true'.
      */
     private String defaultStatusValue = "true";
+
+    /**
+     * Default value for 'statusColumn' field. Default 'true'.
+     */
+    private String objectClassColumn;
+
+    /**
+     * Supported object classes.
+     */
+    private String[] objectClass;
 
     @ConfigurationProperty(displayMessageKey = "sourcePath.display",
             helpMessageKey = "sourcePath.help", required = true, order = 1)
@@ -240,6 +251,18 @@ public class CSVDirConfiguration extends AbstractConfiguration {
         return statusColumn;
     }
 
+    @ConfigurationProperty(displayMessageKey = "objectClassColumn.display",
+            helpMessageKey = "objectClassColumn.help", required = false, order = 18)
+    public String getObjectClassColumn() {
+        return objectClassColumn;
+    }
+
+    @ConfigurationProperty(displayMessageKey = "objectClass.display",
+            helpMessageKey = "objectClass.help", required = false, order = 19)
+    public String[] getObjectClass() {
+        return objectClass == null ? new String[] { ObjectClass.ACCOUNT_NAME } : objectClass.clone();
+    }
+
     public void setKeyseparator(final String keyseparator) {
         this.keyseparator = keyseparator;
     }
@@ -314,6 +337,14 @@ public class CSVDirConfiguration extends AbstractConfiguration {
 
     public void setStatusColumn(final String statusColumn) {
         this.statusColumn = statusColumn;
+    }
+
+    public void setObjectClassColumn(final String objectClassColumn) {
+        this.objectClassColumn = objectClassColumn;
+    }
+
+    public void setObjectClass(final String[] objectClass) {
+        this.objectClass = objectClass == null ? null : objectClass.clone();
     }
 
     /**

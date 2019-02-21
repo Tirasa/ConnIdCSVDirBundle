@@ -25,6 +25,7 @@ import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeUtil;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -51,9 +52,9 @@ public class CSVDirCreate extends CommonOperation {
         this.conn = CSVDirConnection.open(conf);
     }
 
-    public Uid execute() {
+    public Uid execute(final ObjectClass oc) {
         try {
-            return executeImpl();
+            return executeImpl(oc);
         } catch (Exception e) {
             LOG.error(e, "error during creation");
             throw new ConnectorException(e);
@@ -66,18 +67,18 @@ public class CSVDirCreate extends CommonOperation {
         }
     }
 
-    private Uid executeImpl() throws SQLException {
+    private Uid executeImpl(final ObjectClass oc) throws SQLException {
         final Name name = AttributeUtil.getNameFromAttributes(attrs);
         if (name == null || StringUtil.isBlank(name.getNameValue())) {
             throw new IllegalArgumentException(
                     "No Name attribute provided in the attributes");
         }
 
-        if (userExists(name.getNameValue(), conn, conf)) {
+        if (userExists(oc, name.getNameValue(), conn, conf)) {
             throw new ConnectorException("User Exists");
         }
 
-        conn.insertAccount(getAttributeMap(conf, attrs, name));
+        conn.insertAccount(oc, getAttributeMap(conf, attrs, name));
 
         LOG.ok("Creation commited");
 

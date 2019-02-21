@@ -44,8 +44,6 @@ public class CSVDirSync extends CommonOperation {
 
     private final CSVDirConnection conn;
 
-    private final ObjectClass objectClass;
-
     private SyncToken syncToken;
 
     private final SyncResultsHandler handler;
@@ -53,23 +51,21 @@ public class CSVDirSync extends CommonOperation {
     private final OperationOptions options;
 
     public CSVDirSync(final CSVDirConfiguration conf,
-            final ObjectClass objectClass,
             final SyncToken syncToken,
             final SyncResultsHandler handler,
             final OperationOptions options)
             throws ClassNotFoundException, SQLException {
 
         this.conf = conf;
-        this.objectClass = objectClass;
         this.syncToken = syncToken;
         this.handler = handler;
         this.options = options;
         this.conn = CSVDirConnection.open(conf);
     }
 
-    public void execute() {
+    public void execute(final ObjectClass oc) {
         try {
-            executeImpl();
+            executeImpl(oc);
         } catch (Exception e) {
             LOG.error(e, "error during updating");
             throw new ConnectorException(e);
@@ -82,13 +78,8 @@ public class CSVDirSync extends CommonOperation {
         }
     }
 
-    private void executeImpl() throws SQLException {
-        // check objectclass
-        if (objectClass == null || (!objectClass.equals(ObjectClass.ACCOUNT))) {
-            throw new IllegalArgumentException("Invalid objectclass");
-        }
-
-        // check objectclass
+    private void executeImpl(final ObjectClass oc) throws SQLException {
+        // check handler
         if (handler == null) {
             throw new IllegalArgumentException("Invalid handler");
         }
@@ -99,7 +90,8 @@ public class CSVDirSync extends CommonOperation {
         }
 
         try {
-            final Pair<Long, ResultSet> modified = conn.modifiedCsvFiles(Long.valueOf(syncToken.getValue().toString()));
+            final Pair<Long, ResultSet> modified
+                    = conn.modifiedCsvFiles(oc, Long.valueOf(syncToken.getValue().toString()));
             buildSyncDelta(modified.getValue(), modified.getKey(), handler);
         } catch (NumberFormatException e) {
             LOG.error(e, "error during syncronization");

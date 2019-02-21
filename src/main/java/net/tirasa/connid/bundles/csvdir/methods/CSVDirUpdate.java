@@ -24,6 +24,7 @@ import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -52,9 +53,9 @@ public class CSVDirUpdate extends CommonOperation {
         this.conn = CSVDirConnection.open(conf);
     }
 
-    public Uid execute() {
+    public Uid execute(final ObjectClass oc) {
         try {
-            return executeImpl();
+            return executeImpl(oc);
         } catch (Exception e) {
             LOG.error(e, "error during updating");
             throw new ConnectorException(e);
@@ -67,16 +68,16 @@ public class CSVDirUpdate extends CommonOperation {
         }
     }
 
-    private Uid executeImpl() throws SQLException {
+    private Uid executeImpl(final ObjectClass oc) throws SQLException {
         if (uid == null || StringUtil.isBlank(uid.getUidValue())) {
             throw new IllegalArgumentException("No Name attribute provided in the attributes");
         }
 
-        if (!userExists(uid.getUidValue(), conn, conf)) {
+        if (!userExists(oc, uid.getUidValue(), conn, conf)) {
             throw new ConnectorException("User doesn't exist");
         }
 
-        conn.updateAccount(getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
+        conn.updateAccount(oc, getAttributeMap(conf, attrs, new Name(uid.getUidValue())), uid);
 
         LOG.ok("Update commited");
         return uid;

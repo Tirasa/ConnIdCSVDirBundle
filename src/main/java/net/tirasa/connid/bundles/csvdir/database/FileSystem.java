@@ -40,6 +40,7 @@ public class FileSystem {
     }
 
     public final File[] getAllCsvFiles() {
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA source path " + sourcePath);
         final File[] csvFiles = sourcePath.listFiles(fileFilter);
         return returnNewArrayIfCsvFilesIsEmpty(csvFiles);
     }
@@ -52,12 +53,14 @@ public class FileSystem {
         File lastModifiedFile = null;
 
         for (File file : csvFiles) {
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA file " + file.getAbsolutePath());
             if (file.lastModified() > tm) {
                 tm = file.lastModified();
                 lastModifiedFile = file;
             }
         }
 
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA last " + lastModifiedFile);
         return lastModifiedFile;
     }
 
@@ -106,6 +109,18 @@ public class FileSystem {
     }
 
     private boolean isMatched(final File file) {
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA file mask " + conf.getFileMask());
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA is matched file " + file);
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA is diretory " + file.isDirectory());
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA is default " 
+                + file.getName().matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA is name match " 
+                + file.getName().matches(conf.getFileMask()));
+        
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA full match " + (!file.isDirectory()
+                && (file.getName().matches(conf.getFileMask())
+                || file.getName().matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"))));
+        
         return !file.isDirectory()
                 && (file.getName().matches(conf.getFileMask())
                 || file.getName().matches(FileToDB.DEFAULT_PREFIX + ".*\\.csv"));

@@ -36,6 +36,10 @@ public class CSVDirSchema {
      */
     private static final Log LOG = Log.getLog(CSVDirSchema.class);
 
+    public static String OBJECTCLASS_DEFAULT_COLUMN_NAME = "__OC__";
+
+    public static String OBJECTCLASS_DEFAULT_VALUE = ObjectClass.ACCOUNT.getObjectClassValue();
+
     private final CSVDirConfiguration conf;
 
     private final Class<? extends Connector> connectorClass;
@@ -92,8 +96,10 @@ public class CSVDirSchema {
             attrInfos.add(abld.build());
         }
 
-        // set it to object class account..
-        bld.defineObjectClass(ObjectClass.ACCOUNT_NAME, attrInfos);
+        // set it to specified object classes..
+        for (String oc : conf.getObjectClass()) {
+            bld.defineObjectClass(oc, attrInfos);
+        }
 
         // return the new schema object..
         return bld.build();

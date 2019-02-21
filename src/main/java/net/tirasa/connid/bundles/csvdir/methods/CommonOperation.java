@@ -29,16 +29,20 @@ import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ConnectorObjectBuilder;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
 
 public class CommonOperation {
 
-    protected static Boolean userExists(final String uidString,
-            final CSVDirConnection conn, final CSVDirConfiguration conf)
+    protected static Boolean userExists(
+            final ObjectClass oc,
+            final String uidString,
+            final CSVDirConnection conn, 
+            final CSVDirConfiguration conf)
             throws SQLException {
 
-        final ResultSet resultSet = conn.allCsvFiles();
+        final ResultSet resultSet = conn.allCsvFiles(oc);
 
         final String[] keys = conf.getKeyColumnNames();
         final String[] uidKeys = uidString.split(conf.getKeyseparator());
@@ -130,6 +134,8 @@ public class CommonOperation {
                         ? conf.getDefaultStatusValue() : value).equals(conf.getEnabledStatusValue());
 
                 bld.addAttribute(AttributeBuilder.buildEnabled(status));
+            } else if (name.equalsIgnoreCase(conf.getObjectClassColumn()) && !StringUtil.isEmpty(value)) {
+                bld.setObjectClass(new ObjectClass(value));
             } else {
                 bld.addAttribute(name, new AttributeValue(value, conf.getMultivalueSeparator()).get());
             }

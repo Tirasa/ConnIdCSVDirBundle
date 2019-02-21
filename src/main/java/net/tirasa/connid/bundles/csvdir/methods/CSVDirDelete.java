@@ -20,6 +20,7 @@ import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.spi.Connector;
 
@@ -44,9 +45,9 @@ public class CSVDirDelete extends CommonOperation {
         this.conn = CSVDirConnection.open(conf);
     }
 
-    public void execute() {
+    public void execute(final ObjectClass oc) {
         try {
-            executeImpl();
+            executeImpl(oc);
         } catch (Exception e) {
             LOG.error(e, "error during updating");
             throw new ConnectorException(e);
@@ -61,11 +62,11 @@ public class CSVDirDelete extends CommonOperation {
         }
     }
 
-    private void executeImpl() throws SQLException {
-        if (!userExists(uid.getUidValue(), conn, conf)) {
+    private void executeImpl(final ObjectClass oc) throws SQLException {
+        if (!userExists(oc, uid.getUidValue(), conn, conf)) {
             throw new ConnectorException("User does not exist");
         }
-        conn.deleteAccount(uid);
+        conn.deleteAccount(oc, uid);
         LOG.ok("Delete completed");
     }
 }

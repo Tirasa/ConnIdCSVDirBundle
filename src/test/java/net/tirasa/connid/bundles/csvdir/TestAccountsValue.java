@@ -40,9 +40,8 @@ public class TestAccountsValue {
 
     public static final char TEXT_QUALIFIER = '"';
 
-    public static final TestAccount HEADER =
-            new TestAccount(ACCOUNTID, FIRSTNAME,
-                    LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
+    public static final TestAccount HEADER = new TestAccount(
+            ACCOUNTID, FIRSTNAME, LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
 
     public static final List<TestAccount> TEST_ACCOUNTS = new ArrayList<TestAccount>();
 

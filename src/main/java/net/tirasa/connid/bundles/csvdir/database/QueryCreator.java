@@ -19,18 +19,30 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.utilities.QueryTemplate;
 import net.tirasa.connid.bundles.csvdir.utilities.Utilities;
+import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 
 public final class QueryCreator {
 
-    private QueryCreator() {
-        // empty private constructor for utility class
+    private final String ocColumnName;
+
+    public QueryCreator(final CSVDirConfiguration conf) {
+        this.ocColumnName = conf.getObjectClassColumn();
     }
 
-    private static String getWhereClause(final Uid uid, final String keySeparator, final String[] keys) {
+    private String getWhereClause(
+            final ObjectClass oc,
+            final Uid uid,
+            final String keySeparator,
+            final String[] keys) {
         final StringBuilder where = new StringBuilder();
+        if (!StringUtil.isEmpty(ocColumnName)) {
+            where.append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("' AND ");
+        }
 
         final String[] uidKeys = uid.getUidValue().split(keySeparator);
         for (int i = 0; i < keys.length; i++) {
@@ -43,8 +55,11 @@ public final class QueryCreator {
         return where.toString();
     }
 
-    private static Map<String, String> getKeyValueMap(final Map<String, String> valuesMap) {
+    private Map<String, String> getKeyValueMap(final ObjectClass oc, final Map<String, String> valuesMap) {
         final Map<String, String> keyValueMap = new LinkedHashMap<String, String>();
+        if (!StringUtil.isEmpty(ocColumnName)) {
+            keyValueMap.put(ocColumnName, "'" + oc.getObjectClassValue() + "'");
+        }
         for (Map.Entry<String, String> entry : valuesMap.entrySet()) {
             if (entry.getValue() == null) {
                 keyValueMap.put(entry.getKey(), "NULL");
@@ -56,8 +71,11 @@ public final class QueryCreator {
         return keyValueMap;
     }
 
-    public static String insertQuery(final Map<String, String> valuesMap, final String tableName) {
-        final Map<String, String> keyValueMap = getKeyValueMap(valuesMap);
+    public String insertQuery(
+            final ObjectClass oc,
+            final Map<String, String> valuesMap,
+            final String tableName) {
+        final Map<String, String> keyValueMap = getKeyValueMap(oc, valuesMap);
 
         final QueryTemplate queryTemplate = new QueryTemplate("INSERT INTO {0}({1}) VALUES({2})");
         return queryTemplate.apply(tableName,
@@ -65,14 +83,15 @@ public final class QueryCreator {
                 Utilities.join(keyValueMap.values(), ','));
     }
 
-    public static String updateQuery(
+    public String updateQuery(
+            final ObjectClass oc,
             final Map<String, String> valuesMap,
             final Uid uid,
             final String keySeparator,
             final String[] keys,
             final String tableName) {
 
-        final Map<String, String> keyValueMap = getKeyValueMap(valuesMap);
+        final Map<String, String> keyValueMap = getKeyValueMap(oc, valuesMap);
         final List<String> set = new ArrayList<String>(keyValueMap.size());
         for (Map.Entry<String, String> entry : keyValueMap.entrySet()) {
             set.add(entry.getKey() + "=" + entry.getValue());
@@ -81,10 +100,11 @@ public final class QueryCreator {
         final QueryTemplate queryTemplate = new QueryTemplate("UPDATE {0} SET {1} WHERE {2}");
         return queryTemplate.apply(tableName,
                 Utilities.join(set, ','),
-                getWhereClause(uid, keySeparator, keys));
+                getWhereClause(oc, uid, keySeparator, keys));
     }
 
-    public static String deleteQuery(
+    public String deleteQuery(
+            final ObjectClass oc,
             final Uid uid,
             final String keySeparator,
             final String[] keys,
@@ -92,6 +112,6 @@ public final class QueryCreator {
 
         final QueryTemplate queryTemplate = new QueryTemplate("DELETE FROM {0} WHERE {1}");
         return queryTemplate.apply(tableName,
-                getWhereClause(uid, keySeparator, keys));
+                getWhereClause(oc, uid, keySeparator, keys));
     }
 }

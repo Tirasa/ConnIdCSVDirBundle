@@ -17,6 +17,7 @@ package net.tirasa.connid.bundles.csvdir;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import net.tirasa.connid.bundles.csvdir.database.FileSystem;
@@ -101,7 +102,7 @@ public class CSVDirConnector implements Connector,
     public final FilterTranslator<FilterWhereBuilder> createFilterTranslator(
             final ObjectClass oclass, final OperationOptions options) {
 
-        if (oclass == null || (!oclass.equals(ObjectClass.ACCOUNT))) {
+        if (oclass == null || !Arrays.asList(configuration.getObjectClass()).contains(oclass.getObjectClassValue())) {
             throw new IllegalArgumentException("Invalid objectclass");
         }
 
@@ -116,7 +117,7 @@ public class CSVDirConnector implements Connector,
             final OperationOptions options) {
 
         try {
-            new CSVDirExecuteQuery(configuration, oclass, where, handler, options).execute();
+            new CSVDirExecuteQuery(configuration, where, handler, options).execute(oclass);
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException e) {
@@ -132,7 +133,7 @@ public class CSVDirConnector implements Connector,
             final OperationOptions options) {
 
         try {
-            new CSVDirSync(configuration, objectClass, syncToken, handler, options).execute();
+            new CSVDirSync(configuration, syncToken, handler, options).execute(objectClass);
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException ex) {
@@ -155,7 +156,7 @@ public class CSVDirConnector implements Connector,
             final OperationOptions options) {
 
         try {
-            return new CSVDirCreate(configuration, set).execute();
+            return new CSVDirCreate(configuration, set).execute(objectClass);
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException e) {
@@ -168,7 +169,7 @@ public class CSVDirConnector implements Connector,
             final Set<Attribute> attrs, final OperationOptions options) {
 
         try {
-            return new CSVDirUpdate(configuration, uid, attrs).execute();
+            return new CSVDirUpdate(configuration, uid, attrs).execute(objectClass);
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException e) {
@@ -181,7 +182,7 @@ public class CSVDirConnector implements Connector,
             final OperationOptions options) {
 
         try {
-            new CSVDirDelete(configuration, uid).execute();
+            new CSVDirDelete(configuration, uid).execute(objectClass);
         } catch (ClassNotFoundException e) {
             throw new ConnectorIOException(e);
         } catch (SQLException e) {

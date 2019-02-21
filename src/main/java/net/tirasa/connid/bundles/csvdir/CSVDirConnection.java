@@ -35,8 +35,10 @@ import net.tirasa.connid.commons.db.SQLParam;
 import net.tirasa.connid.commons.db.SQLUtil;
 import org.hsqldb.jdbcDriver;
 import org.identityconnectors.common.Pair;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 
 public class CSVDirConnection {
@@ -75,6 +77,8 @@ public class CSVDirConnection {
 
     private final FileToDB fileToDB;
 
+    private final QueryCreator queryCreator;
+
     private CSVDirConnection(final CSVDirConfiguration conf)
             throws ClassNotFoundException, SQLException {
 
@@ -90,6 +94,8 @@ public class CSVDirConnection {
         this.query = "SELECT * FROM " + viewname;
 
         this.fileToDB = new FileToDB(this);
+
+        this.queryCreator = new QueryCreator(conf);
     }
 
     public static CSVDirConnection open(final CSVDirConfiguration conf) throws ClassNotFoundException, SQLException {
@@ -108,15 +114,15 @@ public class CSVDirConnection {
         }
     }
 
-    public int insertAccount(final Map<String, String> attributes) {
+    public int insertAccount(final ObjectClass oc, final Map<String, String> attributes) {
         final String tableName = fileToDB.createDbForCreate();
 
         tables.add(tableName);
 
-        return execute(QueryCreator.insertQuery(attributes, tableName));
+        return execute(queryCreator.insertQuery(oc, attributes, tableName));
     }
 
-    public int updateAccount(final Map<String, String> attrToBeReplaced, final Uid uid) {
+    public int updateAccount(final ObjectClass oc, final Map<String, String> attrToBeReplaced, final Uid uid) {
         final File[] files = fileSystem.getAllCsvFiles();
         if (files.length == 0) {
             throw new ConnectorException("Empty table");
@@ -129,7 +135,8 @@ public class CSVDirConnection {
 
             tables.add(tableName);
 
-            returnValue += execute(QueryCreator.updateQuery(
+            returnValue += execute(queryCreator.updateQuery(
+                    oc,
                     attrToBeReplaced,
                     uid,
                     conf.getKeyseparator(),
@@ -139,7 +146,7 @@ public class CSVDirConnection {
         return returnValue;
     }
 
-    public int deleteAccount(final Uid uid) {
+    public int deleteAccount(final ObjectClass oc, final Uid uid) {
         final File[] files = fileSystem.getAllCsvFiles();
         if (files.length == 0) {
             throw new ConnectorException("Empty table");
@@ -152,7 +159,8 @@ public class CSVDirConnection {
 
             tables.add(tableName);
 
-            returnValue += execute(QueryCreator.deleteQuery(
+            returnValue += execute(queryCreator.deleteQuery(
+                    oc,
                     uid,
                     conf.getKeyseparator(),
                     conf.getKeyColumnNames(),
@@ -177,23 +185,39 @@ public class CSVDirConnection {
         }
     }
 
-    public final Pair<Long, ResultSet> modifiedCsvFiles(final long syncToken) throws SQLException {
+    public final Pair<Long, ResultSet> modifiedCsvFiles(
+            final ObjectClass oc,
+            final long syncToken) throws SQLException {
         final File[] csvFiles = fileSystem.getLastestChangedFiles(syncToken);
         final Long highestTimeStamp = fileSystem.getHighestTimeStamp(csvFiles);
 
         final List<String> tableNames = fileToDB.createDbForSync(csvFiles);
         tables.addAll(tableNames);
 
+        final String ocColumnName = this.conf.getObjectClassColumn();
+
+        String ocQuery = (StringUtil.isBlank(ocColumnName)
+                ? query
+                : new StringBuilder(query).append(" WHERE ").
+                        append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("'")).
+                toString();
         return Pair.of(highestTimeStamp, doQuery(conn.prepareStatement(query)));
     }
 
-    public ResultSet allCsvFiles() {
+    public ResultSet allCsvFiles(final ObjectClass oc) {
         final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
         tables.addAll(tableNames);
 
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement(query);
+            final String ocColumnName = this.conf.getObjectClassColumn();
+
+            String ocQuery = (StringUtil.isBlank(ocColumnName)
+                    ? query
+                    : new StringBuilder(query).append(" WHERE ").
+                            append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("'")).
+                    toString();
+            stmt = conn.prepareStatement(ocQuery);
             return doQuery(stmt);
         } catch (SQLException ex) {
             LOG.error(ex, "Error during sql query");
@@ -203,15 +227,21 @@ public class CSVDirConnection {
         }
     }
 
-    public ResultSet allCsvFiles(final String where, final List<SQLParam> params) {
+    public ResultSet allCsvFiles(final ObjectClass oc, final String where, final List<SQLParam> params) {
         final List<String> tableNames = fileToDB.createDbForSync(fileSystem.getAllCsvFiles());
         tables.addAll(tableNames);
 
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement(
-                    query + (where != null && !where.isEmpty()
-                    ? " WHERE " + where : ""));
+            final String ocColumnName = this.conf.getObjectClassColumn();
+
+            String ocQuery = StringUtil.isBlank(ocColumnName)
+                    ? query + (where != null && !where.isEmpty() ? " WHERE " + where : "")
+                    : (new StringBuilder(query).append(" WHERE ").
+                            append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("'")).
+                            toString() + (where != null && !where.isEmpty() ? " AND " + where : "");
+
+            stmt = conn.prepareStatement(ocQuery);
 
             SQLUtil.setParams(stmt, params);
 

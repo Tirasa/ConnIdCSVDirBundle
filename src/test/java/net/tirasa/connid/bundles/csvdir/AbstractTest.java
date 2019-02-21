@@ -89,6 +89,46 @@ public abstract class AbstractTest {
         return config;
     }
 
+    protected CSVDirConfiguration createMultiOCsConfiguration(final String mask) {
+        // create the connector configuration..
+        final CSVDirConfiguration config = new CSVDirConfiguration();
+        config.setFileMask(mask);
+        config.setKeyColumnNames(new String[] { TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME });
+        config.setDeleteColumnName(TestAccountsValue.DELETED);
+        config.setPasswordColumnName(TestAccountsValue.PASSWORD);
+        config.setSourcePath(testSourceDir.getPath());
+        config.setQuotationRequired(Boolean.TRUE);
+        config.setIgnoreHeader(IGNORE_HEADER);
+        config.setKeyseparator(";");
+        config.setFields(new String[] {
+            "OC",
+            TestAccountsValue.ACCOUNTID,
+            TestAccountsValue.FIRSTNAME,
+            TestAccountsValue.LASTNAME,
+            TestAccountsValue.EMAIL,
+            TestAccountsValue.CHANGE_NUMBER,
+            TestAccountsValue.PASSWORD,
+            TestAccountsValue.DELETED,
+            TestAccountsValue.STATUS });
+        config.setStatusColumn("status");
+        config.validate();
+        config.setObjectClassColumn("OC");
+        config.setObjectClass(new String[] { "_EMPLOYEE_", "_MANAGER_" });
+        return config;
+    }
+
+    protected ConnectorFacade createMultiOCsFacade(final String mask) {
+        final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
+
+        final CSVDirConfiguration cfg = createMultiOCsConfiguration(mask);
+        final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, cfg);
+        // TODO: remove the line below when using ConnId >= 1.4.0.1
+        ((APIConfigurationImpl) impl).
+                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(cfg));
+
+        return factory.newInstance(impl);
+    }
+
     protected ConnectorFacade createFacade(final String mask) {
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
@@ -199,6 +239,21 @@ public abstract class AbstractTest {
         attributes.add(AttributeBuilder.build(TestAccountsValue.PASSWORD, "password"));
         attributes.add(AttributeBuilder.build(TestAccountsValue.DELETED, "no"));
 
+        return attributes;
+    }
+
+    protected Set<Attribute> setAccountId(final Set<Attribute> attributes) {
+        attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro123"));
+        return attributes;
+    }
+
+    protected Set<Attribute> setEmployee(final Set<Attribute> attributes) {
+        attributes.add(AttributeBuilder.build("OC", "_EMPLOYEE_"));
+        return attributes;
+    }
+
+    protected Set<Attribute> setManager(final Set<Attribute> attributes) {
+        attributes.add(AttributeBuilder.build("OC", "_MANAGER_"));
         return attributes;
     }
 }

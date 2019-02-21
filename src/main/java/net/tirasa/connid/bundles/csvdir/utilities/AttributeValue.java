@@ -65,7 +65,7 @@ public class AttributeValue {
 
     @Override
     public String toString() {
-        return value == null ? null : value.get(0).toString();
+        return value == null || value.get(0) == null ? null : value.get(0).toString();
     }
 
     public String toString(final String multivaluDelimiter) {
@@ -76,10 +76,12 @@ public class AttributeValue {
         } else {
             final StringBuilder bld = new StringBuilder();
             for (Object item : value) {
-                if (bld.length() > 0) {
-                    bld.append(multivaluDelimiter);
+                if (item != null) {
+                    if (bld.length() > 0) {
+                        bld.append(multivaluDelimiter);
+                    }
+                    bld.append(item.toString().trim());
                 }
-                bld.append(item.toString().trim());
             }
             return bld.toString();
         }

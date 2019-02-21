@@ -21,6 +21,7 @@ import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 import net.tirasa.connid.bundles.csvdir.CSVDirConnection;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 
 public class CSVDirTest {
 
@@ -37,7 +38,7 @@ public class CSVDirTest {
         ResultSet resultSet = null;
         try {
             conn = CSVDirConnection.open(conf);
-            resultSet = conn.allCsvFiles();
+            resultSet = conn.allCsvFiles(new ObjectClass(conf.getObjectClass()[0]));
 
             if (resultSet == null || resultSet.wasNull()) {
                 throw new ConnectorException("Test failed");
