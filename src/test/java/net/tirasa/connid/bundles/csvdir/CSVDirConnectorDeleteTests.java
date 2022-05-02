@@ -15,9 +15,10 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -25,7 +26,7 @@ import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirConnectorDeleteTests extends AbstractTest {
 
@@ -51,14 +52,14 @@ public class CSVDirConnectorDeleteTests extends AbstractTest {
         connector.dispose();
     }
 
-    @Test(expected = ConnectorException.class)
+    @Test
     public void deleteTestOfNotExistsUser() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         final Uid uid = new Uid("____jpc4323435,jPenelo");
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
-        connector.delete(ObjectClass.ACCOUNT, uid, null);
+        assertThrows(ConnectorException.class, () -> connector.delete(ObjectClass.ACCOUNT, uid, null));
         connector.dispose();
     }
 }

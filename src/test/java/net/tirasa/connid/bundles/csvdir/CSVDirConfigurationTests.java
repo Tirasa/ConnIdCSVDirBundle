@@ -15,13 +15,13 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Attempts to test that the configuration options can validate the input given them. It also attempt to make sure the
@@ -29,15 +29,8 @@ import org.junit.Test;
  */
 public class CSVDirConfigurationTests extends AbstractTest {
 
-    /**
-     *
-     * Tests setting and validating the parameters provided.
-     *
-     */
     @Test
-
     public void testValidate() throws Exception {
-
         final CSVDirConfiguration config = new CSVDirConfiguration();
 
         // check defaults..

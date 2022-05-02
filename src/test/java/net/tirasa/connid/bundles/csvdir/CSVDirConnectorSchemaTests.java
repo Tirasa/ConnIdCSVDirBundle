@@ -15,13 +15,13 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.common.objects.Schema;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirConnectorSchemaTests extends AbstractTest {
 

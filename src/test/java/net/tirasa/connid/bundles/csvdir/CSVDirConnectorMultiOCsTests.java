@@ -15,10 +15,10 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -34,8 +34,7 @@ import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
 import org.identityconnectors.framework.common.objects.Uid;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirConnectorMultiOCsTests extends AbstractTest {
 
@@ -67,13 +66,8 @@ public class CSVDirConnectorMultiOCsTests extends AbstractTest {
         final Attribute password = AttributeUtil.find(OperationalAttributes.PASSWORD_NAME, object.getAttributes());
         assertNotNull(password.getValue().get(0));
 
-        ((GuardedString) password.getValue().get(0)).access(new GuardedString.Accessor() {
-
-            @Override
-            public void access(final char[] clearChars) {
-                assertEquals("password", new String(clearChars));
-            }
-        });
+        ((GuardedString) password.getValue().get(0)).
+                access(clearChars -> assertEquals("password", new String(clearChars)));
         // --------------------------------
 
         final Uid uid = connector.authenticate(
@@ -88,7 +82,7 @@ public class CSVDirConnectorMultiOCsTests extends AbstractTest {
         attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "newemail@tirasa.net"));
 
         Uid updatedAccount = connector.update(new ObjectClass("_EMPLOYEE_"), uid, attributes, null);
-        Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
+        assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
 
         object = facade.getObject(new ObjectClass("_EMPLOYEE_"), employee, null);
         assertEquals("newemail@tirasa.net",

@@ -15,8 +15,9 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,12 +41,12 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.local.JavaClassProperties;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
-    public final void create() throws IOException {
+    public void create() throws IOException {
         createFile("createAccountTest", Collections.<TestAccount>emptyList());
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -65,13 +66,8 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final Attribute password = AttributeUtil.find(OperationalAttributes.PASSWORD_NAME, object.getAttributes());
         assertNotNull(password.getValue().get(0));
 
-        ((GuardedString) password.getValue().get(0)).access(new GuardedString.Accessor() {
-
-            @Override
-            public void access(final char[] clearChars) {
-                assertEquals("password", new String(clearChars));
-            }
-        });
+        ((GuardedString) password.getValue().get(0)).
+                access(clearChars -> assertEquals("password", new String(clearChars)));
         // --------------------------------
 
         final Uid uid = connector.authenticate(
@@ -85,19 +81,18 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         connector.dispose();
     }
 
-    @Test(expected = ConnectorException.class)
-    public final void createExistingUserTest() throws IOException {
+    public void createExistingUserTest() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
 
         final Name name = new Name("____jpc4323435;jPenelope");
         connector.create(ObjectClass.ACCOUNT, setAccountId(buildTestAttributes(name)), null);
-        connector.dispose();
+        assertThrows(ConnectorException.class, () -> connector.dispose());
     }
 
     @Test
-    public final void issue51() throws IOException {
+    public void issue51() throws IOException {
         createFile("createAccountTest", Collections.<TestAccount>emptyList());
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -133,13 +128,8 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         final Attribute password = AttributeUtil.find(OperationalAttributes.PASSWORD_NAME, object.getAttributes());
         assertNotNull(password.getValue().get(0));
 
-        ((GuardedString) password.getValue().get(0)).access(new GuardedString.Accessor() {
-
-            @Override
-            public void access(final char[] clearChars) {
-                assertEquals("password", new String(clearChars));
-            }
-        });
+        ((GuardedString) password.getValue().get(0)).
+                access(clearChars -> assertEquals("password", new String(clearChars)));
         // --------------------------------
 
         final Name accountid = AttributeUtil.getNameFromAttributes(object.getAttributes());

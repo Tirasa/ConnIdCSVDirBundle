@@ -15,9 +15,9 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -42,19 +42,19 @@ import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.local.JavaClassProperties;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeAll;
 
 public abstract class AbstractTest {
 
     private static final boolean IGNORE_HEADER = false;
 
-    protected File testSourceDir;
+    protected static File testSourceDir;
 
-    @Before
-    public void readTestProperties() {
+    @BeforeAll
+    public static void readTestProperties() {
         Properties props = new Properties();
         try {
-            InputStream propStream = getClass().getResourceAsStream("/test.properties");
+            InputStream propStream = AbstractTest.class.getResourceAsStream("/test.properties");
             props.load(propStream);
             testSourceDir = new File(props.getProperty("testSourcePath"));
         } catch (Exception e) {

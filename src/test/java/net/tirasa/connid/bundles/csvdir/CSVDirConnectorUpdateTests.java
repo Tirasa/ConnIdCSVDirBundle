@@ -15,7 +15,9 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -34,8 +36,7 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.local.JavaClassProperties;
 import org.identityconnectors.test.common.TestHelpers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirConnectorUpdateTests extends AbstractTest {
 
@@ -52,8 +53,8 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
 
         ConnectorObject object = facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
-        Assert.assertNotNull(object);
-        Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+        assertNotNull(object);
+        assertEquals(object.getName().getNameValue(), uid.getUidValue());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
@@ -61,35 +62,33 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
         Uid updatedAccount = connector.update(
                 ObjectClass.ACCOUNT, uid, createSetOfAttributes(), null);
 
-        Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
+        assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
 
         ConnectorObject objectUpdated = facade.getObject(ObjectClass.ACCOUNT, uid, null);
 
-        Assert.assertNotNull(object);
-        Assert.assertEquals(NEWMAIL,
+        assertNotNull(object);
+        assertEquals(NEWMAIL,
                 objectUpdated.getAttributeByName(TestAccountsValue.EMAIL).getValue().get(0));
 
         connector.dispose();
     }
 
     private Set<Attribute> createSetOfAttributes() {
-        Set<Attribute> attributes = new HashSet<Attribute>();
+        Set<Attribute> attributes = new HashSet<>();
         attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, NEWMAIL));
         return attributes;
     }
 
-    @Test(expected = ConnectorException.class)
-    public final void updateTestOfNotExistsUser()
-            throws IOException {
+    @Test
+    public final void updateTestOfNotExistsUser() throws IOException {
         createFile("sample", TestAccountsValue.TEST_ACCOUNTS);
         Uid uid = new Uid("____jpc4323435;jPenelo");
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("sample.*\\.csv"));
-        Uid updatedAccount = connector.update(ObjectClass.ACCOUNT, uid,
-                createSetOfAttributes(), null);
-        Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
-
+        assertThrows(
+                ConnectorException.class,
+                () -> connector.update(ObjectClass.ACCOUNT, uid, createSetOfAttributes(), null));
         connector.dispose();
     }
 
@@ -103,25 +102,25 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
 
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, config);
-        
+
         // TODO: remove the line below when using ConnId >= 1.4.0.1
         ((APIConfigurationImpl) impl).
                 setConfigurationProperties(JavaClassProperties.createConfigurationProperties(config));
-        
+
         final ConnectorFacade connector = factory.newInstance(impl);
 
         Uid uid = new Uid("____jpc4323435;jPenelope");
 
         final ConnectorObject object = connector.getObject(ObjectClass.ACCOUNT, uid, null);
 
-        Assert.assertNotNull(object);
-        Assert.assertEquals(object.getName().getNameValue(), uid.getUidValue());
+        assertNotNull(object);
+        assertEquals(object.getName().getNameValue(), uid.getUidValue());
 
-        final Set<Attribute> attributes = new HashSet<Attribute>();
+        final Set<Attribute> attributes = new HashSet<>();
         attributes.add(AttributeBuilder.build(TestAccountsValue.EMAIL, "mrossi1@tirasa.net", "mrossi2@tirasa.net"));
 
         final Uid updatedAccount = connector.update(ObjectClass.ACCOUNT, uid, attributes, null);
-        Assert.assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
+        assertEquals(uid.getUidValue(), updatedAccount.getUidValue());
 
         final OperationOptionsBuilder oob = new OperationOptionsBuilder();
         oob.setAttributesToGet(TestAccountsValue.EMAIL);

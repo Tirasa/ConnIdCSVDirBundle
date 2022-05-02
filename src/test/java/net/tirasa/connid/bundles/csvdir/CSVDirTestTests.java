@@ -15,10 +15,9 @@
  */
 package net.tirasa.connid.bundles.csvdir;
 
-import net.tirasa.connid.bundles.csvdir.CSVDirConnector;
 import java.io.IOException;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CSVDirTestTests extends AbstractTest {
 

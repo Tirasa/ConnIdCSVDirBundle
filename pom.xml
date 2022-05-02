@@ -23,7 +23,7 @@
   <parent>
     <groupId>net.tirasa.connid</groupId>
     <artifactId>connid</artifactId>
-    <version>1.4.5.0</version>
+    <version>1.5.1.0</version>
   </parent>
 
   <groupId>net.tirasa.connid.bundles</groupId>
@@ -76,9 +76,9 @@
   </mailingLists>
 
   <properties>
-    <connid.version>1.4.5.0</connid.version>
+    <connid.version>1.5.1.0</connid.version>
     
-    <hsqldb.version>2.3.5</hsqldb.version>
+    <hsqldb.version>2.5.2</hsqldb.version>
     <test.source.path>${project.build.directory}/test-source-path</test.source.path>    
     
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -88,7 +88,7 @@
     <dependency>
       <groupId>net.tirasa.connid.commons</groupId>
       <artifactId>commons-db</artifactId>
-      <version>1.4.1.1</version>
+      <version>1.4.1.3</version>
     </dependency>
     
     <dependency>
@@ -104,10 +104,11 @@
       <version>${connid.version}</version>
       <scope>test</scope>
     </dependency>
-        
+
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -230,7 +231,7 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
-          <appendAssemblyId>false</appendAssemblyId>
+          <appendAssemblyId>true</appendAssemblyId>
           <descriptors>
             <descriptor>src/assemble/connector.xml</descriptor>
           </descriptors>
@@ -242,7 +243,7 @@
               <ConnectorBundle-Version>${project.version}</ConnectorBundle-Version>
             </manifestEntries>
           </archive>
-        </configuration>                
+        </configuration>
         <executions>
           <execution>
             <id>make-assembly</id>
