@@ -88,7 +88,7 @@
     <dependency>
       <groupId>net.tirasa.connid.commons</groupId>
       <artifactId>commons-db</artifactId>
-      <version>1.4.1.4</version>
+      <version>1.5.2.0</version>
     </dependency>
     
     <dependency>
