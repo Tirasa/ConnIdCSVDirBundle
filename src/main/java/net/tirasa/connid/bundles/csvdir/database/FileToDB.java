@@ -16,6 +16,7 @@
 package net.tirasa.connid.bundles.csvdir.database;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +51,7 @@ public class FileToDB {
     public String createDbForCreate() {
         File file = fileSystem.getLastModifiedCsvFile();
         if (file == null) {
-            file = new File(DEFAULT_PREFIX + Utilities.randomNumber() + ".csv");
+            file = Path.of(DEFAULT_PREFIX + Utilities.randomNumber() + ".csv").toFile();
         }
         return bindFileTable(file);
     }

@@ -81,6 +81,7 @@
     <hsqldb.version>2.7.4</hsqldb.version>
     <test.source.path>${project.build.directory}/test-source-path</test.source.path>    
     
+    <targetJdk>11</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -195,7 +196,7 @@
       <plugin>
         <groupId>org.gaul</groupId>
         <artifactId>modernizer-maven-plugin</artifactId>
-        <version>2.9.0</version>
+        <version>3.0.0</version>
         <configuration>
           <javaVersion>${targetJdk}</javaVersion>
         </configuration>

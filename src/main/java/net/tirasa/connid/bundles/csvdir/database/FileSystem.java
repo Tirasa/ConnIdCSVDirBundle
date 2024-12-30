@@ -17,6 +17,7 @@ package net.tirasa.connid.bundles.csvdir.database;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Path;
 import net.tirasa.connid.bundles.csvdir.CSVDirConfiguration;
 
 public class FileSystem {
@@ -29,7 +30,7 @@ public class FileSystem {
 
     public FileSystem(final CSVDirConfiguration conf) {
         this.conf = conf;
-        this.sourcePath = new File(conf.getSourcePath());
+        this.sourcePath = Path.of(conf.getSourcePath()).toFile();
         this.fileFilter = new FileFilter() {
 
             @Override

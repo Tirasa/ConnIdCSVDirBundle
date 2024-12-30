@@ -21,14 +21,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -39,8 +39,6 @@ import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.Name;
-import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
-import org.identityconnectors.framework.impl.api.local.JavaClassProperties;
 import org.identityconnectors.test.common.TestHelpers;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -56,7 +54,7 @@ public abstract class AbstractTest {
         try {
             InputStream propStream = AbstractTest.class.getResourceAsStream("/test.properties");
             props.load(propStream);
-            testSourceDir = new File(props.getProperty("testSourcePath"));
+            testSourceDir = Path.of(props.getProperty("testSourcePath")).toFile();
         } catch (Exception e) {
             fail("Could not load test.properties: " + e.getMessage());
         }
@@ -64,7 +62,7 @@ public abstract class AbstractTest {
         assertTrue(testSourceDir.exists() ? testSourceDir.isDirectory() : testSourceDir.mkdir());
     }
 
-    protected CSVDirConfiguration createConfiguration(final String mask) {
+    protected static CSVDirConfiguration createConfiguration(final String mask) {
         // create the connector configuration..
         final CSVDirConfiguration config = new CSVDirConfiguration();
         config.setFileMask(mask);
@@ -89,7 +87,7 @@ public abstract class AbstractTest {
         return config;
     }
 
-    protected CSVDirConfiguration createMultiOCsConfiguration(final String mask) {
+    protected static CSVDirConfiguration createMultiOCsConfiguration(final String mask) {
         // create the connector configuration..
         final CSVDirConfiguration config = new CSVDirConfiguration();
         config.setFileMask(mask);
@@ -117,44 +115,36 @@ public abstract class AbstractTest {
         return config;
     }
 
-    protected ConnectorFacade createMultiOCsFacade(final String mask) {
+    protected static ConnectorFacade createMultiOCsFacade(final String mask) {
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
         final CSVDirConfiguration cfg = createMultiOCsConfiguration(mask);
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, cfg);
-        // TODO: remove the line below when using ConnId >= 1.4.0.1
-        ((APIConfigurationImpl) impl).
-                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(cfg));
 
         return factory.newInstance(impl);
     }
 
-    protected ConnectorFacade createFacade(final String mask) {
+    protected static ConnectorFacade createFacade(final String mask) {
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
 
         final CSVDirConfiguration cfg = createConfiguration(mask);
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, cfg);
-        // TODO: remove the line below when using ConnId >= 1.4.0.1
-        ((APIConfigurationImpl) impl).
-                setConfigurationProperties(JavaClassProperties.createConfigurationProperties(cfg));
 
         return factory.newInstance(impl);
     }
 
-    protected File createFile(final String name, final List<TestAccount> testAccounts)
-            throws IOException {
-
+    protected static File createFile(final String name, final List<TestAccount> testAccounts) throws IOException {
         final File file = File.createTempFile(name, ".csv", testSourceDir);
         file.deleteOnExit();
 
-        final PrintWriter wrt = writeOutFileData(file);
-        writeOutEachUser(wrt, testAccounts);
-        wrt.close();
+        try (PrintWriter wrt = writeOutFileData(file.toPath())) {
+            writeOutEachUser(wrt, testAccounts);
+        }
 
         return file;
     }
 
-    private void writeOutEachUser(
+    private static void writeOutEachUser(
             final PrintWriter wrt,
             final List<TestAccount> testAccounts) {
 
@@ -171,65 +161,56 @@ public abstract class AbstractTest {
         }
     }
 
-    protected File createSampleFile(final String name, final int THOUSANDS)
-            throws IOException {
-
+    protected static File createSampleFile(final String name, final int thousands) throws IOException {
         final File file = File.createTempFile(name, ".csv", testSourceDir);
         file.deleteOnExit();
 
-        final PrintWriter wrt = writeOutFileData(file);
+        try (PrintWriter wrt = writeOutFileData(file.toPath())) {
+            if (IGNORE_HEADER) {
+                wrt.println(TestAccountsValue.HEADER.toLine(
+                        TestAccountsValue.FIELD_DELIMITER,
+                        TestAccountsValue.TEXT_QUALIFIER));
+            }
 
-        if (IGNORE_HEADER) {
-            wrt.println(TestAccountsValue.HEADER.toLine(
-                    TestAccountsValue.FIELD_DELIMITER,
-                    TestAccountsValue.TEXT_QUALIFIER));
+            for (int i = 0; i < thousands; i++) {
+                TestAccount account = new TestAccount(
+                        "accountid" + i,
+                        "firstname",
+                        "lastname",
+                        "email",
+                        "changeNumber",
+                        "password",
+                        "no");
+
+                wrt.println(account.toLine(
+                        TestAccountsValue.FIELD_DELIMITER,
+                        TestAccountsValue.TEXT_QUALIFIER));
+            }
         }
-
-        for (int i = 0; i < THOUSANDS; i++) {
-            TestAccount account = new TestAccount(
-                    "accountid" + i,
-                    "firstname",
-                    "lastname",
-                    "email",
-                    "changeNumber",
-                    "password",
-                    "no");
-
-            wrt.println(account.toLine(
-                    TestAccountsValue.FIELD_DELIMITER,
-                    TestAccountsValue.TEXT_QUALIFIER));
-        }
-        wrt.close();
         return file;
     }
 
-    private PrintWriter writeOutFileData(final File file)
-            throws FileNotFoundException {
-        return new PrintWriter(new OutputStreamWriter(
-                new FileOutputStream(file), getUTF8Charset()));
+    private static PrintWriter writeOutFileData(final Path file) throws IOException {
+        return new PrintWriter(new OutputStreamWriter(Files.newOutputStream(file), StandardCharsets.UTF_8));
     }
 
-    private Charset getUTF8Charset() {
-        return Charset.forName("UTF-8");
-    }
+    protected static File updateFile(final File file, final List<TestAccount> testAccounts) throws IOException {
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+                file.toPath(), StandardOpenOption.APPEND, StandardOpenOption.WRITE)) {
 
-    protected File updateFile(final File file, final List<TestAccount> testAccounts)
-            throws IOException {
-
-        final BufferedWriter bufferedWriter = new BufferedWriter(
-                new FileWriter(file, true));
-        for (TestAccount user : testAccounts) {
-            bufferedWriter.write(user.toLine(TestAccountsValue.FIELD_DELIMITER,
-                    TestAccountsValue.TEXT_QUALIFIER));
-            bufferedWriter.newLine();
+            for (TestAccount user : testAccounts) {
+                bufferedWriter.write(user.toLine(
+                        TestAccountsValue.FIELD_DELIMITER,
+                        TestAccountsValue.TEXT_QUALIFIER));
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.flush();
         }
-        bufferedWriter.flush();
-        bufferedWriter.close();
         return file;
     }
 
-    protected Set<Attribute> buildTestAttributes(final Name name) {
-        final Set<Attribute> attributes = new HashSet<Attribute>();
+    protected static Set<Attribute> buildTestAttributes(final Name name) {
+        final Set<Attribute> attributes = new HashSet<>();
 
         attributes.add(name);
         attributes.add(AttributeBuilder.build(TestAccountsValue.FIRSTNAME, "pmassi"));
@@ -242,17 +223,17 @@ public abstract class AbstractTest {
         return attributes;
     }
 
-    protected Set<Attribute> setAccountId(final Set<Attribute> attributes) {
+    protected static Set<Attribute> setAccountId(final Set<Attribute> attributes) {
         attributes.add(AttributeBuilder.build(TestAccountsValue.ACCOUNTID, "___mperro123"));
         return attributes;
     }
 
-    protected Set<Attribute> setEmployee(final Set<Attribute> attributes) {
+    protected static Set<Attribute> setEmployee(final Set<Attribute> attributes) {
         attributes.add(AttributeBuilder.build("OC", "_EMPLOYEE_"));
         return attributes;
     }
 
-    protected Set<Attribute> setManager(final Set<Attribute> attributes) {
+    protected static Set<Attribute> setManager(final Set<Attribute> attributes) {
         attributes.add(AttributeBuilder.build("OC", "_MANAGER_"));
         return attributes;
     }
