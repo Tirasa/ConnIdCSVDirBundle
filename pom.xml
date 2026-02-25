@@ -28,7 +28,7 @@
 
   <groupId>net.tirasa.connid.bundles</groupId>
   <artifactId>net.tirasa.connid.bundles.csvdir</artifactId>
-  <version>0.8.10</version>
+  <version>0.8.11-SNAPSHOT</version>
 
   <name>ConnId Bundles: CSV Directory</name>
 
