@@ -194,6 +194,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <id>copy-artifact-legal-files</id>
@@ -202,10 +203,10 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/classes/META-INF</outputDirectory>
+              <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
               <resources>
                 <resource>
-                  <directory>.</directory>
+                  <directory>${basedir}</directory>
                   <includes>
                     <include>LICENSE</include>
                     <include>NOTICE</include>
@@ -221,10 +222,10 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/apidocs/META-INF</outputDirectory>
+              <outputDirectory>${project.build.directory}/reports/apidocs/META-INF</outputDirectory>
               <resources>
                 <resource>
-                  <directory>.</directory>
+                  <directory>${basedir}</directory>
                   <includes>
                     <include>LICENSE</include>
                     <include>NOTICE</include>
