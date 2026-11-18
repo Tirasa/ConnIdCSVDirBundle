@@ -46,7 +46,7 @@ public abstract class AbstractTest {
 
     private static final boolean IGNORE_HEADER = false;
 
-    protected static File testSourceDir;
+    protected static File TEST_SOURCE_DIR;
 
     @BeforeAll
     public static void readTestProperties() {
@@ -54,12 +54,12 @@ public abstract class AbstractTest {
         try {
             InputStream propStream = AbstractTest.class.getResourceAsStream("/test.properties");
             props.load(propStream);
-            testSourceDir = Path.of(props.getProperty("testSourcePath")).toFile();
+            TEST_SOURCE_DIR = Path.of(props.getProperty("testSourcePath")).toFile();
         } catch (Exception e) {
             fail("Could not load test.properties: " + e.getMessage());
         }
-        assertNotNull(testSourceDir);
-        assertTrue(testSourceDir.exists() ? testSourceDir.isDirectory() : testSourceDir.mkdir());
+        assertNotNull(TEST_SOURCE_DIR);
+        assertTrue(TEST_SOURCE_DIR.exists() ? TEST_SOURCE_DIR.isDirectory() : TEST_SOURCE_DIR.mkdir());
     }
 
     protected static CSVDirConfiguration createConfiguration(final String mask) {
@@ -69,7 +69,7 @@ public abstract class AbstractTest {
         config.setKeyColumnNames(new String[] { TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME });
         config.setDeleteColumnName(TestAccountsValue.DELETED);
         config.setPasswordColumnName(TestAccountsValue.PASSWORD);
-        config.setSourcePath(testSourceDir.getPath());
+        config.setSourcePath(TEST_SOURCE_DIR.getPath());
         config.setQuotationRequired(Boolean.TRUE);
         config.setIgnoreHeader(IGNORE_HEADER);
         config.setKeyseparator(";");
@@ -94,7 +94,7 @@ public abstract class AbstractTest {
         config.setKeyColumnNames(new String[] { TestAccountsValue.ACCOUNTID, TestAccountsValue.FIRSTNAME });
         config.setDeleteColumnName(TestAccountsValue.DELETED);
         config.setPasswordColumnName(TestAccountsValue.PASSWORD);
-        config.setSourcePath(testSourceDir.getPath());
+        config.setSourcePath(TEST_SOURCE_DIR.getPath());
         config.setQuotationRequired(Boolean.TRUE);
         config.setIgnoreHeader(IGNORE_HEADER);
         config.setKeyseparator(";");
@@ -134,7 +134,7 @@ public abstract class AbstractTest {
     }
 
     protected static File createFile(final String name, final List<TestAccount> testAccounts) throws IOException {
-        final File file = File.createTempFile(name, ".csv", testSourceDir);
+        final File file = Files.createTempFile(TEST_SOURCE_DIR.toPath(), name, ".csv").toFile();
         file.deleteOnExit();
 
         try (PrintWriter wrt = writeOutFileData(file.toPath())) {
@@ -162,7 +162,7 @@ public abstract class AbstractTest {
     }
 
     protected static File createSampleFile(final String name, final int thousands) throws IOException {
-        final File file = File.createTempFile(name, ".csv", testSourceDir);
+        final File file = Files.createTempFile(TEST_SOURCE_DIR.toPath(), name, ".csv").toFile();
         file.deleteOnExit();
 
         try (PrintWriter wrt = writeOutFileData(file.toPath())) {

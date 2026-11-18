@@ -18,7 +18,7 @@ package net.tirasa.connid.bundles.csvdir;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestAccountsValue {
+public final class TestAccountsValue {
 
     public static final String CHANGE_NUMBER = "changeNumber";
 
@@ -43,13 +43,13 @@ public class TestAccountsValue {
     public static final TestAccount HEADER = new TestAccount(
             ACCOUNTID, FIRSTNAME, LASTNAME, EMAIL, CHANGE_NUMBER, PASSWORD, DELETED);
 
-    public static final List<TestAccount> TEST_ACCOUNTS = new ArrayList<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS = new ArrayList<>();
 
-    public static final List<TestAccount> TEST_ACCOUNTS2 = new ArrayList<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS2 = new ArrayList<>();
 
-    public static final List<TestAccount> TEST_ACCOUNTS3 = new ArrayList<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS3 = new ArrayList<>();
 
-    public static final List<TestAccount> TEST_ACCOUNTS4 = new ArrayList<TestAccount>();
+    public static final List<TestAccount> TEST_ACCOUNTS4 = new ArrayList<>();
 
     static {
         TEST_ACCOUNTS.add(new TestAccount("____jpc4323435", "jPenelope",
@@ -128,5 +128,8 @@ public class TestAccountsValue {
         TEST_ACCOUNTS4.add(new TestAccount("_jkb3234419", "jKevin",
                 "jCinzia,III", "jzKevin.Bacon@mail.com", "5",
                 "password", "false"));
+    }
+
+    private TestAccountsValue() {
     }
 }

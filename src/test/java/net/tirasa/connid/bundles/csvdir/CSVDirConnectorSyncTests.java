@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.BaseObject;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.OperationalAttributes;
@@ -56,7 +57,7 @@ public class CSVDirConnectorSyncTests extends AbstractTest {
     private static class NoFilter implements Filter {
 
         @Override
-        public boolean accept(final ConnectorObject obj) {
+        public boolean accept(final BaseObject obj) {
             return true;
         }
 

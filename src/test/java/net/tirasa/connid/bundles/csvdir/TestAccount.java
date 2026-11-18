@@ -23,21 +23,21 @@ import org.identityconnectors.framework.common.objects.ConnectorObject;
 
 public class TestAccount {
 
-    private String _changeNumber;
+    private String changeNumber;
 
-    private String _accountId;
+    private String accountId;
 
-    private String _firstName;
+    private String firstName;
 
-    private String _lastName;
+    private String lastName;
 
-    private String _email;
+    private String email;
 
-    private String _password;
+    private String password;
 
-    private String _deleted;
+    private String deleted;
 
-    private String _status;
+    private String status;
 
     public TestAccount(
             final String accountId,
@@ -48,28 +48,27 @@ public class TestAccount {
             final String password,
             final String deleted,
             final String status) {
-        _accountId = accountId;
-        _firstName = firstName;
-        _lastName = lastName;
-        _email = email;
-        _changeNumber = changeNumber;
-        _password = password;
-        _deleted = deleted;
-        _status = status;
+
+        this.accountId = accountId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.changeNumber = changeNumber;
+        this.password = password;
+        this.deleted = deleted;
+        this.status = status;
     }
 
-    public TestAccount(final String accountId, final String firstName,
-            final String lastName, final String email,
-            final String changeNumber, final String password,
+    public TestAccount(
+            final String accountId,
+            final String firstName,
+            final String lastName,
+            final String email,
+            final String changeNumber,
+            final String password,
             final String deleted) {
-        _accountId = accountId;
-        _firstName = firstName;
-        _lastName = lastName;
-        _email = email;
-        _changeNumber = changeNumber;
-        _password = password;
-        _deleted = deleted;
-        _status = "true";
+
+        this(accountId, firstName, lastName, email, changeNumber, password, deleted, "true");
     }
 
     public TestAccount(final ConnectorObject obj) {
@@ -80,52 +79,52 @@ public class TestAccount {
                     ? attr.getValue().get(0).toString() : null;
 
             if (TestAccountsValue.CHANGE_NUMBER.equalsIgnoreCase(attr.getName())) {
-                _changeNumber = value;
+                changeNumber = value;
             } else if (TestAccountsValue.FIRSTNAME.equalsIgnoreCase(
                     attr.getName())) {
-                _firstName = value;
+                firstName = value;
             } else if (TestAccountsValue.LASTNAME.equalsIgnoreCase(
                     attr.getName())) {
-                _lastName = value;
+                lastName = value;
             } else if (TestAccountsValue.EMAIL.equalsIgnoreCase(attr.getName())) {
-                _email = value;
+                email = value;
             } else if (TestAccountsValue.ACCOUNTID.equalsIgnoreCase(
                     attr.getName())) {
-                _accountId = value;
+                accountId = value;
             }
         }
     }
 
     public String getAccountId() {
-        return _accountId;
+        return accountId;
     }
 
     public String getFirstName() {
-        return _firstName;
+        return firstName;
     }
 
     public String getLastName() {
-        return _lastName;
+        return lastName;
     }
 
     public String getEmail() {
-        return _email;
+        return email;
     }
 
     public String getChangeNumber() {
-        return _changeNumber;
+        return changeNumber;
     }
 
     public String getDeleted() {
-        return _deleted;
+        return deleted;
     }
 
     public String getPassword() {
-        return _password;
+        return password;
     }
 
     public String getStatus() {
-        return _status;
+        return status;
     }
 
     public EqualsHashCodeBuilder getEqHash() {
@@ -156,24 +155,24 @@ public class TestAccount {
     public String toString() {
         // poor man's to string..
         Map<String, String> map = new HashMap<String, String>();
-        map.put("id", _accountId);
-        map.put("changeNumber", _changeNumber);
-        map.put("email", _email);
-        map.put("firstName", _firstName);
-        map.put("lastName", _lastName);
+        map.put("id", accountId);
+        map.put("changeNumber", changeNumber);
+        map.put("email", email);
+        map.put("firstName", firstName);
+        map.put("lastName", lastName);
         return map.toString();
     }
 
     /**
      * Create a string representation of a field, using the textQualifier if
      * the fieldDelimiter is contained in the field's value.
-     * 
+     *
      * @param field
-     *            String value of field to convert/externalize.
+     * String value of field to convert/externalize.
      * @param fieldDelimiter
-     *            delimiter used between fields
+     * delimiter used between fields
      * @param textQualifier
-     *            text qualifier to use as needed
+     * text qualifier to use as needed
      * @return String representation of the field suitable for writing.
      */
     static String getField(final String field, final char fieldDelimiter,

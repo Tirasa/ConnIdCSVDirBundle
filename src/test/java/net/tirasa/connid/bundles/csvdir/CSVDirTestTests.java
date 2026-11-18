@@ -16,14 +16,14 @@
 package net.tirasa.connid.bundles.csvdir;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class CSVDirTestTests extends AbstractTest {
 
     @Test
     public final void test() throws IOException {
-        createFile("createAccountTest", Collections.<TestAccount>emptyList());
+        createFile("createAccountTest", List.of());
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
         connector.test();

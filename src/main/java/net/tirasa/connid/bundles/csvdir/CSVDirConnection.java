@@ -41,7 +41,7 @@ import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Uid;
 
-public class CSVDirConnection {
+public final class CSVDirConnection {
 
     /**
      * Setup logging for the {@link DatabaseConnection}.
@@ -67,7 +67,7 @@ public class CSVDirConnection {
 
     private final String jdbcUrl;
 
-    private final Set<String> tables = new HashSet<String>();
+    private final Set<String> tables = new HashSet<>();
 
     private final Connection conn;
 
@@ -185,9 +185,10 @@ public class CSVDirConnection {
         }
     }
 
-    public final Pair<Long, ResultSet> modifiedCsvFiles(
+    public Pair<Long, ResultSet> modifiedCsvFiles(
             final ObjectClass oc,
             final long syncToken) throws SQLException {
+
         final File[] csvFiles = fileSystem.getLastestChangedFiles(syncToken);
         final Long highestTimeStamp = fileSystem.getHighestTimeStamp(csvFiles);
 
@@ -196,12 +197,12 @@ public class CSVDirConnection {
 
         final String ocColumnName = this.conf.getObjectClassColumn();
 
-        String ocQuery = (StringUtil.isBlank(ocColumnName)
+        String ocQuery = StringUtil.isBlank(ocColumnName)
                 ? query
                 : new StringBuilder(query).append(" WHERE ").
-                        append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("'")).
-                toString();
-        return Pair.of(highestTimeStamp, doQuery(conn.prepareStatement(query)));
+                        append(ocColumnName).append("=").append("'").append(oc.getObjectClassValue()).append("'").
+                        toString();
+        return Pair.of(highestTimeStamp, doQuery(conn.prepareStatement(ocQuery)));
     }
 
     public ResultSet allCsvFiles(final ObjectClass oc) {

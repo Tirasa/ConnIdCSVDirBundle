@@ -102,8 +102,6 @@ public class CSVDirConnectorUpdateTests extends AbstractTest {
 
         final ConnectorFacadeFactory factory = ConnectorFacadeFactory.getInstance();
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, config);
-
-        // TODO: remove the line below when using ConnId >= 1.4.0.1
         ((APIConfigurationImpl) impl).
                 setConfigurationProperties(JavaClassProperties.createConfigurationProperties(config));
 

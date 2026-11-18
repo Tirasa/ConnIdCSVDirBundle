@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import org.identityconnectors.common.security.GuardedString;
@@ -47,7 +47,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
     public void create() throws IOException {
-        createFile("createAccountTest", Collections.<TestAccount>emptyList());
+        createFile("createAccountTest", List.of());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createConfiguration("createAccountTest.*\\.csv"));
@@ -93,7 +93,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
 
     @Test
     public void issue51() throws IOException {
-        createFile("createAccountTest", Collections.<TestAccount>emptyList());
+        createFile("createAccountTest", List.of());
 
         final CSVDirConnector connector = new CSVDirConnector();
         final CSVDirConfiguration configuration = createConfiguration("createAccountTest.*\\.csv");
@@ -116,7 +116,6 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         newCfg.setKeyColumnNames(new String[] { TestAccountsValue.ACCOUNTID });
 
         final APIConfiguration impl = TestHelpers.createTestConfiguration(CSVDirConnector.class, newCfg);
-        // TODO: remove the line below when using ConnId >= 1.4.0.1
         ((APIConfigurationImpl) impl).
                 setConfigurationProperties(JavaClassProperties.createConfigurationProperties(newCfg));
 
@@ -152,7 +151,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         config.setFieldDelimiter(';');
         config.validate();
 
-        final File csv = File.createTempFile("issueCSVDIR6", ".csv", testSourceDir);
+        final File csv = Files.createTempFile(TEST_SOURCE_DIR.toPath(), "issueCSVDIR6", ".csv").toFile();
         csv.deleteOnExit();
 
         final CSVDirConnector connector = new CSVDirConnector();
@@ -171,7 +170,7 @@ public class CSVDirConnectorCreateTests extends AbstractTest {
         config.setMultivalueSeparator("|");
         config.validate();
 
-        final File csv = File.createTempFile("issueCSVDIR12", ".csv", testSourceDir);
+        final File csv = Files.createTempFile(TEST_SOURCE_DIR.toPath(), "issueCSVDIR12", ".csv").toFile();
         csv.deleteOnExit();
 
         final Name name = new Name("___csvdir12;pmassi");

@@ -36,9 +36,9 @@ public class CSVDirSchema {
      */
     private static final Log LOG = Log.getLog(CSVDirSchema.class);
 
-    public static String OBJECTCLASS_DEFAULT_COLUMN_NAME = "__OC__";
+    public static final String OBJECTCLASS_DEFAULT_COLUMN_NAME = "__OC__";
 
-    public static String OBJECTCLASS_DEFAULT_VALUE = ObjectClass.ACCOUNT.getObjectClassValue();
+    public static final String OBJECTCLASS_DEFAULT_VALUE = ObjectClass.ACCOUNT.getObjectClassValue();
 
     private final CSVDirConfiguration conf;
 

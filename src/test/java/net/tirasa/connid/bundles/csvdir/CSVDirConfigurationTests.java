@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -65,7 +66,7 @@ public class CSVDirConfigurationTests extends AbstractTest {
         config.setFields(new String[] { "accountid", "password", "deleted" });
 
         // create a temp file
-        final File csv = File.createTempFile("sample", ".csv", testSourceDir);
+        final File csv = Files.createTempFile(TEST_SOURCE_DIR.toPath(), "sample", ".csv").toFile();
 
         csv.deleteOnExit();
 

@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -40,7 +40,7 @@ public class CSVDirConnectorMultiOCsTests extends AbstractTest {
 
     @Test
     public final void createUpdateDeleteMultiOCs() throws IOException {
-        createFile("createAccountTestMOCs", Collections.<TestAccount>emptyList());
+        createFile("createAccountTestMOCs", List.of());
 
         final CSVDirConnector connector = new CSVDirConnector();
         connector.init(createMultiOCsConfiguration("createAccountTestMOCs.*\\.csv"));
